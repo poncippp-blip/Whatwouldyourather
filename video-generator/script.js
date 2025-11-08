@@ -233,38 +233,7 @@ class VideoGenerator {
     }
 
     async fetchImages(option1, option2) {
-        // Check if user has selected images from Image Finder
-        const selectedImages = localStorage.getItem('videoGeneratorImages');
-        let img1Url, img2Url;
-
-        if (selectedImages) {
-            try {
-                const parsed = JSON.parse(selectedImages);
-                if (parsed.option1 && parsed.option2) {
-                    // Use selected images
-                    img1Url = parsed.option1.url;
-                    img2Url = parsed.option2.url;
-                    console.log('Using images from Image Finder');
-                } else {
-                    // Auto-fetch if not enough images selected
-                    throw new Error('Not enough images selected');
-                }
-            } catch (e) {
-                // Fall back to auto-fetch
-                console.log('Falling back to auto-fetch');
-                [img1Url, img2Url] = await this.autoFetchImages(option1, option2);
-            }
-        } else {
-            // Auto-fetch images
-            [img1Url, img2Url] = await this.autoFetchImages(option1, option2);
-        }
-
-        // Load images
-        this.assets.option1Image = await this.loadImage(img1Url);
-        this.assets.option2Image = await this.loadImage(img2Url);
-    }
-
-    async autoFetchImages(option1, option2) {
+        // Auto-fetch images from Unsplash based on prompts
         const fetchImage = async (query) => {
             const url = new URL('https://api.unsplash.com/search/photos');
             url.searchParams.append('query', query);
@@ -290,11 +259,15 @@ class VideoGenerator {
             return data.results[0].urls.regular;
         };
 
-        // Fetch both images
-        return await Promise.all([
+        // Fetch both images automatically
+        const [img1Url, img2Url] = await Promise.all([
             fetchImage(option1),
             fetchImage(option2)
         ]);
+
+        // Load images
+        this.assets.option1Image = await this.loadImage(img1Url);
+        this.assets.option2Image = await this.loadImage(img2Url);
     }
 
     loadImage(url) {

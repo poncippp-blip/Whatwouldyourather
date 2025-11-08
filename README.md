@@ -13,11 +13,10 @@ Create viral "Would You Rather" videos with AI-powered voiceovers, animations, a
 - **9:16 Vertical Format**: Perfect for TikTok, Instagram Reels, and YouTube Shorts
 
 ### 🖼️ Image Finder
-- **Purpose**: Find and select images from Unsplash for your videos
-- **Image Selection**: Choose exactly which images appear in your videos
-- **2-Image Limit**: Select one image for each option (Option 1 & Option 2)
-- **Seamless Integration**: Selected images automatically used in Video Generator
-- **Visual Preview**: See your selections before generating videos
+- **Purpose**: Browse and discover high-quality images from Unsplash
+- **Preview Images**: View full-size images with photographer credits
+- **Download Support**: Download images directly from Unsplash
+- **Reference Tool**: See what images are available for your prompts
 
 ## Quick Start
 
@@ -67,14 +66,17 @@ All audio is automatically loaded and synchronized with the video timeline!
 
 ### 4. Start Creating!
 
-Open `index.html` in your browser:
+Open `index.html` in your browser and go to **Video Generator**:
 
-**Recommended Workflow:**
-1. **Image Finder** → Search and select 2 images for your video
-2. **Video Generator** → Create your video with selected images
+1. Enter your two options (e.g., "Pizza" and "Burger")
+2. Select your preferred AI voice
+3. Click "Generate Video"
+4. Images are **automatically fetched** from Unsplash!
+5. Preview and enjoy your video
 
-**Quick Workflow:**
-- **Video Generator** → Auto-fetches images based on your prompts
+**Image Finder** (Optional):
+- Browse Unsplash to see what images exist for your prompts
+- Preview high-quality images before generating videos
 
 ## Project Structure
 
@@ -109,32 +111,29 @@ Whatwouldyourather/
         └── or.png
 ```
 
-## Complete Workflow
+## Complete Automated Workflow
 
-### Method 1: Using Image Finder (Recommended)
-
-1. **Image Finder**:
-   - Search "pizza" on Unsplash
-   - Click "Select for Option 1" on your preferred pizza image
-   - Search "burger" on Unsplash
-   - Click "Select for Option 2" on your preferred burger image
-   - Click "Use in Video Generator →"
-
-2. **Video Generator**:
-   - Enter options: "Pizza" and "Burger"
-   - Select voice from ElevenLabs
-   - Click "Generate Video"
-   - ✅ Uses your selected images automatically!
-   - Preview and export
-
-### Method 2: Quick Auto-Fetch
+### Creating a "Would You Rather" Video
 
 1. **Video Generator**:
-   - Enter options: "Pizza" and "Burger"
-   - Select voice from ElevenLabs
+   - Enter Option 1: "Pizza"
+   - Enter Option 2: "Burger"
+   - Select AI voice (Rachel, Josh, etc.)
    - Click "Generate Video"
-   - Images auto-fetched from Unsplash based on your prompts
-   - Preview and export
+
+2. **Automatic Processing**:
+   - ✅ Fetches best "pizza" image from Unsplash
+   - ✅ Fetches best "burger" image from Unsplash
+   - ✅ Generates AI voiceover: "Pizza or Burger?"
+   - ✅ Loads all audio (music, clock, ding, swoosh)
+   - ✅ Creates animation timeline
+
+3. **Preview & Enjoy**:
+   - Watch the video preview
+   - All audio and animations synchronized
+   - Ready for screen recording or export
+
+**That's it!** Completely automated - no manual steps needed!
 
 ### Animation Timeline
 
