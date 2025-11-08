@@ -62,6 +62,15 @@ class VideoGenerator {
         this.progressFill = document.getElementById('progressFill');
         this.previewOverlay = document.getElementById('previewOverlay');
 
+        // Engagement checkboxes
+        this.commentEngagement = document.getElementById('commentEngagement');
+        this.followEngagement = document.getElementById('followEngagement');
+        this.shareEngagement = document.getElementById('shareEngagement');
+        this.likeEngagement = document.getElementById('likeEngagement');
+
+        // Advanced prompts
+        this.advancedPrompts = document.getElementById('advancedPrompts');
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -130,8 +139,9 @@ class VideoGenerator {
     }
 
     generateRandomQuestions(baseOption1, baseOption2) {
-        // Generate 3 variations based on the base options
-        const allPrompts = [
+        // Check if there are custom prompts
+        const customPromptsText = this.advancedPrompts.value.trim();
+        let allPrompts = [
             ['Pizza', 'Burger'],
             ['Coffee', 'Tea'],
             ['Beach', 'Mountains'],
@@ -148,6 +158,25 @@ class VideoGenerator {
             ['Hot', 'Cold'],
             ['Sweet', 'Salty']
         ];
+
+        // Parse custom prompts if provided
+        if (customPromptsText) {
+            const customLines = customPromptsText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+
+            const customPrompts = customLines.map(line => {
+                const parts = line.split(/\s+vs\s+|\s+or\s+/i);
+                if (parts.length === 2) {
+                    return [parts[0].trim(), parts[1].trim()];
+                }
+                return null;
+            }).filter(p => p !== null);
+
+            if (customPrompts.length > 0) {
+                allPrompts = [...customPrompts, ...allPrompts];
+            }
+        }
 
         // First question is always the user's input
         const questions = [
@@ -213,40 +242,54 @@ class VideoGenerator {
         const text = `${option1} or ${option2}?`;
         const voiceId = this.voiceSelect.value;
 
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'audio/mpeg',
-                'Content-Type': 'application/json',
-                'xi-api-key': this.elevenlabsKey
-            },
-            body: JSON.stringify({
-                text: text,
-                model_id: 'eleven_turbo_v2',
-                voice_settings: {
-                    stability: 0.5,
-                    similarity_boost: 0.75
-                }
-            })
-        });
+        console.log(`🎤 Generating voice for: "${text}"`);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('ElevenLabs API Error:', response.status, errorText);
-            throw new Error(`Failed to generate voice (${response.status}): ${errorText}`);
+        try {
+            const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'audio/mpeg',
+                    'Content-Type': 'application/json',
+                    'xi-api-key': this.elevenlabsKey
+                },
+                body: JSON.stringify({
+                    text: text,
+                    model_id: 'eleven_turbo_v2',
+                    voice_settings: {
+                        stability: 0.5,
+                        similarity_boost: 0.75
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ ElevenLabs API Error:', response.status, errorText);
+                throw new Error(`Failed to generate voice for "${text}" (${response.status}): ${errorText}`);
+            }
+
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            const voiceAudio = new Audio(audioUrl);
+
+            // Wait for metadata to load to get duration
+            await new Promise((resolve, reject) => {
+                voiceAudio.addEventListener('loadedmetadata', () => {
+                    console.log(`✅ Voice generated: "${text}" (${voiceAudio.duration.toFixed(2)}s)`);
+                    resolve();
+                });
+                voiceAudio.addEventListener('error', (e) => {
+                    console.error(`❌ Audio load error for "${text}":`, e);
+                    reject(new Error(`Failed to load audio for "${text}"`));
+                });
+            });
+
+            return voiceAudio;
+        } catch (error) {
+            console.error(`❌ Error generating voice for "${text}":`, error);
+            throw error;
         }
-
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        const voiceAudio = new Audio(audioUrl);
-
-        // Wait for metadata to load to get duration
-        await new Promise((resolve) => {
-            voiceAudio.addEventListener('loadedmetadata', resolve);
-        });
-
-        return voiceAudio;
     }
 
     drawInitialCanvas() {
@@ -293,8 +336,18 @@ class VideoGenerator {
         this.previewOverlay.classList.add('hidden');
 
         try {
+            // Get engagement settings
+            const engagementSettings = {
+                comment: this.commentEngagement.checked,
+                follow: this.followEngagement.checked,
+                share: this.shareEngagement.checked,
+                like: this.likeEngagement.checked
+            };
+            console.log('📊 Engagement settings:', engagementSettings);
+
             // Generate 3 random question pairs
             const allQuestions = this.generateRandomQuestions(option1, option2);
+            console.log('🎯 Generated 3 questions:', allQuestions);
 
             // Step 1: Load background image
             this.updateStatus('🎨 Loading background...', 3);
@@ -311,15 +364,21 @@ class VideoGenerator {
                 const question = allQuestions[i];
                 const progress = 10 + (i * 30); // 10%, 40%, 70%
 
+                console.log(`\n🎬 === Processing Question ${i + 1}/3 ===`);
+                console.log(`   Options: "${question.option1}" vs "${question.option2}"`);
                 this.updateStatus(`🎬 Generating question ${i + 1}/3...`, progress);
 
                 // Fetch images
                 this.updateStatus(`🖼️ Fetching images ${i + 1}/3...`, progress + 5);
+                console.log(`   📸 Fetching images...`);
                 const [img1, img2] = await this.fetchQuestionImages(question.option1, question.option2);
+                console.log(`   ✅ Images fetched`);
 
                 // Generate voice
                 this.updateStatus(`🎤 Generating voice ${i + 1}/3...`, progress + 15);
+                console.log(`   🎤 Generating voice...`);
                 const voice = await this.generateQuestionVoice(question.option1, question.option2);
+                console.log(`   ✅ Voice generated`);
 
                 // Generate percentages
                 const percentage1 = Math.floor(Math.random() * 40) + 30; // 30-70
@@ -334,7 +393,11 @@ class VideoGenerator {
                     percentage1: percentage1,
                     percentage2: percentage2
                 });
+
+                console.log(`   ✅ Question ${i + 1} complete! (${percentage1}% vs ${percentage2}%)`);
             }
+
+            console.log('\n✨ All 3 questions generated successfully!');
 
             // Step 6: Calculate timeline
             this.updateStatus('⏱️ Building timeline...', 95);

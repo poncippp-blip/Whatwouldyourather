@@ -72,7 +72,42 @@
                 </div>
 
                 <div class="panel-section">
-                    <h3>4. Generate Video</h3>
+                    <h3>4. Engagement Features</h3>
+                    <div class="checkboxes-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="commentEngagement" checked>
+                            <span>💬 Comment Engagement</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="followEngagement" checked>
+                            <span>👤 Follow Engagement</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="shareEngagement" checked>
+                            <span>🔄 Share Engagement</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="likeEngagement" checked>
+                            <span>❤️ Like Engagement</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>5. Advanced Prompts</h3>
+                    <textarea
+                        id="advancedPrompts"
+                        class="input-field textarea-field"
+                        placeholder="Add custom prompts (one per line)&#10;Example:&#10;Travel vs Staycation&#10;Netflix vs Cinema&#10;Early Bird vs Night Owl"
+                        rows="4"
+                    ></textarea>
+                    <small class="help-text">
+                        Leave empty to use default prompts
+                    </small>
+                </div>
+
+                <div class="panel-section">
+                    <h3>6. Generate Video</h3>
                     <button id="generateBtn" class="btn btn-primary">
                         ✨ Generate Video
                     </button>
