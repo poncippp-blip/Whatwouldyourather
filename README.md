@@ -13,10 +13,11 @@ Create viral "Would You Rather" videos with AI-powered voiceovers, animations, a
 - **9:16 Vertical Format**: Perfect for TikTok, Instagram Reels, and YouTube Shorts
 
 ### 🖼️ Image Finder
-- **High-Quality Images**: Search millions of professional photos from Unsplash
-- **Clean Interface**: Modern, responsive design
-- **Image Preview**: Full-size viewing with photographer credits
-- **Download Support**: Direct image downloads
+- **Purpose**: Find and select images from Unsplash for your videos
+- **Image Selection**: Choose exactly which images appear in your videos
+- **2-Image Limit**: Select one image for each option (Option 1 & Option 2)
+- **Seamless Integration**: Selected images automatically used in Video Generator
+- **Visual Preview**: See your selections before generating videos
 
 ## Quick Start
 
@@ -54,21 +55,26 @@ cp config.example.js config.js
 **Option B: Using the UI**
 Just open the tool and enter your API keys in the provided fields.
 
-### 3. Add Audio Assets (Optional but Recommended)
+### 3. Audio Assets (Already Included!)
 
-For the best video experience, add these audio files to `assets/audio/`:
-- `music.mp3` - Background music
-- `clock.mp3` - Clock ticking sound (3 seconds)
-- `ding.mp3` - Ding sound effect
-- `swoosh.mp3` - Transition sound effect
+✅ **Audio files are already provided** in `assets/audio/`:
+- `music.mp3` - Background music (plays throughout)
+- `clock.mp3` - Clock ticking sound (3-second countdown)
+- `ding.mp3` - Ding sound effect (percentage reveal)
+- `swoosh.mp3` - Transition sound effect (ending)
 
-See [assets/README.md](assets/README.md) for detailed requirements and free resources.
+All audio is automatically loaded and synchronized with the video timeline!
 
 ### 4. Start Creating!
 
-Open `index.html` in your browser and choose:
-- **Video Generator** - Create viral videos
-- **Image Finder** - Search for images
+Open `index.html` in your browser:
+
+**Recommended Workflow:**
+1. **Image Finder** → Search and select 2 images for your video
+2. **Video Generator** → Create your video with selected images
+
+**Quick Workflow:**
+- **Video Generator** → Auto-fetches images based on your prompts
 
 ## Project Structure
 
@@ -103,15 +109,32 @@ Whatwouldyourather/
         └── or.png
 ```
 
-## Video Generator Usage
+## Complete Workflow
 
-### Basic Workflow
+### Method 1: Using Image Finder (Recommended)
 
-1. **Enter Options**: Type two choices (e.g., "Pizza" or "Burger")
-2. **Configure Voice**: Select preferred voice from ElevenLabs
-3. **Generate**: Click "Generate Video"
-4. **Preview**: Watch the animated preview
-5. **Export**: Download or screen record
+1. **Image Finder**:
+   - Search "pizza" on Unsplash
+   - Click "Select for Option 1" on your preferred pizza image
+   - Search "burger" on Unsplash
+   - Click "Select for Option 2" on your preferred burger image
+   - Click "Use in Video Generator →"
+
+2. **Video Generator**:
+   - Enter options: "Pizza" and "Burger"
+   - Select voice from ElevenLabs
+   - Click "Generate Video"
+   - ✅ Uses your selected images automatically!
+   - Preview and export
+
+### Method 2: Quick Auto-Fetch
+
+1. **Video Generator**:
+   - Enter options: "Pizza" and "Burger"
+   - Select voice from ElevenLabs
+   - Click "Generate Video"
+   - Images auto-fetched from Unsplash based on your prompts
+   - Preview and export
 
 ### Animation Timeline
 

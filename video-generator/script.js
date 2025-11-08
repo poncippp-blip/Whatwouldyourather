@@ -344,12 +344,40 @@ class VideoGenerator {
     }
 
     async loadAudioAssets() {
-        // For now, create silent audio or use placeholder
-        // In production, user should provide these files
-        this.assets.music = null; // User should add music.mp3
-        this.assets.clockSound = null; // User should add clock.mp3
-        this.assets.dingSound = null; // User should add ding.mp3
-        this.assets.swooshSound = null; // User should add swoosh.mp3
+        // Load audio files from assets folder
+        try {
+            // Load music
+            this.assets.music = new Audio('../assets/audio/music.mp3');
+            await this.waitForAudioLoad(this.assets.music);
+
+            // Load clock sound
+            this.assets.clockSound = new Audio('../assets/audio/clock.mp3');
+            await this.waitForAudioLoad(this.assets.clockSound);
+
+            // Load ding sound
+            this.assets.dingSound = new Audio('../assets/audio/ding.mp3');
+            await this.waitForAudioLoad(this.assets.dingSound);
+
+            // Load swoosh sound
+            this.assets.swooshSound = new Audio('../assets/audio/swoosh.mp3');
+            await this.waitForAudioLoad(this.assets.swooshSound);
+
+            console.log('All audio assets loaded successfully');
+        } catch (error) {
+            console.warn('Some audio files could not be loaded:', error.message);
+            console.log('Video will continue without background audio');
+            // Continue without audio - not critical for preview
+        }
+    }
+
+    waitForAudioLoad(audio) {
+        return new Promise((resolve, reject) => {
+            audio.addEventListener('canplaythrough', resolve, { once: true });
+            audio.addEventListener('error', () => {
+                reject(new Error(`Failed to load ${audio.src}`));
+            }, { once: true });
+            audio.load();
+        });
     }
 
     calculateTimeline() {
@@ -385,6 +413,13 @@ class VideoGenerator {
         this.startTime = Date.now() - (this.currentTime * 1000);
         this.animate();
 
+        // Play background music (loops)
+        if (this.assets.music && this.currentTime < this.timeline.totalDuration) {
+            this.assets.music.loop = true;
+            this.assets.music.volume = 0.3; // Background volume
+            this.assets.music.play();
+        }
+
         // Play voice at correct time
         if (this.assets.voiceAudio) {
             const timeUntilVoice = Math.max(0, this.timeline.voiceStart - this.currentTime);
@@ -395,22 +430,62 @@ class VideoGenerator {
                 }
             }, timeUntilVoice * 1000);
         }
+
+        // Play clock sound at correct time
+        if (this.assets.clockSound) {
+            const timeUntilClock = Math.max(0, this.timeline.clockStart - this.currentTime);
+            setTimeout(() => {
+                if (this.isPlaying) {
+                    this.assets.clockSound.play();
+                }
+            }, timeUntilClock * 1000);
+        }
+
+        // Play ding sound at correct time
+        if (this.assets.dingSound) {
+            const timeUntilDing = Math.max(0, this.timeline.dingStart - this.currentTime);
+            setTimeout(() => {
+                if (this.isPlaying) {
+                    this.assets.dingSound.play();
+                }
+            }, timeUntilDing * 1000);
+        }
+
+        // Play swoosh sound at correct time
+        if (this.assets.swooshSound) {
+            const timeUntilSwoosh = Math.max(0, this.timeline.swooshStart - this.currentTime);
+            setTimeout(() => {
+                if (this.isPlaying) {
+                    this.assets.swooshSound.play();
+                }
+            }, timeUntilSwoosh * 1000);
+        }
     }
 
     pause() {
         this.isPlaying = false;
-        if (this.assets.voiceAudio) {
-            this.assets.voiceAudio.pause();
-        }
+
+        // Pause all audio
+        if (this.assets.voiceAudio) this.assets.voiceAudio.pause();
+        if (this.assets.music) this.assets.music.pause();
+        if (this.assets.clockSound) this.assets.clockSound.pause();
+        if (this.assets.dingSound) this.assets.dingSound.pause();
+        if (this.assets.swooshSound) this.assets.swooshSound.pause();
+
         cancelAnimationFrame(this.animationFrame);
     }
 
     restart() {
         this.pause();
         this.currentTime = 0;
-        if (this.assets.voiceAudio) {
-            this.assets.voiceAudio.currentTime = 0;
-        }
+
+        // Reset all audio
+        if (this.assets.voiceAudio) this.assets.voiceAudio.currentTime = 0;
+        if (this.assets.music) this.assets.music.currentTime = 0;
+        if (this.assets.clockSound) this.assets.clockSound.currentTime = 0;
+        if (this.assets.dingSound) this.assets.dingSound.currentTime = 0;
+        if (this.assets.swooshSound) this.assets.swooshSound.currentTime = 0;
+
         this.renderFrame(0);
         this.play();
     }
