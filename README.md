@@ -28,10 +28,32 @@ A beautiful, modern web application for searching and discovering high-quality i
 
 ### 2. Set Up the Application
 
+**Option A: Using config.js (Recommended for local development)**
+
+1. Clone or download this repository
+2. Copy `config.example.js` to `config.js`:
+   ```bash
+   cp config.example.js config.js
+   ```
+3. Open `config.js` and add your API key:
+   ```javascript
+   const CONFIG = {
+       unsplashAccessKey: 'YOUR_ACCESS_KEY_HERE',
+       imagesPerPage: 12,
+       defaultSearchTerm: 'nature'
+   };
+   ```
+4. Open `index.html` in a web browser
+5. Your API key will be automatically loaded!
+
+**Option B: Using the UI (Quick and easy)**
+
 1. Clone or download this repository
 2. Open `index.html` in a web browser
 3. Enter your Unsplash API key in the "API Key" field
 4. Start searching for images!
+
+**Security Note**: The `config.js` file is gitignored to keep your API key private. Never commit your actual API key to version control!
 
 ### 3. Using the Application
 
@@ -58,7 +80,10 @@ image-finder/
 ├── index.html          # Main HTML structure
 ├── style.css           # Styling and responsive design
 ├── script.js           # Application logic and API integration
-└── README.md          # This file
+├── config.example.js   # Configuration template
+├── config.js           # Your API key (gitignored - create from example)
+├── .gitignore          # Git ignore file for security
+└── README.md           # This file
 ```
 
 ## Technologies Used
@@ -85,19 +110,36 @@ Works on all modern browsers:
 - Safari
 - Edge
 
-## Privacy
+## Privacy & Security
 
-- Your API key is stored only in your browser's localStorage
-- No data is sent to any server except Unsplash API
-- All processing happens client-side
+- **API Key Storage**: Your API key can be stored in `config.js` (gitignored) or browser localStorage
+- **No Backend**: All processing happens client-side in your browser
+- **Secure**: No data is sent to any server except the official Unsplash API
+- **Git Protection**: `config.js` is automatically excluded from git commits via `.gitignore`
+- **Never Share**: Keep your API keys private and never commit them to version control
 
 ## Customization
 
 ### Change Images Per Page
 
-Edit `script.js`:
+Edit `config.js`:
 ```javascript
-this.perPage = 12; // Change to 20, 30, etc.
+const CONFIG = {
+    unsplashAccessKey: 'YOUR_KEY',
+    imagesPerPage: 20,  // Change this
+    defaultSearchTerm: 'nature'
+};
+```
+
+### Change Default Search Term
+
+Edit `config.js`:
+```javascript
+const CONFIG = {
+    unsplashAccessKey: 'YOUR_KEY',
+    imagesPerPage: 12,
+    defaultSearchTerm: 'technology'  // Change this
+};
 ```
 
 ### Modify Color Scheme

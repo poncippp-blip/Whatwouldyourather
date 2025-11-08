@@ -5,9 +5,10 @@ class ImageFinder {
         this.apiKey = '';
         this.baseURL = 'https://api.unsplash.com';
         this.currentPage = 1;
-        this.perPage = 12;
+        this.perPage = typeof CONFIG !== 'undefined' ? CONFIG.imagesPerPage : 12;
         this.currentQuery = '';
         this.totalResults = 0;
+        this.defaultSearch = typeof CONFIG !== 'undefined' ? CONFIG.defaultSearchTerm : 'nature';
 
         // DOM Elements
         this.searchInput = document.getElementById('searchInput');
@@ -32,11 +33,18 @@ class ImageFinder {
     }
 
     init() {
-        // Load saved API key
-        const savedApiKey = localStorage.getItem('unsplashApiKey');
-        if (savedApiKey) {
-            this.apiKey = savedApiKey;
-            this.apiKeyInput.value = savedApiKey;
+        // Check for API key in config file first
+        if (typeof CONFIG !== 'undefined' && CONFIG.unsplashAccessKey && CONFIG.unsplashAccessKey !== 'YOUR_ACCESS_KEY_HERE') {
+            this.apiKey = CONFIG.unsplashAccessKey;
+            this.apiKeyInput.value = CONFIG.unsplashAccessKey;
+            this.apiKeyInput.placeholder = 'API Key loaded from config.js';
+        } else {
+            // Load saved API key from localStorage
+            const savedApiKey = localStorage.getItem('unsplashApiKey');
+            if (savedApiKey) {
+                this.apiKey = savedApiKey;
+                this.apiKeyInput.value = savedApiKey;
+            }
         }
 
         // Event Listeners
@@ -60,7 +68,7 @@ class ImageFinder {
         });
 
         // Load default images
-        this.searchImages('nature');
+        this.searchImages(this.defaultSearch);
     }
 
     async handleSearch() {
@@ -92,9 +100,9 @@ class ImageFinder {
             url.searchParams.append('per_page', this.perPage);
             url.searchParams.append('orientation', 'landscape');
 
-            // Use demo API key if user hasn't provided one
+            // Use API key from config or input field
             const headers = {
-                'Authorization': `Client-ID ${this.apiKey || 'YOUR_DEMO_KEY_HERE'}`
+                'Authorization': `Client-ID ${this.apiKey}`
             };
 
             const response = await fetch(url, { headers });
