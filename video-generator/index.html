@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Would You Rather Video Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../" class="back-link">← Back to Home</a>
+            <h1>🎥 Video Generator</h1>
+            <p class="subtitle">Create unique "Would You Rather" videos</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- Left Panel: Controls -->
+            <div class="controls-panel">
+                <div class="panel-section">
+                    <h3>1. Enter Prompt</h3>
+                    <input
+                        type="text"
+                        id="option1Input"
+                        class="input-field"
+                        placeholder="Option 1 (e.g., Pizza)"
+                    >
+                    <input
+                        type="text"
+                        id="option2Input"
+                        class="input-field"
+                        placeholder="Option 2 (e.g., Burger)"
+                    >
+                    <button id="randomPromptBtn" class="btn btn-secondary">
+                        🎲 Random Prompt
+                    </button>
+                </div>
+
+                <div class="panel-section">
+                    <h3>2. API Configuration</h3>
+                    <input
+                        type="text"
+                        id="unsplashKeyInput"
+                        class="input-field"
+                        placeholder="Unsplash API Key"
+                    >
+                    <input
+                        type="text"
+                        id="elevenlabsKeyInput"
+                        class="input-field"
+                        placeholder="ElevenLabs API Key"
+                    >
+                    <small class="help-text">
+                        Keys saved locally. Get them from:
+                        <a href="https://unsplash.com/developers" target="_blank">Unsplash</a> |
+                        <a href="https://elevenlabs.io" target="_blank">ElevenLabs</a>
+                    </small>
+                </div>
+
+                <div class="panel-section">
+                    <h3>3. Voice Settings</h3>
+                    <select id="voiceSelect" class="input-field">
+                        <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
+                        <option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option>
+                        <option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option>
+                        <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
+                        <option value="MF3mGyEYCl7XYWbV9V6O">Elli (Female)</option>
+                        <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Male)</option>
+                        <option value="VR6AewLTigWG4xSOukaG">Arnold (Male)</option>
+                        <option value="pNInz6obpgDQGcFmaJgB">Adam (Male)</option>
+                    </select>
+                </div>
+
+                <div class="panel-section">
+                    <h3>4. Generate Video</h3>
+                    <button id="generateBtn" class="btn btn-primary">
+                        ✨ Generate Video
+                    </button>
+                    <button id="downloadBtn" class="btn btn-secondary" disabled>
+                        📥 Download Video
+                    </button>
+                </div>
+
+                <div id="statusPanel" class="status-panel hidden">
+                    <div class="status-item">
+                        <span class="status-icon">⏳</span>
+                        <span id="statusText">Ready to generate...</span>
+                    </div>
+                    <div id="progressBar" class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Preview -->
+            <div class="preview-panel">
+                <h3>Preview (9:16)</h3>
+                <div class="canvas-wrapper">
+                    <canvas id="previewCanvas" width="1080" height="1920"></canvas>
+                    <div id="previewOverlay" class="preview-overlay">
+                        <p>Video preview will appear here</p>
+                        <p class="overlay-hint">Click "Generate Video" to start</p>
+                    </div>
+                </div>
+                <div class="controls-row">
+                    <button id="playBtn" class="control-btn" disabled>
+                        ▶️ Play
+                    </button>
+                    <button id="pauseBtn" class="control-btn" disabled>
+                        ⏸️ Pause
+                    </button>
+                    <button id="restartBtn" class="control-btn" disabled>
+                        🔄 Restart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
