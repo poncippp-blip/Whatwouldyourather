@@ -1,0 +1,24 @@
+# API Keys and Environment Variables
+.env
+.env.local
+config.js
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies (if you add a package manager later)
+node_modules/
+package-lock.json
+yarn.lock
