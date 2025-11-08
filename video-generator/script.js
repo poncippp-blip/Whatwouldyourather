@@ -195,23 +195,27 @@ class VideoGenerator {
             this.videoData.percentage1 = Math.floor(Math.random() * 40) + 30; // 30-70
             this.videoData.percentage2 = 100 - this.videoData.percentage1;
 
-            // Step 1: Fetch images
-            this.updateStatus('🖼️ Fetching images from Unsplash...', 10);
+            // Step 1: Load background image
+            this.updateStatus('🎨 Loading background...', 5);
+            await this.loadBackgroundImage();
+
+            // Step 2: Fetch images
+            this.updateStatus('🖼️ Fetching images from Unsplash...', 15);
             await this.fetchImages(option1, option2);
 
-            // Step 2: Generate voice
-            this.updateStatus('🎤 Generating voice with ElevenLabs...', 40);
+            // Step 3: Generate voice
+            this.updateStatus('🎤 Generating voice with ElevenLabs...', 45);
             await this.generateVoice(option1, option2);
 
-            // Step 3: Load audio assets
-            this.updateStatus('🔊 Loading audio assets...', 60);
+            // Step 4: Load audio assets
+            this.updateStatus('🔊 Loading audio assets...', 65);
             await this.loadAudioAssets();
 
-            // Step 4: Calculate timeline
-            this.updateStatus('⏱️ Building timeline...', 80);
+            // Step 5: Calculate timeline
+            this.updateStatus('⏱️ Building timeline...', 85);
             this.calculateTimeline();
 
-            // Step 5: Ready to play
+            // Step 6: Ready to play
             this.updateStatus('✅ Video ready!', 100);
 
             this.playBtn.disabled = false;
@@ -229,6 +233,15 @@ class VideoGenerator {
             alert('Error generating video: ' + error.message);
         } finally {
             this.generateBtn.disabled = false;
+        }
+    }
+
+    async loadBackgroundImage() {
+        try {
+            this.assets.background = await this.loadImage('../assets/images/or.png');
+        } catch (error) {
+            console.warn('Background image not found, using solid color');
+            this.assets.background = null;
         }
     }
 
@@ -524,7 +537,7 @@ class VideoGenerator {
     }
 
     drawOption(image, text, percentage, position, progress, slideFrom, showPercentage) {
-        const y = position === 'top' ? 300 : 1300;
+        const y = position === 'top' ? 150 : 1150;  // Moved up by 150px
         const imageSize = 400;
         const imageX = (this.width - imageSize) / 2;
 
