@@ -302,7 +302,9 @@ class VideoGenerator {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to generate voice');
+            const errorText = await response.text();
+            console.error('ElevenLabs API Error:', response.status, errorText);
+            throw new Error(`Failed to generate voice (${response.status}): ${errorText}`);
         }
 
         const audioBlob = await response.blob();
