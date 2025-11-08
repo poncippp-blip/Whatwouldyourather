@@ -14,13 +14,11 @@ class VideoGenerator {
         // Assets
         this.assets = {
             background: null,
-            option1Image: null,
-            option2Image: null,
-            voiceAudio: null,
             music: null,
             clockSound: null,
             dingSound: null,
-            swooshSound: null
+            swooshSound: null,
+            questions: [] // Array of 3 questions, each with images, voice, data
         };
 
         // Animation state
@@ -28,24 +26,11 @@ class VideoGenerator {
         this.isPlaying = false;
         this.startTime = 0;
         this.currentTime = 0;
+        this.currentQuestionIndex = 0; // Which question is currently playing (0-2)
 
-        // Video data
-        this.videoData = {
-            option1: '',
-            option2: '',
-            percentage1: 0,
-            percentage2: 0
-        };
-
-        // Timeline (in seconds)
+        // Timeline (in seconds) - for all 3 questions
         this.timeline = {
-            voiceStart: 0.5,
-            option1Appear: 0.7,  // 200ms after voice starts
-            option2Appear: null, // Will be calculated based on voice duration
-            clockStart: null,
-            dingStart: null,
-            percentageReveal: null,
-            swooshStart: null,
+            questions: [], // Array of 3 question timelines
             totalDuration: 0
         };
 
@@ -144,6 +129,126 @@ class VideoGenerator {
         this.option2Input.value = random[1];
     }
 
+    generateRandomQuestions(baseOption1, baseOption2) {
+        // Generate 3 variations based on the base options
+        const allPrompts = [
+            ['Pizza', 'Burger'],
+            ['Coffee', 'Tea'],
+            ['Beach', 'Mountains'],
+            ['Summer', 'Winter'],
+            ['Dog', 'Cat'],
+            ['Books', 'Movies'],
+            ['Morning', 'Night'],
+            ['City', 'Countryside'],
+            ['Swimming', 'Hiking'],
+            ['Chocolate', 'Vanilla'],
+            ['Flying', 'Invisibility'],
+            ['Past', 'Future'],
+            ['Rich', 'Famous'],
+            ['Hot', 'Cold'],
+            ['Sweet', 'Salty']
+        ];
+
+        // First question is always the user's input
+        const questions = [
+            { option1: baseOption1, option2: baseOption2 }
+        ];
+
+        // Pick 2 more random questions that are different from the first
+        const availablePrompts = allPrompts.filter(p =>
+            p[0] !== baseOption1 && p[1] !== baseOption2
+        );
+
+        // Shuffle and pick 2
+        for (let i = 0; i < 2 && i < availablePrompts.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availablePrompts.length);
+            const [opt1, opt2] = availablePrompts.splice(randomIndex, 1)[0];
+            questions.push({ option1: opt1, option2: opt2 });
+        }
+
+        return questions;
+    }
+
+    async fetchQuestionImages(option1, option2) {
+        // Fetch images for a specific question
+        const fetchImage = async (query) => {
+            const url = new URL('https://api.unsplash.com/search/photos');
+            url.searchParams.append('query', query);
+            url.searchParams.append('per_page', 1);
+            url.searchParams.append('orientation', 'squarish');
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Client-ID ${this.unsplashKey}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch image for "${query}"`);
+            }
+
+            const data = await response.json();
+
+            if (data.results.length === 0) {
+                throw new Error(`No images found for "${query}"`);
+            }
+
+            return data.results[0].urls.regular;
+        };
+
+        // Fetch both images automatically
+        const [img1Url, img2Url] = await Promise.all([
+            fetchImage(option1),
+            fetchImage(option2)
+        ]);
+
+        // Load images
+        const img1 = await this.loadImage(img1Url);
+        const img2 = await this.loadImage(img2Url);
+
+        return [img1, img2];
+    }
+
+    async generateQuestionVoice(option1, option2) {
+        const text = `${option1} or ${option2}?`;
+        const voiceId = this.voiceSelect.value;
+
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'audio/mpeg',
+                'Content-Type': 'application/json',
+                'xi-api-key': this.elevenlabsKey
+            },
+            body: JSON.stringify({
+                text: text,
+                model_id: 'eleven_turbo_v2',
+                voice_settings: {
+                    stability: 0.5,
+                    similarity_boost: 0.75
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('ElevenLabs API Error:', response.status, errorText);
+            throw new Error(`Failed to generate voice (${response.status}): ${errorText}`);
+        }
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        const voiceAudio = new Audio(audioUrl);
+
+        // Wait for metadata to load to get duration
+        await new Promise((resolve) => {
+            voiceAudio.addEventListener('loadedmetadata', resolve);
+        });
+
+        return voiceAudio;
+    }
+
     drawInitialCanvas() {
         // Draw black background
         this.ctx.fillStyle = '#000';
@@ -188,35 +293,55 @@ class VideoGenerator {
         this.previewOverlay.classList.add('hidden');
 
         try {
-            this.videoData.option1 = option1;
-            this.videoData.option2 = option2;
-
-            // Generate random percentages
-            this.videoData.percentage1 = Math.floor(Math.random() * 40) + 30; // 30-70
-            this.videoData.percentage2 = 100 - this.videoData.percentage1;
+            // Generate 3 random question pairs
+            const allQuestions = this.generateRandomQuestions(option1, option2);
 
             // Step 1: Load background image
-            this.updateStatus('🎨 Loading background...', 5);
+            this.updateStatus('🎨 Loading background...', 3);
             await this.loadBackgroundImage();
 
-            // Step 2: Fetch images
-            this.updateStatus('🖼️ Fetching images from Unsplash...', 15);
-            await this.fetchImages(option1, option2);
-
-            // Step 3: Generate voice
-            this.updateStatus('🎤 Generating voice with ElevenLabs...', 45);
-            await this.generateVoice(option1, option2);
-
-            // Step 4: Load audio assets
-            this.updateStatus('🔊 Loading audio assets...', 65);
+            // Step 2: Load audio assets
+            this.updateStatus('🔊 Loading audio assets...', 8);
             await this.loadAudioAssets();
 
-            // Step 5: Calculate timeline
-            this.updateStatus('⏱️ Building timeline...', 85);
+            // Step 3-5: Generate all 3 questions
+            this.assets.questions = [];
+
+            for (let i = 0; i < 3; i++) {
+                const question = allQuestions[i];
+                const progress = 10 + (i * 30); // 10%, 40%, 70%
+
+                this.updateStatus(`🎬 Generating question ${i + 1}/3...`, progress);
+
+                // Fetch images
+                this.updateStatus(`🖼️ Fetching images ${i + 1}/3...`, progress + 5);
+                const [img1, img2] = await this.fetchQuestionImages(question.option1, question.option2);
+
+                // Generate voice
+                this.updateStatus(`🎤 Generating voice ${i + 1}/3...`, progress + 15);
+                const voice = await this.generateQuestionVoice(question.option1, question.option2);
+
+                // Generate percentages
+                const percentage1 = Math.floor(Math.random() * 40) + 30; // 30-70
+                const percentage2 = 100 - percentage1;
+
+                this.assets.questions.push({
+                    option1: question.option1,
+                    option2: question.option2,
+                    image1: img1,
+                    image2: img2,
+                    voice: voice,
+                    percentage1: percentage1,
+                    percentage2: percentage2
+                });
+            }
+
+            // Step 6: Calculate timeline
+            this.updateStatus('⏱️ Building timeline...', 95);
             this.calculateTimeline();
 
-            // Step 6: Ready to play
-            this.updateStatus('✅ Video ready!', 100);
+            // Step 7: Ready to play
+            this.updateStatus('✅ Video ready! (3 questions)', 100);
 
             this.playBtn.disabled = false;
             this.pauseBtn.disabled = false;
@@ -238,49 +363,24 @@ class VideoGenerator {
 
     async loadBackgroundImage() {
         try {
-            this.assets.background = await this.loadImage('../assets/images/or.png');
+            // Load local image without CORS
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+                img.onload = () => {
+                    console.log('✅ Background image loaded successfully');
+                    resolve();
+                };
+                img.onerror = (e) => {
+                    console.error('❌ Background image failed to load:', e);
+                    reject(new Error('Failed to load background'));
+                };
+                img.src = '../assets/images/or.png';
+            });
+            this.assets.background = img;
         } catch (error) {
-            console.warn('Background image not found, using solid color');
+            console.warn('Background image not found, using solid color:', error.message);
             this.assets.background = null;
         }
-    }
-
-    async fetchImages(option1, option2) {
-        // Auto-fetch images from Unsplash based on prompts
-        const fetchImage = async (query) => {
-            const url = new URL('https://api.unsplash.com/search/photos');
-            url.searchParams.append('query', query);
-            url.searchParams.append('per_page', 1);
-            url.searchParams.append('orientation', 'squarish');
-
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Client-ID ${this.unsplashKey}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch image for "${query}"`);
-            }
-
-            const data = await response.json();
-
-            if (data.results.length === 0) {
-                throw new Error(`No images found for "${query}"`);
-            }
-
-            return data.results[0].urls.regular;
-        };
-
-        // Fetch both images automatically
-        const [img1Url, img2Url] = await Promise.all([
-            fetchImage(option1),
-            fetchImage(option2)
-        ]);
-
-        // Load images
-        this.assets.option1Image = await this.loadImage(img1Url);
-        this.assets.option2Image = await this.loadImage(img2Url);
     }
 
     loadImage(url) {
@@ -290,44 +390,6 @@ class VideoGenerator {
             img.onload = () => resolve(img);
             img.onerror = () => reject(new Error('Failed to load image'));
             img.src = url;
-        });
-    }
-
-    async generateVoice(option1, option2) {
-        const text = `${option1} or ${option2}?`;
-        const voiceId = this.voiceSelect.value;
-
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'audio/mpeg',
-                'Content-Type': 'application/json',
-                'xi-api-key': this.elevenlabsKey
-            },
-            body: JSON.stringify({
-                text: text,
-                model_id: 'eleven_turbo_v2',  // Updated to free tier model
-                voice_settings: {
-                    stability: 0.5,
-                    similarity_boost: 0.75
-                }
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('ElevenLabs API Error:', response.status, errorText);
-            throw new Error(`Failed to generate voice (${response.status}): ${errorText}`);
-        }
-
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        this.assets.voiceAudio = new Audio(audioUrl);
-
-        // Wait for metadata to load to get duration
-        await new Promise((resolve) => {
-            this.assets.voiceAudio.addEventListener('loadedmetadata', resolve);
         });
     }
 
@@ -369,29 +431,34 @@ class VideoGenerator {
     }
 
     calculateTimeline() {
-        const voiceDuration = this.assets.voiceAudio.duration;
+        // Build timeline for all 3 questions
+        this.timeline.questions = [];
+        let currentTime = 0;
 
-        // Calculate when each element appears
-        this.timeline.voiceStart = 0.5;
-        this.timeline.option1Appear = this.timeline.voiceStart + 0.2; // 200ms after voice
+        for (let i = 0; i < this.assets.questions.length; i++) {
+            const question = this.assets.questions[i];
+            const voiceDuration = question.voice.duration;
 
-        // Option 2 appears mid-way through voice (when "or" is said)
-        this.timeline.option2Appear = this.timeline.voiceStart + (voiceDuration / 2);
+            const questionTimeline = {
+                startTime: currentTime,
+                voiceStart: currentTime + 0.5,
+                option1Appear: currentTime + 0.5 + 0.2, // 200ms after voice
+                option2Appear: currentTime + 0.5 + (voiceDuration / 2), // Mid-way through voice
+                clockStart: currentTime + 0.5 + voiceDuration + 0.5,
+                dingStart: currentTime + 0.5 + voiceDuration + 0.5 + 3.0,
+                percentageReveal: currentTime + 0.5 + voiceDuration + 0.5 + 3.0,
+                swooshStart: currentTime + 0.5 + voiceDuration + 0.5 + 3.0 + 2.0,
+                endTime: currentTime + 0.5 + voiceDuration + 0.5 + 3.0 + 2.0 + 1.0
+            };
 
-        // Clock starts 0.5s after voice ends
-        this.timeline.clockStart = this.timeline.voiceStart + voiceDuration + 0.5;
+            this.timeline.questions.push(questionTimeline);
 
-        // Ding after 3 seconds of clock
-        this.timeline.dingStart = this.timeline.clockStart + 3.0;
+            // Next question starts after swoosh completes
+            currentTime = questionTimeline.endTime;
+        }
 
-        // Percentages revealed with ding
-        this.timeline.percentageReveal = this.timeline.dingStart;
-
-        // Swoosh 2 seconds after ding
-        this.timeline.swooshStart = this.timeline.dingStart + 2.0;
-
-        // Total duration
-        this.timeline.totalDuration = this.timeline.swooshStart + 1.0;
+        // Total duration is when the last question ends
+        this.timeline.totalDuration = currentTime;
     }
 
     play() {
@@ -408,57 +475,70 @@ class VideoGenerator {
             this.assets.music.play();
         }
 
-        // Play voice at correct time
-        if (this.assets.voiceAudio) {
-            const timeUntilVoice = Math.max(0, this.timeline.voiceStart - this.currentTime);
-            setTimeout(() => {
-                if (this.isPlaying) {
-                    this.assets.voiceAudio.currentTime = Math.max(0, this.currentTime - this.timeline.voiceStart);
-                    this.assets.voiceAudio.play();
-                }
-            }, timeUntilVoice * 1000);
-        }
+        // Schedule audio for all 3 questions
+        for (let i = 0; i < this.timeline.questions.length; i++) {
+            const qt = this.timeline.questions[i];
+            const question = this.assets.questions[i];
 
-        // Play clock sound at correct time
-        if (this.assets.clockSound) {
-            const timeUntilClock = Math.max(0, this.timeline.clockStart - this.currentTime);
-            setTimeout(() => {
-                if (this.isPlaying) {
-                    this.assets.clockSound.play();
-                }
-            }, timeUntilClock * 1000);
-        }
+            // Play voice at correct time
+            if (question.voice && this.currentTime < qt.voiceStart + question.voice.duration) {
+                const timeUntilVoice = Math.max(0, qt.voiceStart - this.currentTime);
+                setTimeout(() => {
+                    if (this.isPlaying) {
+                        question.voice.currentTime = Math.max(0, this.currentTime - qt.voiceStart);
+                        question.voice.play().catch(e => console.log('Voice play error:', e));
+                    }
+                }, timeUntilVoice * 1000);
+            }
 
-        // Play ding sound at correct time
-        if (this.assets.dingSound) {
-            const timeUntilDing = Math.max(0, this.timeline.dingStart - this.currentTime);
-            setTimeout(() => {
-                if (this.isPlaying) {
-                    this.assets.dingSound.play();
-                }
-            }, timeUntilDing * 1000);
-        }
+            // Play clock sound at correct time
+            if (this.assets.clockSound && this.currentTime < qt.clockStart + 3) {
+                const timeUntilClock = Math.max(0, qt.clockStart - this.currentTime);
+                setTimeout(() => {
+                    if (this.isPlaying) {
+                        const clockClone = this.assets.clockSound.cloneNode();
+                        clockClone.play().catch(e => console.log('Clock play error:', e));
+                    }
+                }, timeUntilClock * 1000);
+            }
 
-        // Play swoosh sound at correct time
-        if (this.assets.swooshSound) {
-            const timeUntilSwoosh = Math.max(0, this.timeline.swooshStart - this.currentTime);
-            setTimeout(() => {
-                if (this.isPlaying) {
-                    this.assets.swooshSound.play();
-                }
-            }, timeUntilSwoosh * 1000);
+            // Play ding sound at correct time
+            if (this.assets.dingSound && this.currentTime < qt.dingStart + 0.5) {
+                const timeUntilDing = Math.max(0, qt.dingStart - this.currentTime);
+                setTimeout(() => {
+                    if (this.isPlaying) {
+                        const dingClone = this.assets.dingSound.cloneNode();
+                        dingClone.play().catch(e => console.log('Ding play error:', e));
+                    }
+                }, timeUntilDing * 1000);
+            }
+
+            // Play swoosh sound at correct time
+            if (this.assets.swooshSound && this.currentTime < qt.swooshStart + 1) {
+                const timeUntilSwoosh = Math.max(0, qt.swooshStart - this.currentTime);
+                setTimeout(() => {
+                    if (this.isPlaying) {
+                        const swooshClone = this.assets.swooshSound.cloneNode();
+                        swooshClone.play().catch(e => console.log('Swoosh play error:', e));
+                    }
+                }, timeUntilSwoosh * 1000);
+            }
         }
     }
 
     pause() {
         this.isPlaying = false;
 
-        // Pause all audio
-        if (this.assets.voiceAudio) this.assets.voiceAudio.pause();
+        // Pause background music
         if (this.assets.music) this.assets.music.pause();
-        if (this.assets.clockSound) this.assets.clockSound.pause();
-        if (this.assets.dingSound) this.assets.dingSound.pause();
-        if (this.assets.swooshSound) this.assets.swooshSound.pause();
+
+        // Pause all question voices
+        for (const question of this.assets.questions) {
+            if (question.voice) question.voice.pause();
+        }
+
+        // Note: Sound effects (clock, ding, swoosh) are cloned and short-lived,
+        // so we don't need to pause them
 
         cancelAnimationFrame(this.animationFrame);
     }
@@ -467,12 +547,13 @@ class VideoGenerator {
         this.pause();
         this.currentTime = 0;
 
-        // Reset all audio
-        if (this.assets.voiceAudio) this.assets.voiceAudio.currentTime = 0;
+        // Reset background music
         if (this.assets.music) this.assets.music.currentTime = 0;
-        if (this.assets.clockSound) this.assets.clockSound.currentTime = 0;
-        if (this.assets.dingSound) this.assets.dingSound.currentTime = 0;
-        if (this.assets.swooshSound) this.assets.swooshSound.currentTime = 0;
+
+        // Reset all question voices
+        for (const question of this.assets.questions) {
+            if (question.voice) question.voice.currentTime = 0;
+        }
 
         this.renderFrame(0);
         this.play();
@@ -494,46 +575,79 @@ class VideoGenerator {
     }
 
     renderFrame(time) {
-        // Clear canvas
-        this.ctx.fillStyle = '#000';
-        this.ctx.fillRect(0, 0, this.width, this.height);
-
-        // Draw background if loaded
+        // Draw background image (stretched to 9:16)
         if (this.assets.background) {
             this.ctx.drawImage(this.assets.background, 0, 0, this.width, this.height);
+        } else {
+            // Fallback to black if no background
+            this.ctx.fillStyle = '#000';
+            this.ctx.fillRect(0, 0, this.width, this.height);
+        }
+
+        // Find which question we're currently on
+        let questionIndex = -1;
+        let questionTimeline = null;
+
+        for (let i = 0; i < this.timeline.questions.length; i++) {
+            const qt = this.timeline.questions[i];
+            if (time >= qt.startTime && time < qt.endTime) {
+                questionIndex = i;
+                questionTimeline = qt;
+                break;
+            }
+        }
+
+        // If no question found, we're between questions or done
+        if (questionIndex === -1) return;
+
+        const question = this.assets.questions[questionIndex];
+
+        // Apply swoosh exit animation if we're near the end
+        this.ctx.save();
+        if (time >= questionTimeline.swooshStart) {
+            const elapsed = time - questionTimeline.swooshStart;
+            const swooshDuration = questionTimeline.endTime - questionTimeline.swooshStart;
+            const progress = Math.min(elapsed / swooshDuration, 1);
+
+            // Slide everything to the left and fade out
+            const slideDistance = this.width;
+            this.ctx.translate(-slideDistance * progress, 0);
+            this.ctx.globalAlpha = 1 - progress;
         }
 
         // Draw option 1 (top) with animation
-        if (time >= this.timeline.option1Appear) {
-            const elapsed = time - this.timeline.option1Appear;
+        if (time >= questionTimeline.option1Appear) {
+            const elapsed = time - questionTimeline.option1Appear;
             const progress = Math.min(elapsed / 0.5, 1); // 0.5s animation
 
             this.drawOption(
-                this.assets.option1Image,
-                this.videoData.option1,
-                this.videoData.percentage1,
+                question.image1,
+                question.option1,
+                question.percentage1,
                 'top',
                 progress,
                 'left',
-                time >= this.timeline.percentageReveal
+                time >= questionTimeline.percentageReveal
             );
         }
 
         // Draw option 2 (bottom) with animation
-        if (time >= this.timeline.option2Appear) {
-            const elapsed = time - this.timeline.option2Appear;
+        if (time >= questionTimeline.option2Appear) {
+            const elapsed = time - questionTimeline.option2Appear;
             const progress = Math.min(elapsed / 0.5, 1);
 
             this.drawOption(
-                this.assets.option2Image,
-                this.videoData.option2,
-                this.videoData.percentage2,
+                question.image2,
+                question.option2,
+                question.percentage2,
                 'bottom',
                 progress,
                 'right',
-                time >= this.timeline.percentageReveal
+                time >= questionTimeline.percentageReveal
             );
         }
+
+        this.ctx.restore();
     }
 
     drawOption(image, text, percentage, position, progress, slideFrom, showPercentage) {
