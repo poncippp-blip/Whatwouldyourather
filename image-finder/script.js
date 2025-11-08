@@ -1,4 +1,4 @@
-// Image Finder Application
+// Image Finder Application - For Would You Rather Videos
 class ImageFinder {
     constructor() {
         // Unsplash API configuration
@@ -9,6 +9,15 @@ class ImageFinder {
         this.currentQuery = '';
         this.totalResults = 0;
         this.defaultSearch = typeof CONFIG !== 'undefined' ? CONFIG.defaultSearchTerm : 'nature';
+
+        // Selected images for video (max 2: option1 and option2)
+        this.selectedImages = {
+            option1: null,
+            option2: null
+        };
+
+        // Track displayed images for selection management
+        this.displayedImages = [];
 
         // DOM Elements
         this.searchInput = document.getElementById('searchInput');
@@ -28,6 +37,13 @@ class ImageFinder {
         this.photographerLink = document.getElementById('photographerLink');
         this.photographerName = document.getElementById('photographerName');
         this.closeModal = document.querySelector('.close');
+
+        // Selection panel
+        this.selectedPanel = document.getElementById('selectedPanel');
+        this.selectedCount = document.getElementById('selectedCount');
+        this.selectedImagesGrid = document.getElementById('selectedImages');
+        this.clearSelectionBtn = document.getElementById('clearSelectionBtn');
+        this.useInVideoBtn = document.getElementById('useInVideoBtn');
 
         this.init();
     }
@@ -67,8 +83,29 @@ class ImageFinder {
             if (e.target === this.modal) this.closeImageModal();
         });
 
+        this.clearSelectionBtn.addEventListener('click', () => this.clearAllSelections());
+
+        // Load saved selections
+        this.loadSavedSelections();
+
         // Load default images
         this.searchImages(this.defaultSearch);
+    }
+
+    loadSavedSelections() {
+        const saved = localStorage.getItem('videoGeneratorImages');
+        if (saved) {
+            try {
+                this.selectedImages = JSON.parse(saved);
+                this.updateSelectedPanel();
+            } catch (e) {
+                console.error('Error loading saved selections:', e);
+            }
+        }
+    }
+
+    saveSelections() {
+        localStorage.setItem('videoGeneratorImages', JSON.stringify(this.selectedImages));
     }
 
     async handleSearch() {
@@ -80,6 +117,7 @@ class ImageFinder {
 
         this.currentPage = 1;
         this.imageGrid.innerHTML = '';
+        this.displayedImages = [];
         await this.searchImages(query);
     }
 
@@ -143,6 +181,7 @@ class ImageFinder {
 
     displayImages(images) {
         images.forEach(image => {
+            this.displayedImages.push(image);
             const card = this.createImageCard(image);
             this.imageGrid.appendChild(card);
         });
@@ -167,15 +206,166 @@ class ImageFinder {
         photographer.className = 'photographer';
         photographer.textContent = `📸 ${image.user.name}`;
 
+        // Add select button
+        const selectBtn = document.createElement('button');
+        selectBtn.className = 'select-btn';
+        this.updateSelectButtonState(selectBtn, image);
+
+        selectBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleImageSelect(image);
+        });
+
         info.appendChild(description);
         info.appendChild(photographer);
+        info.appendChild(selectBtn);
         card.appendChild(img);
         card.appendChild(info);
 
-        // Open modal on click
-        card.addEventListener('click', () => this.openImageModal(image));
+        // Open modal on card click (but not button)
+        card.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('select-btn')) {
+                this.openImageModal(image);
+            }
+        });
 
         return card;
+    }
+
+    updateSelectButtonState(button, image) {
+        const isOption1 = this.selectedImages.option1?.id === image.id;
+        const isOption2 = this.selectedImages.option2?.id === image.id;
+        const bothSelected = this.selectedImages.option1 && this.selectedImages.option2;
+
+        if (isOption1) {
+            button.textContent = '✓ Selected (Option 1)';
+            button.classList.add('selected');
+            button.classList.remove('disabled');
+        } else if (isOption2) {
+            button.textContent = '✓ Selected (Option 2)';
+            button.classList.add('selected');
+            button.classList.remove('disabled');
+        } else if (bothSelected) {
+            button.textContent = 'Max 2 Images';
+            button.classList.add('disabled');
+            button.classList.remove('selected');
+            button.disabled = true;
+        } else {
+            const slot = !this.selectedImages.option1 ? 'Option 1' : 'Option 2';
+            button.textContent = `Select for ${slot}`;
+            button.classList.remove('selected', 'disabled');
+            button.disabled = false;
+        }
+    }
+
+    handleImageSelect(image) {
+        const isOption1 = this.selectedImages.option1?.id === image.id;
+        const isOption2 = this.selectedImages.option2?.id === image.id;
+
+        if (isOption1) {
+            // Deselect option 1
+            this.selectedImages.option1 = null;
+        } else if (isOption2) {
+            // Deselect option 2
+            this.selectedImages.option2 = null;
+        } else {
+            // Select image
+            if (!this.selectedImages.option1) {
+                this.selectedImages.option1 = this.formatImageData(image);
+            } else if (!this.selectedImages.option2) {
+                this.selectedImages.option2 = this.formatImageData(image);
+            }
+        }
+
+        this.saveSelections();
+        this.updateAllSelectButtons();
+        this.updateSelectedPanel();
+    }
+
+    formatImageData(image) {
+        return {
+            id: image.id,
+            url: image.urls.regular,
+            thumbnail: image.urls.small,
+            description: image.alt_description || image.description || 'Image',
+            photographer: image.user.name,
+            photographerUrl: image.user.links.html
+        };
+    }
+
+    updateAllSelectButtons() {
+        const allButtons = this.imageGrid.querySelectorAll('.select-btn');
+        const cards = this.imageGrid.querySelectorAll('.image-card');
+
+        this.displayedImages.forEach((image, index) => {
+            const button = allButtons[index];
+            if (button) {
+                this.updateSelectButtonState(button, image);
+            }
+        });
+    }
+
+    updateSelectedPanel() {
+        const count = (this.selectedImages.option1 ? 1 : 0) + (this.selectedImages.option2 ? 1 : 0);
+        this.selectedCount.textContent = count;
+
+        if (count === 0) {
+            this.selectedPanel.classList.add('hidden');
+        } else {
+            this.selectedPanel.classList.remove('hidden');
+            this.renderSelectedImages();
+        }
+    }
+
+    renderSelectedImages() {
+        this.selectedImagesGrid.innerHTML = '';
+
+        if (this.selectedImages.option1) {
+            this.selectedImagesGrid.appendChild(this.createSelectedCard(this.selectedImages.option1, 'option1', 'Option 1'));
+        }
+
+        if (this.selectedImages.option2) {
+            this.selectedImagesGrid.appendChild(this.createSelectedCard(this.selectedImages.option2, 'option2', 'Option 2'));
+        }
+    }
+
+    createSelectedCard(imageData, slot, label) {
+        const card = document.createElement('div');
+        card.className = 'selected-image-card';
+
+        const img = document.createElement('img');
+        img.src = imageData.thumbnail;
+        img.alt = imageData.description;
+
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'selected-label';
+        labelDiv.textContent = label;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-selection';
+        removeBtn.innerHTML = '×';
+        removeBtn.addEventListener('click', () => {
+            this.selectedImages[slot] = null;
+            this.saveSelections();
+            this.updateAllSelectButtons();
+            this.updateSelectedPanel();
+        });
+
+        card.appendChild(img);
+        card.appendChild(labelDiv);
+        card.appendChild(removeBtn);
+
+        return card;
+    }
+
+    clearAllSelections() {
+        if (confirm('Clear all selected images?')) {
+            this.selectedImages.option1 = null;
+            this.selectedImages.option2 = null;
+            this.saveSelections();
+            this.updateAllSelectButtons();
+            this.updateSelectedPanel();
+        }
     }
 
     openImageModal(image) {

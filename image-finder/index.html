@@ -9,9 +9,23 @@
 <body>
     <div class="container">
         <header>
+            <a href="../" class="back-link">← Back to Home</a>
             <h1>🖼️ Image Finder</h1>
-            <p class="subtitle">Discover high-quality images for any prompt</p>
+            <p class="subtitle">Find images for your "Would You Rather" videos</p>
         </header>
+
+        <div id="selectedPanel" class="selected-panel hidden">
+            <div class="selected-header">
+                <h3>Selected Images (<span id="selectedCount">0</span>/2)</h3>
+                <div class="selected-actions">
+                    <button id="clearSelectionBtn" class="btn-small">Clear All</button>
+                    <a href="../video-generator/" id="useInVideoBtn" class="btn-primary-small">
+                        Use in Video Generator →
+                    </a>
+                </div>
+            </div>
+            <div id="selectedImages" class="selected-images-grid"></div>
+        </div>
 
         <div class="search-section">
             <div class="search-box">
