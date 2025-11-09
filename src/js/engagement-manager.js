@@ -6,12 +6,12 @@ class EngagementManager {
             prompts: [
                 {
                     text: 'Comment "I love God"',
-                    image: 'assets/images/engagement/comment.png',
+                    image: '../assets/images/engagement/comment.png',
                     position: 'top'
                 },
                 {
                     text: 'Reject the offer',
-                    image: 'assets/images/engagement/reject.png',
+                    image: '../assets/images/engagement/reject.png',
                     position: 'bottom'
                 }
             ]
@@ -38,7 +38,7 @@ class EngagementManager {
                 },
                 {
                     text: 'Marry the 3rd person when you click share',
-                    image: 'assets/images/engagement/marry.png',
+                    image: '../assets/images/engagement/marry.png',
                     position: 'bottom'
                 }
             ]

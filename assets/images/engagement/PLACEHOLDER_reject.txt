@@ -1,0 +1,19 @@
+REQUIRED IMAGE: reject.png
+
+This file is a placeholder. Replace it with an actual PNG image.
+
+**Purpose:** Used for "Reject the offer" engagement prompt (displayed at bottom)
+
+**Specifications:**
+- Format: PNG
+- Recommended size: 400x400px (square)
+- Transparent background preferred
+- Should represent rejection/denial
+
+**How to add:**
+1. Create or find an appropriate image
+2. Name it exactly: reject.png
+3. Place it in this folder (assets/images/engagement/)
+4. Delete this PLACEHOLDER file
+
+The app will work without this image, but engagement prompts won't have visuals.
