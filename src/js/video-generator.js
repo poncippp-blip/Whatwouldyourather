@@ -108,18 +108,18 @@ class VideoGenerator {
         this.advancedTimingBtn = document.getElementById('advancedTimingBtn');
         this.advancedTimingPanel = document.getElementById('advancedTimingPanel');
 
-        // Timing parameters (in seconds)
+        // Timing parameters (in seconds) - Optimized for faster pacing
         this.timing = {
-            questionDelay: 1.0,      // Delay between questions
-            voiceDelay: 0.5,         // Voice start delay
-            option1Delay: 0.2,       // Option 1 appearance delay after voice
+            questionDelay: 0.65,     // Delay between questions (35% faster)
+            voiceDelay: 0.325,       // Voice start delay (35% faster)
+            option1Delay: 0.13,      // Option 1 appearance delay after voice (35% faster)
             option2DelayPercent: 50, // Option 2 delay as % of voice duration
-            clockDuration: 3.0,      // Thinking time with clock
-            percentageDuration: 2.0, // How long to show percentages
-            engagementDuration: 3.0, // How long to show engagement hooks
-            swooshDuration: 1.0,     // Transition duration between questions
-            fadeInDuration: 0.5,     // Fade in animation duration
-            afterVoicePause: 0.5     // Pause after voice before clock
+            clockDuration: 2.7,      // Thinking time with clock (10% faster)
+            percentageDuration: 1.8, // How long to show percentages (10% faster)
+            engagementDuration: 2.7, // How long to show engagement hooks (10% faster)
+            swooshDuration: 0.9,     // Transition duration between questions (10% faster)
+            fadeInDuration: 0.45,    // Fade in animation duration (10% faster)
+            afterVoicePause: 0.325   // Pause after voice before clock (35% faster)
         };
 
         // Event listeners
@@ -1092,11 +1092,25 @@ class VideoGenerator {
         }
 
         const textY = y + imageSize + 80;
+
+        // Add vibrant glow to option text
+        this.ctx.save();
+        this.ctx.shadowColor = '#00d4ff'; // Bright cyan glow
+        this.ctx.shadowBlur = 25;
+
         this.drawStrokedText(text, this.width / 2, textY, 'bold 70px Arial', '#fff', '#000', 8);
 
+        this.ctx.restore();
+
         if (showPercentage) {
-            const color = percentage >= 50 ? '#10b981' : '#ef4444';
+            const color = percentage >= 50 ? '#00ff88' : '#ff3366'; // More vibrant green and red
             const percentY = textY + 100;
+
+            // Add glow effect for percentages
+            this.ctx.save();
+            this.ctx.shadowColor = color;
+            this.ctx.shadowBlur = 30;
+
             this.drawStrokedText(
                 `${percentage}%`,
                 this.width / 2,
@@ -1106,6 +1120,8 @@ class VideoGenerator {
                 '#000',
                 10
             );
+
+            this.ctx.restore();
         }
 
         this.ctx.restore();
@@ -1150,11 +1166,12 @@ class VideoGenerator {
         const badgeY = 60;
         const centerX = this.width / 2;
 
-        // Background for badge
-        this.ctx.fillStyle = this.getEngagementColor(engagementType);
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        this.ctx.shadowBlur = 15;
-        this.ctx.shadowOffsetY = 3;
+        // Background for badge with vibrant glow
+        const badgeColor = this.getEngagementColor(engagementType);
+        this.ctx.fillStyle = badgeColor;
+        this.ctx.shadowColor = badgeColor;
+        this.ctx.shadowBlur = 40;
+        this.ctx.shadowOffsetY = 0;
 
         const padding = 30;
         const tempFont = this.ctx.font;
@@ -1193,12 +1210,12 @@ class VideoGenerator {
 
     getEngagementColor(type) {
         const colors = {
-            'comment': 'rgba(59, 130, 246, 0.9)',  // Blue
-            'share': 'rgba(139, 92, 246, 0.9)',    // Purple
-            'follow': 'rgba(236, 72, 153, 0.9)',   // Pink
-            'like': 'rgba(239, 68, 68, 0.9)'       // Red
+            'comment': '#00aaff',  // Vibrant bright blue
+            'share': '#aa44ff',    // Vibrant purple
+            'follow': '#ff0099',   // Vibrant hot pink
+            'like': '#ff3344'      // Vibrant red
         };
-        return colors[type] || 'rgba(102, 126, 234, 0.9)';
+        return colors[type] || '#667eea';
     }
 
     getEngagementImages(type) {
