@@ -1,263 +1,231 @@
-# Would You Rather Generator
+# WouldYouRather.ai - SaaS Video Generator
 
-Create viral "Would You Rather" videos with AI-powered voiceovers, animations, and high-quality images automatically.
+A professional-grade SaaS platform for generating viral "Would You Rather" videos with AI-powered voiceovers, engagement hooks, and automated content creation.
 
-## Features
+## 🚀 Features
 
-### 🎥 Video Generator (NEW)
-- **Automated Video Creation**: Generate unique "Would You Rather" videos in seconds
-- **AI Voiceovers**: Natural-sounding voice using ElevenLabs API
-- **Dynamic Animations**: Smooth slide-in animations with precise timing
-- **Smart Percentages**: Random percentage reveals with color-coded results
-- **High-Quality Images**: Automatic image fetching from Unsplash
-- **9:16 Vertical Format**: Perfect for TikTok, Instagram Reels, and YouTube Shorts
+### Core Features
+- **🎬 3-Question Video Generation**: Automatically generates 3 unique "Would You Rather" questions per video
+- **🎤 AI Voice Generation**: Powered by ElevenLabs with 8 voice options
+- **🖼️ Auto Image Fetching**: Pulls high-quality images from Unsplash API
+- **🎵 Audio Integration**: Background music, clock ticking, ding sounds, and swoosh transitions
+- **📊 Engagement Hooks**: Built-in engagement prompts to boost viewer interaction
 
-### 🖼️ Image Finder
-- **Purpose**: Browse and discover high-quality images from Unsplash
-- **Preview Images**: View full-size images with photographer credits
-- **Download Support**: Download images directly from Unsplash
-- **Reference Tool**: See what images are available for your prompts
+### Engagement Features
 
-## Quick Start
+#### Comment Engagement
+- **Option 1**: "Comment 'I love God'" (uses `comment.png`)
+- **Option 2**: "Reject the offer" (uses `reject.png`)
 
-### 1. Get API Keys
+#### Share Engagement
+- **Option 1**: "Get a curse" (random curse selection)
+  - Always be alone
+  - Have bad luck forever
+  - Lose your legs
+  - Go bald instantly
+  - Stuck in elevator for 24h
+  - Never taste food again
+  - And more...
+- **Option 2**: "Marry the 3rd person when you click share" (uses `marry.png`)
 
-**Unsplash API (Required for both tools)**
-1. Go to [Unsplash Developers](https://unsplash.com/developers)
-2. Create a new application
-3. Copy your **Access Key**
+### Prompt Management
+- **Auto-Generate**: Randomly selects from 20+ default prompts
+- **Custom Prompts**: Add, edit, and delete your own prompts
+- **Import/Export**: Share prompt libraries with JSON files
+- **Persistent Storage**: Prompts saved in localStorage
 
-**ElevenLabs API (Required for video generator)**
-1. Go to [ElevenLabs](https://elevenlabs.io)
-2. Sign up for an account (free tier available)
-3. Navigate to your profile settings
-4. Copy your **API Key**
+## 📁 Project Structure
 
-### 2. Configure API Keys
+```
+/
+├── src/                          # New SaaS application
+│   ├── index.html               # Main UI (modern SaaS design)
+│   ├── css/
+│   │   └── style.css           # Modern dark theme with glass morphism
+│   └── js/
+│       ├── app.js              # Application initialization
+│       ├── video-generator.js  # Main video generation engine
+│       ├── prompt-manager.js   # Prompt management system
+│       └── engagement-manager.js # Engagement hook system
+│
+├── assets/
+│   ├── images/
+│   │   ├── or.png              # Background image (9:16)
+│   │   └── engagement/
+│   │       ├── comment.png     # "I love God" engagement
+│   │       ├── reject.png      # "Reject offer" engagement
+│   │       └── marry.png       # "Marry 3rd person" engagement
+│   └── audio/
+│       ├── music.mp3           # Background music (loops)
+│       ├── clock.mp3           # Clock ticking sound (3s)
+│       ├── ding.mp3            # Percentage reveal sound
+│       └── swoosh.mp3          # Transition sound
+│
+├── video-generator/             # Legacy version (deprecated)
+└── README.md                    # This file
+```
 
-**Option A: Using config files (Recommended)**
+## 🎨 UI/UX Design
 
-For Image Finder:
+### Modern SaaS Theme
+- **Black Matte Design**: Professional dark theme (#0a0a0a base)
+- **Glass Morphism**: Translucent panels with backdrop blur
+- **Soft Transparent White**: Accent colors with opacity variations
+- **Responsive Layout**: Works on desktop and mobile
+- **Smooth Animations**: CSS transitions and transforms
+
+### Color System
+- **Background**: Pure black (#0a0a0a)
+- **Surfaces**: White with 3-9% opacity
+- **Borders**: White with 6-18% opacity
+- **Text**: White (primary), #b4b4b4 (secondary), #737373 (tertiary)
+- **Accents**: White for primary actions
+
+## 🛠️ Setup Instructions
+
+### 1. Required Images
+
+Add these images to `assets/images/engagement/`:
+- `comment.png` - For "I love God" prompt (400x400px recommended)
+- `reject.png` - For "Reject the offer" prompt (400x400px recommended)
+- `marry.png` - For "Marry 3rd person" prompt (400x400px recommended)
+
+### 2. API Keys
+
+You'll need:
+1. **Unsplash API Key** - Get from [Unsplash Developers](https://unsplash.com/developers)
+2. **ElevenLabs API Key** - Get from [ElevenLabs](https://elevenlabs.io)
+
+### 3. Configuration
+
+Option 1: Create `video-generator/config.js`:
+```javascript
+const CONFIG = {
+    unsplashAccessKey: 'YOUR_UNSPLASH_KEY',
+    elevenlabsApiKey: 'YOUR_ELEVENLABS_KEY',
+    defaultVoiceId: '21m00Tcm4TlvDq8ikWAM'
+};
+```
+
+Option 2: Enter keys directly in the UI (saved to localStorage)
+
+### 4. Launch
+
+Open `src/index.html` in your browser or serve with a local server:
 ```bash
-cd image-finder
-cp config.example.js config.js
-# Edit config.js and add your Unsplash key
+# Using Python
+python -m http.server 8000
+
+# Using Node.js
+npx serve
+
+# Then navigate to http://localhost:8000/src/
 ```
 
-For Video Generator:
-```bash
-cd video-generator
-cp config.example.js config.js
-# Edit config.js and add both API keys
-```
+## 📝 How It Works
 
-**Option B: Using the UI**
-Just open the tool and enter your API keys in the provided fields.
+### Video Generation Flow
 
-### 3. Audio Assets (Already Included!)
+1. **Prompt Selection**
+   - Auto-generate: Picks 3 random prompts from library
+   - Custom: Use user-provided prompt + 2 random prompts
 
-✅ **Audio files are already provided** in `assets/audio/`:
-- `music.mp3` - Background music (plays throughout)
-- `clock.mp3` - Clock ticking sound (3-second countdown)
-- `ding.mp3` - Ding sound effect (percentage reveal)
-- `swoosh.mp3` - Transition sound effect (ending)
+2. **Asset Loading**
+   - Background image (or.png)
+   - Audio files (music, clock, ding, swoosh)
 
-All audio is automatically loaded and synchronized with the video timeline!
+3. **Question Generation** (x3)
+   - Fetch images from Unsplash
+   - Generate AI voice with ElevenLabs
+   - Assign random percentages (30-70%)
+   - Add engagement hook (last question only)
 
-### 4. Start Creating!
+4. **Timeline Building**
+   - Question 1: 0s - 8s
+   - Question 2: 8s - 16s
+   - Question 3: 16s - 24s
+   - Each question: voice → images → clock (3s) → ding → percentages → swoosh (1s)
 
-Open `index.html` in your browser and go to **Video Generator**:
+5. **Rendering**
+   - Canvas-based 9:16 video (1080x1920)
+   - Slide animations (left/right)
+   - Swoosh transitions between questions
+   - Engagement overlays
 
-1. Enter your two options (e.g., "Pizza" and "Burger")
-2. Select your preferred AI voice
-3. Click "Generate Video"
-4. Images are **automatically fetched** from Unsplash!
-5. Preview and enjoy your video
+## 🎯 Engagement System
 
-**Image Finder** (Optional):
-- Browse Unsplash to see what images exist for your prompts
-- Preview high-quality images before generating videos
+### How Engagement Hooks Work
 
-## Project Structure
+1. **Selection**: Only the last question (3/3) gets an engagement hook
+2. **Randomization**: System randomly picks between enabled engagement types
+3. **Display**: Engagement prompt appears after percentages are revealed
+4. **Types**:
+   - Comment: Choose between "I love God" or "Reject"
+   - Share: Choose between "Curse" or "Marry 3rd person"
+   - Follow: Simple follow prompt
+   - Like: Simple like prompt
 
-```
-Whatwouldyourather/
-├── index.html              # Main landing page
-├── README.md              # This file
-├── .gitignore            # Git ignore rules
-│
-├── video-generator/       # Video generation tool
-│   ├── index.html        # Generator interface
-│   ├── style.css         # Styling
-│   ├── script.js         # Video generation logic
-│   ├── config.js         # Your API keys (gitignored)
-│   └── config.example.js # Configuration template
-│
-├── image-finder/          # Image search tool
-│   ├── index.html        # Finder interface
-│   ├── style.css         # Styling
-│   ├── script.js         # Search logic
-│   ├── config.js         # Your API key (gitignored)
-│   └── config.example.js # Configuration template
-│
-└── assets/               # Media assets
-    ├── README.md         # Assets documentation
-    ├── audio/            # Audio files (user-provided)
-    │   ├── music.mp3
-    │   ├── clock.mp3
-    │   ├── ding.mp3
-    │   └── swoosh.mp3
-    └── images/           # Background images
-        └── or.png
-```
+### Configuration
 
-## Complete Automated Workflow
+Toggle engagement types in the UI:
+- ✅ Enabled: Hook may appear
+- ❌ Disabled: Hook will never appear
 
-### Creating a "Would You Rather" Video
+## 🚀 Future Roadmap
 
-1. **Video Generator**:
-   - Enter Option 1: "Pizza"
-   - Enter Option 2: "Burger"
-   - Select AI voice (Rachel, Josh, etc.)
-   - Click "Generate Video"
+- [ ] Backend server for video encoding
+- [ ] User authentication system
+- [ ] Video export to MP4
+- [ ] Bulk video generation
+- [ ] Analytics dashboard
+- [ ] Template marketplace
+- [ ] Custom fonts and themes
+- [ ] Social media auto-posting
+- [ ] Webhook integrations
 
-2. **Automatic Processing**:
-   - ✅ Fetches best "pizza" image from Unsplash
-   - ✅ Fetches best "burger" image from Unsplash
-   - ✅ Generates AI voiceover: "Pizza or Burger?"
-   - ✅ Loads all audio (music, clock, ding, swoosh)
-   - ✅ Creates animation timeline
+## 📦 Dependencies
 
-3. **Preview & Enjoy**:
-   - Watch the video preview
-   - All audio and animations synchronized
-   - Ready for screen recording or export
-
-**That's it!** Completely automated - no manual steps needed!
-
-### Animation Timeline
-
-The video follows this sequence:
-
-1. **0.0s** - Video starts with background
-2. **0.5s** - Voice begins: "Pizza or Burger?"
-3. **0.7s** - First option slides in from left (200ms after voice)
-4. **Mid-voice** - Second option slides in from right
-5. **+0.5s** - Clock ticking starts (after voice ends)
-6. **+3.0s** - Ding sound plays
-7. **Same time** - Percentages revealed (green >50%, red <50%)
-8. **+2.0s** - Swoosh transition sound
-9. **End** - Video completes
-
-### Text Styling
-
-- All text has **black stroke** for readability
-- Percentages are color-coded:
-  - **Green** = Above 50%
-  - **Red** = Below 50%
-- Bold, large fonts for maximum impact
-
-## Technologies Used
-
-- **HTML5 Canvas**: Video rendering and animations
-- **JavaScript ES6+**: Application logic
-- **Unsplash API**: High-quality image sourcing
+### External APIs
+- **Unsplash API**: Image fetching
 - **ElevenLabs API**: AI voice generation
-- **CSS3**: Modern UI with animations
 
-## API Rate Limits
+### Browser APIs
+- Canvas API (video rendering)
+- Web Audio API (sound playback)
+- localStorage (settings persistence)
+- Fetch API (external requests)
 
-### Unsplash (Free Tier)
-- 50 requests per hour
-- Sufficient for most use cases
+## 🐛 Troubleshooting
 
-### ElevenLabs (Free Tier)
-- 10,000 characters per month
-- ~100-200 short prompts
-- Upgrade for higher limits
+### Background Image Not Showing
+- Ensure `assets/images/or.png` exists
+- Check browser console for CORS errors
 
-## Browser Compatibility
+### Voices Not Generating
+- Verify ElevenLabs API key is correct
+- Check if you're using `eleven_turbo_v2` model (free tier compatible)
+- Monitor browser console for API errors
 
-Works on all modern browsers:
-- Chrome (recommended)
-- Firefox
-- Safari
-- Edge
+### Images Not Loading
+- Verify Unsplash API key is valid
+- Check daily API rate limits (50 requests/hour for free tier)
 
-**Note**: For best performance, use Chrome or Edge.
+### Audio Not Playing
+- Ensure all audio files exist in `assets/audio/`
+- Check browser autoplay policies
+- Try clicking play manually after generation
 
-## Privacy & Security
+## 📄 License
 
-- **Local Storage**: API keys stored in browser localStorage or config files
-- **No Backend**: All processing happens client-side
-- **Gitignored Keys**: config.js files are excluded from version control
-- **Secure**: Only communicates with Unsplash and ElevenLabs APIs
+This project is for educational and commercial use. Please ensure you comply with:
+- Unsplash API Terms of Service
+- ElevenLabs Terms of Service
+- Any applicable content licensing
 
-## Troubleshooting
+## 🤝 Contributing
 
-### Video Generator Issues
-
-**"Failed to generate voice"**
-- Check your ElevenLabs API key
-- Verify you haven't exceeded rate limits
-- Ensure internet connection is stable
-
-**"Failed to fetch images"**
-- Check your Unsplash API key
-- Try different search terms
-- Verify rate limits not exceeded
-
-**No audio playing**
-- Add audio files to `assets/audio/` directory
-- Check file names match exactly (music.mp3, clock.mp3, etc.)
-- Verify audio files are in MP3 format
-
-**Animation timing off**
-- This is expected if voice duration varies
-- Timeline auto-adjusts based on voice length
-
-### General Issues
-
-**API Key Not Saving**
-- Check browser localStorage is enabled
-- Try using config.js files instead
-- Clear browser cache and retry
-
-## Future Enhancements
-
-- [ ] Video export/download functionality
-- [ ] More voice options and languages
-- [ ] Custom background images
-- [ ] Text customization options
-- [ ] Batch video generation
-- [ ] Templates and themes
-- [ ] Social media direct sharing
-- [ ] Video history and management
-
-## Contributing
-
-Contributions welcome! Areas for improvement:
-- Video encoding/export functionality
-- Additional animation styles
-- More voice provider integrations
-- Custom font support
-- Advanced editing features
-
-## License
-
-This project is open source and available for personal and educational use.
-
-**Important**:
-- Unsplash images: [License terms](https://unsplash.com/license)
-- ElevenLabs: [Terms of service](https://elevenlabs.io/terms)
-- Audio assets: Ensure compliance with respective licenses
-
-## Credits
-
-- **Images**: [Unsplash](https://unsplash.com)
-- **Voice AI**: [ElevenLabs](https://elevenlabs.io)
-- **Design**: Custom UI with modern aesthetics
+This is a SaaS platform. For feature requests or bug reports, please open an issue.
 
 ---
 
-**Ready to go viral? Start creating!** 🎬✨
+**Built with ❤️ for viral content creators**
