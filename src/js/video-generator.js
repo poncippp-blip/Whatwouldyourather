@@ -110,7 +110,7 @@ class VideoGenerator {
 
         // Timing parameters (in seconds) - Optimized for faster pacing
         this.timing = {
-            questionDelay: 0.65,     // Delay between questions (35% faster)
+            questionDelay: 0.325,    // Delay between questions (50% faster than previous)
             voiceDelay: 0.325,       // Voice start delay (35% faster)
             option1Delay: 0.13,      // Option 1 appearance delay after voice (35% faster)
             option2DelayPercent: 50, // Option 2 delay as % of voice duration
@@ -693,6 +693,7 @@ class VideoGenerator {
     async loadBackgroundImage() {
         try {
             const img = new Image();
+            img.crossOrigin = 'anonymous'; // Enable CORS for canvas export
             await new Promise((resolve, reject) => {
                 img.onload = () => {
                     console.log('✅ Background image loaded successfully');
@@ -1065,10 +1066,7 @@ class VideoGenerator {
 
         this.ctx.restore();
 
-        // Draw engagement indicator if this is an engagement question
-        if (question.isEngagement && time >= questionTimeline.option1Appear) {
-            this.drawEngagementIndicator(question.engagementType);
-        }
+        // Engagement indicator removed for cleaner canvas
     }
 
     drawOption(image, text, percentage, position, progress, slideFrom, showPercentage) {
@@ -1098,7 +1096,8 @@ class VideoGenerator {
         this.ctx.shadowColor = '#00d4ff'; // Bright cyan glow
         this.ctx.shadowBlur = 25;
 
-        this.drawStrokedText(text, this.width / 2, textY, 'bold 70px Arial', '#fff', '#000', 8);
+        // Use wrapped text with max width of 950px and line height of 85px
+        this.drawStrokedTextWrapped(text, this.width / 2, textY, 'bold 70px Arial', '#fff', '#000', 8, 950, 85);
 
         this.ctx.restore();
 
@@ -1156,6 +1155,42 @@ class VideoGenerator {
 
         this.ctx.fillStyle = fillColor;
         this.ctx.fillText(text, x, y);
+    }
+
+    // Wrap text into multiple lines if too long
+    wrapText(text, maxWidth) {
+        this.ctx.textAlign = 'center';
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = this.ctx.measureText(currentLine + ' ' + word).width;
+            if (width < maxWidth) {
+                currentLine += ' ' + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+
+    // Draw stroked text with automatic wrapping
+    drawStrokedTextWrapped(text, x, y, font, fillColor, strokeColor, strokeWidth, maxWidth, lineHeight) {
+        this.ctx.font = font;
+        const lines = this.wrapText(text, maxWidth);
+
+        // Adjust starting y position to center multi-line text
+        const totalHeight = (lines.length - 1) * lineHeight;
+        const startY = y - (totalHeight / 2);
+
+        for (let i = 0; i < lines.length; i++) {
+            const lineY = startY + (i * lineHeight);
+            this.drawStrokedText(lines[i], x, lineY, font, fillColor, strokeColor, strokeWidth);
+        }
     }
 
     drawEngagementIndicator(engagementType) {
