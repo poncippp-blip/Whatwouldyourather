@@ -44,9 +44,8 @@
         }
 
         .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            display: flex;
+            justify-content: center;
             margin-top: 40px;
         }
 
@@ -61,6 +60,8 @@
             text-decoration: none;
             color: inherit;
             display: block;
+            max-width: 500px;
+            width: 100%;
         }
 
         .card:hover {
@@ -116,8 +117,8 @@
                 font-size: 1rem;
             }
 
-            .cards-grid {
-                grid-template-columns: 1fr;
+            .card {
+                padding: 30px 20px;
             }
         }
     </style>
@@ -125,30 +126,16 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎬 Would You Rather Generator</h1>
-            <p class="subtitle">Create viral "Would You Rather" videos in seconds</p>
+            <h1>🎬 Would You Rather Video Generator</h1>
+            <p class="subtitle">Professional AI-powered video creation platform</p>
         </header>
 
         <div class="cards-grid">
             <a href="src/" class="card">
                 <div class="card-icon">✨</div>
-                <h2>SaaS Platform (NEW)</h2>
-                <p>Professional video generator with engagement hooks, prompt management, and modern UI. Generate 3 questions per video with AI voices!</p>
-                <span class="badge new">RECOMMENDED</span>
-            </a>
-
-            <a href="video-generator/" class="card">
-                <div class="card-icon">🎥</div>
-                <h2>Video Generator (Legacy)</h2>
-                <p>Original automated video creation. Simple interface for quick video generation with images, voiceover, and animations.</p>
-                <span class="badge">CLASSIC</span>
-            </a>
-
-            <a href="image-finder/" class="card">
-                <div class="card-icon">🖼️</div>
-                <h2>Image Finder</h2>
-                <p>Browse and preview high-quality images from Unsplash. See what's available before generating videos.</p>
-                <span class="badge">TOOLS</span>
+                <h2>Create Your Video</h2>
+                <p>Generate viral "Would You Rather" videos with AI voices, engagement hooks, custom prompts, and stunning visuals. Create 3 questions per video with adjustable music and downloadable results!</p>
+                <span class="badge new">GET STARTED</span>
             </a>
         </div>
 

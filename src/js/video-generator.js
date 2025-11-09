@@ -73,6 +73,11 @@ class VideoGenerator {
         this.customOption2 = document.getElementById('customOption2');
         this.customPromptSection = document.getElementById('customPromptSection');
 
+        // Volume control
+        this.musicVolumeSlider = document.getElementById('musicVolume');
+        this.volumeValueDisplay = document.getElementById('volumeValue');
+        this.musicVolume = 0.3; // Default 30%
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -107,6 +112,17 @@ class VideoGenerator {
         this.likeEngagementCB.addEventListener('change', (e) => {
             this.engagementManager.setEngagementEnabled('like', e.target.checked);
         });
+
+        // Volume slider
+        if (this.musicVolumeSlider) {
+            this.musicVolumeSlider.addEventListener('input', (e) => {
+                this.musicVolume = parseInt(e.target.value) / 100;
+                this.volumeValueDisplay.textContent = `${e.target.value}%`;
+                if (this.assets.music) {
+                    this.assets.music.volume = this.musicVolume;
+                }
+            });
+        }
     }
 
     loadAPIKeys() {
@@ -479,7 +495,7 @@ class VideoGenerator {
 
         if (this.assets.music && this.currentTime < this.timeline.totalDuration) {
             this.assets.music.loop = true;
-            this.assets.music.volume = 0.3;
+            this.assets.music.volume = this.musicVolume;
             this.assets.music.play();
         }
 
@@ -715,6 +731,164 @@ class VideoGenerator {
     }
 
     async downloadVideo() {
-        alert('Video download functionality requires a backend server for proper video encoding. For now, you can screen record the preview!');
+        if (!this.assets.questions || this.assets.questions.length === 0) {
+            alert('Please generate a video first!');
+            return;
+        }
+
+        try {
+            this.updateStatus('📹 Recording video...', 0);
+            this.downloadBtn.disabled = true;
+
+            // Reset to start
+            this.pause();
+            this.currentTime = 0;
+            if (this.assets.music) this.assets.music.currentTime = 0;
+            for (const question of this.assets.questions) {
+                if (question.voice) question.voice.currentTime = 0;
+            }
+
+            // Create canvas stream
+            const canvasStream = this.canvas.captureStream(30); // 30 fps
+
+            // Create audio context to mix all audio sources
+            const audioContext = new AudioContext();
+            const audioDestination = audioContext.createMediaStreamDestination();
+
+            // Add music to mix
+            if (this.assets.music) {
+                const musicSource = audioContext.createMediaElementSource(this.assets.music);
+                musicSource.connect(audioDestination);
+                musicSource.connect(audioContext.destination); // Also play through speakers
+            }
+
+            // Add question voices to mix
+            for (const question of this.assets.questions) {
+                if (question.voice) {
+                    const voiceSource = audioContext.createMediaElementSource(question.voice);
+                    voiceSource.connect(audioDestination);
+                }
+            }
+
+            // Combine video and audio streams
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioDestination.stream.getAudioTracks()
+            ]);
+
+            // Set up MediaRecorder
+            const chunks = [];
+            const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9')
+                ? 'video/webm; codecs=vp9'
+                : 'video/webm';
+
+            const mediaRecorder = new MediaRecorder(combinedStream, {
+                mimeType: mimeType,
+                videoBitsPerSecond: 5000000 // 5 Mbps
+            });
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    chunks.push(e.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `would-you-rather-${Date.now()}.webm`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                this.updateStatus('✅ Video downloaded!', 100);
+                setTimeout(() => {
+                    this.statusPanel.classList.add('hidden');
+                    this.downloadBtn.disabled = false;
+                }, 2000);
+            };
+
+            // Start recording
+            mediaRecorder.start();
+            this.updateStatus('📹 Recording video...', 10);
+
+            // Play the video and monitor progress
+            this.isPlaying = true;
+            this.startTime = Date.now();
+            this.animate();
+
+            // Start all audio
+            if (this.assets.music) {
+                this.assets.music.loop = true;
+                this.assets.music.volume = this.musicVolume;
+                this.assets.music.play();
+            }
+
+            // Schedule all audio events
+            for (let i = 0; i < this.timeline.questions.length; i++) {
+                const qt = this.timeline.questions[i];
+                const question = this.assets.questions[i];
+
+                if (question.voice) {
+                    setTimeout(() => {
+                        if (this.isPlaying) {
+                            question.voice.play().catch(e => console.log('Voice play error:', e));
+                        }
+                    }, qt.voiceStart * 1000);
+                }
+
+                if (this.assets.clockSound) {
+                    setTimeout(() => {
+                        if (this.isPlaying) {
+                            const clockClone = this.assets.clockSound.cloneNode();
+                            clockClone.play().catch(e => console.log('Clock play error:', e));
+                        }
+                    }, qt.clockStart * 1000);
+                }
+
+                if (this.assets.dingSound) {
+                    setTimeout(() => {
+                        if (this.isPlaying) {
+                            const dingClone = this.assets.dingSound.cloneNode();
+                            dingClone.play().catch(e => console.log('Ding play error:', e));
+                        }
+                    }, qt.dingStart * 1000);
+                }
+
+                if (this.assets.swooshSound) {
+                    setTimeout(() => {
+                        if (this.isPlaying) {
+                            const swooshClone = this.assets.swooshSound.cloneNode();
+                            swooshClone.play().catch(e => console.log('Swoosh play error:', e));
+                        }
+                    }, qt.swooshStart * 1000);
+                }
+            }
+
+            // Update progress during recording
+            const progressInterval = setInterval(() => {
+                if (this.isPlaying) {
+                    const progress = (this.currentTime / this.timeline.totalDuration) * 90;
+                    this.updateStatus(`📹 Recording video... ${Math.floor(progress)}%`, 10 + progress);
+                }
+            }, 100);
+
+            // Stop recording when video ends
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                this.pause();
+                mediaRecorder.stop();
+                audioContext.close();
+            }, this.timeline.totalDuration * 1000 + 500);
+
+        } catch (error) {
+            console.error('Download error:', error);
+            alert('Error downloading video: ' + error.message);
+            this.downloadBtn.disabled = false;
+            this.statusPanel.classList.add('hidden');
+        }
     }
 }

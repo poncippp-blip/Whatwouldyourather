@@ -64,15 +64,15 @@
                         </div>
                     </div>
 
-                    <!-- Voice Settings -->
+                    <!-- Audio Settings -->
                     <div class="card mb-lg">
                         <div class="card-header">
-                            <h3 class="card-title">Voice Settings</h3>
-                            <p class="card-description">Choose the AI voice for your videos</p>
+                            <h3 class="card-title">Audio Settings</h3>
+                            <p class="card-description">Configure voice and music settings</p>
                         </div>
                         <div class="card-body">
-                            <div class="form-group mb-0">
-                                <label class="form-label" for="voiceSelect">Voice</label>
+                            <div class="form-group">
+                                <label class="form-label" for="voiceSelect">AI Voice</label>
                                 <select class="form-select" id="voiceSelect">
                                     <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
                                     <option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option>
@@ -83,6 +83,13 @@
                                     <option value="VR6AewLTigWG4xSOukaG">Arnold (Male)</option>
                                     <option value="pNInz6obpgDQGcFmaJgB">Adam (Male)</option>
                                 </select>
+                            </div>
+                            <div class="slider-group mb-0">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Music Volume</label>
+                                    <span class="slider-value" id="volumeValue">30%</span>
+                                </div>
+                                <input type="range" min="0" max="100" value="30" class="slider" id="musicVolume">
                             </div>
                         </div>
                     </div>
