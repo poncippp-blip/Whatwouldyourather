@@ -78,6 +78,11 @@ class VideoGenerator {
         this.volumeValueDisplay = document.getElementById('volumeValue');
         this.musicVolume = 0.3; // Default 30%
 
+        // Question count
+        this.questionCountSlider = document.getElementById('questionCount');
+        this.questionCountValue = document.getElementById('questionCountValue');
+        this.questionCount = 3; // Default 3 questions
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -121,6 +126,14 @@ class VideoGenerator {
                 if (this.assets.music) {
                     this.assets.music.volume = this.musicVolume;
                 }
+            });
+        }
+
+        // Question count slider
+        if (this.questionCountSlider) {
+            this.questionCountSlider.addEventListener('input', (e) => {
+                this.questionCount = parseInt(e.target.value);
+                this.questionCountValue.textContent = e.target.value;
             });
         }
     }
@@ -200,7 +213,7 @@ class VideoGenerator {
             const engagementSettings = this.engagementManager.getEnabledEngagements();
             console.log('📊 Engagement settings:', engagementSettings);
 
-            // Generate 3 prompts
+            // Generate prompts based on question count
             const promptSource = document.querySelector('input[name="promptSource"]:checked').value;
             let allQuestions;
 
@@ -214,17 +227,17 @@ class VideoGenerator {
                     return;
                 }
 
-                // Get 2 more random prompts + the custom one
-                const randomPrompts = this.promptManager.getRandomPrompts(2);
+                // Get random prompts + the custom one
+                const randomPrompts = this.promptManager.getRandomPrompts(this.questionCount - 1);
                 allQuestions = [
                     { option1: opt1, option2: opt2 },
                     ...randomPrompts
                 ];
             } else {
-                allQuestions = this.promptManager.getRandomPrompts(3);
+                allQuestions = this.promptManager.getRandomPrompts(this.questionCount);
             }
 
-            console.log('🎯 Generated 3 questions:', allQuestions);
+            console.log(`🎯 Generated ${this.questionCount} questions:`, allQuestions);
 
             // Step 1: Load background image
             this.updateStatus('🎨 Loading background...', 3);
@@ -234,25 +247,26 @@ class VideoGenerator {
             this.updateStatus('🔊 Loading audio assets...', 8);
             await this.loadAudioAssets();
 
-            // Step 3-5: Generate all 3 questions
+            // Step 3+: Generate all questions
             this.assets.questions = [];
+            const progressPerQuestion = 85 / this.questionCount; // 85% total for all questions (10-95%)
 
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < this.questionCount; i++) {
                 const question = allQuestions[i];
-                const progress = 10 + (i * 30); // 10%, 40%, 70%
+                const baseProgress = 10 + (i * progressPerQuestion);
 
-                console.log(`\n🎬 === Processing Question ${i + 1}/3 ===`);
+                console.log(`\n🎬 === Processing Question ${i + 1}/${this.questionCount} ===`);
                 console.log(`   Options: "${question.option1}" vs "${question.option2}"`);
-                this.updateStatus(`🎬 Generating question ${i + 1}/3...`, progress);
+                this.updateStatus(`🎬 Generating question ${i + 1}/${this.questionCount}...`, baseProgress);
 
                 // Fetch images
-                this.updateStatus(`🖼️ Fetching images ${i + 1}/3...`, progress + 5);
+                this.updateStatus(`🖼️ Fetching images ${i + 1}/${this.questionCount}...`, baseProgress + progressPerQuestion * 0.2);
                 console.log(`   📸 Fetching images...`);
                 const [img1, img2] = await this.fetchQuestionImages(question.option1, question.option2);
                 console.log(`   ✅ Images fetched`);
 
                 // Generate voice
-                this.updateStatus(`🎤 Generating voice ${i + 1}/3...`, progress + 15);
+                this.updateStatus(`🎤 Generating voice ${i + 1}/${this.questionCount}...`, baseProgress + progressPerQuestion * 0.6);
                 console.log(`   🎤 Generating voice...`);
                 const voice = await this.generateQuestionVoice(question.option1, question.option2);
                 console.log(`   ✅ Voice generated`);
@@ -262,7 +276,7 @@ class VideoGenerator {
                 const percentage2 = 100 - percentage1;
 
                 // Get engagement for this question (last question gets engagement)
-                const engagement = this.engagementManager.getEngagementForQuestion(i, 3);
+                const engagement = this.engagementManager.getEngagementForQuestion(i, this.questionCount);
 
                 this.assets.questions.push({
                     option1: question.option1,
@@ -281,14 +295,14 @@ class VideoGenerator {
                 }
             }
 
-            console.log('\n✨ All 3 questions generated successfully!');
+            console.log(`\n✨ All ${this.questionCount} questions generated successfully!`);
 
             // Step 6: Calculate timeline
             this.updateStatus('⏱️ Building timeline...', 95);
             this.calculateTimeline();
 
             // Step 7: Ready to play
-            this.updateStatus('✅ Video ready! (3 questions)', 100);
+            this.updateStatus(`✅ Video ready! (${this.questionCount} question${this.questionCount > 1 ? 's' : ''})`, 100);
 
             this.playBtn.disabled = false;
             this.pauseBtn.disabled = false;
