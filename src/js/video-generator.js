@@ -83,6 +83,24 @@ class VideoGenerator {
         this.questionCountValue = document.getElementById('questionCountValue');
         this.questionCount = 3; // Default 3 questions
 
+        // Advanced timing controls
+        this.advancedTimingBtn = document.getElementById('advancedTimingBtn');
+        this.advancedTimingPanel = document.getElementById('advancedTimingPanel');
+
+        // Timing parameters (in seconds)
+        this.timing = {
+            questionDelay: 1.0,      // Delay between questions
+            voiceDelay: 0.5,         // Voice start delay
+            option1Delay: 0.2,       // Option 1 appearance delay after voice
+            option2DelayPercent: 50, // Option 2 delay as % of voice duration
+            clockDuration: 3.0,      // Thinking time with clock
+            percentageDuration: 2.0, // How long to show percentages
+            engagementDuration: 3.0, // How long to show engagement hooks
+            swooshDuration: 1.0,     // Transition duration between questions
+            fadeInDuration: 0.5,     // Fade in animation duration
+            afterVoicePause: 0.5     // Pause after voice before clock
+        };
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -134,6 +152,58 @@ class VideoGenerator {
             this.questionCountSlider.addEventListener('input', (e) => {
                 this.questionCount = parseInt(e.target.value);
                 this.questionCountValue.textContent = e.target.value;
+            });
+        }
+
+        // Advanced timing panel toggle
+        if (this.advancedTimingBtn) {
+            this.advancedTimingBtn.addEventListener('click', () => {
+                this.advancedTimingPanel.classList.toggle('hidden');
+            });
+        }
+
+        // Advanced timing sliders
+        this.setupTimingSlider('questionDelay', 'questionDelayValue', (val) => `${val}s`);
+        this.setupTimingSlider('voiceDelay', 'voiceDelayValue', (val) => `${val}s`);
+        this.setupTimingSlider('option1Delay', 'option1DelayValue', (val) => `${val}s`);
+        this.setupTimingSlider('option2Delay', 'option2DelayValue', (val) => `${val}%`, 'option2DelayPercent');
+        this.setupTimingSlider('clockDuration', 'clockDurationValue', (val) => `${val}s`);
+        this.setupTimingSlider('percentageDuration', 'percentageDurationValue', (val) => `${val}s`);
+        this.setupTimingSlider('engagementDuration', 'engagementDurationValue', (val) => `${val}s`);
+        this.setupTimingSlider('swooshDuration', 'swooshDurationValue', (val) => `${val}s`);
+        this.setupTimingSlider('fadeInDuration', 'fadeInDurationValue', (val) => `${val}s`);
+        this.setupTimingSlider('afterVoicePause', 'afterVoicePauseValue', (val) => `${val}s`);
+    }
+
+    setupTimingSlider(sliderId, valueId, formatter, timingKey = null) {
+        const slider = document.getElementById(sliderId);
+        const valueDisplay = document.getElementById(valueId);
+
+        if (slider && valueDisplay) {
+            slider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                const key = timingKey || sliderId.replace(/([A-Z])/g, (match) => match.toLowerCase()).replace(/delay$/, 'Delay').replace(/duration$/, 'Duration').replace(/pause$/, 'Pause');
+
+                // Update the timing object
+                if (timingKey) {
+                    this.timing[timingKey] = value;
+                } else {
+                    // Convert camelCase ID to timing key
+                    const timingKeyMap = {
+                        'questionDelay': 'questionDelay',
+                        'voiceDelay': 'voiceDelay',
+                        'option1Delay': 'option1Delay',
+                        'clockDuration': 'clockDuration',
+                        'percentageDuration': 'percentageDuration',
+                        'engagementDuration': 'engagementDuration',
+                        'swooshDuration': 'swooshDuration',
+                        'fadeInDuration': 'fadeInDuration',
+                        'afterVoicePause': 'afterVoicePause'
+                    };
+                    this.timing[timingKeyMap[sliderId]] = value;
+                }
+
+                valueDisplay.textContent = formatter(value);
             });
         }
     }
@@ -480,24 +550,30 @@ class VideoGenerator {
         for (let i = 0; i < this.assets.questions.length; i++) {
             const question = this.assets.questions[i];
             const voiceDuration = question.voice.duration;
+            const isLastQuestion = i === this.assets.questions.length - 1;
+            const hasEngagement = isLastQuestion && question.engagement;
+
+            // Calculate option 2 delay based on percentage of voice duration
+            const option2Delay = (voiceDuration * this.timing.option2DelayPercent) / 100;
 
             const questionTimeline = {
                 startTime: currentTime,
-                voiceStart: currentTime + 0.5,
-                option1Appear: currentTime + 0.5 + 0.2,
-                option2Appear: currentTime + 0.5 + (voiceDuration / 2),
-                clockStart: currentTime + 0.5 + voiceDuration + 0.5,
-                dingStart: currentTime + 0.5 + voiceDuration + 0.5 + 3.0,
-                percentageReveal: currentTime + 0.5 + voiceDuration + 0.5 + 3.0,
-                swooshStart: currentTime + 0.5 + voiceDuration + 0.5 + 3.0 + 2.0,
-                endTime: currentTime + 0.5 + voiceDuration + 0.5 + 3.0 + 2.0 + 1.0
+                voiceStart: currentTime + this.timing.voiceDelay,
+                option1Appear: currentTime + this.timing.voiceDelay + this.timing.option1Delay,
+                option2Appear: currentTime + this.timing.voiceDelay + option2Delay,
+                clockStart: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause,
+                dingStart: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration,
+                percentageReveal: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration,
+                engagementStart: hasEngagement ? currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration : null,
+                swooshStart: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration + (hasEngagement ? this.timing.engagementDuration : 0),
+                endTime: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration + (hasEngagement ? this.timing.engagementDuration : 0) + this.timing.swooshDuration
             };
 
             this.timeline.questions.push(questionTimeline);
-            currentTime = questionTimeline.endTime;
+            currentTime = questionTimeline.endTime + this.timing.questionDelay;
         }
 
-        this.timeline.totalDuration = currentTime;
+        this.timeline.totalDuration = currentTime - this.timing.questionDelay; // Remove last delay
     }
 
     play() {
@@ -641,7 +717,7 @@ class VideoGenerator {
         // Draw option 1 (top)
         if (time >= questionTimeline.option1Appear) {
             const elapsed = time - questionTimeline.option1Appear;
-            const progress = Math.min(elapsed / 0.5, 1);
+            const progress = Math.min(elapsed / this.timing.fadeInDuration, 1);
 
             this.drawOption(
                 question.image1,
@@ -657,7 +733,7 @@ class VideoGenerator {
         // Draw option 2 (bottom)
         if (time >= questionTimeline.option2Appear) {
             const elapsed = time - questionTimeline.option2Appear;
-            const progress = Math.min(elapsed / 0.5, 1);
+            const progress = Math.min(elapsed / this.timing.fadeInDuration, 1);
 
             this.drawOption(
                 question.image2,
@@ -668,6 +744,14 @@ class VideoGenerator {
                 'right',
                 time >= questionTimeline.percentageReveal
             );
+        }
+
+        // Draw engagement hooks (only for last question)
+        if (question.engagement && questionTimeline.engagementStart && time >= questionTimeline.engagementStart) {
+            const elapsed = time - questionTimeline.engagementStart;
+            const progress = Math.min(elapsed / 0.5, 1); // 0.5s fade in
+
+            this.drawEngagement(question.engagement, progress);
         }
 
         this.ctx.restore();
@@ -742,6 +826,56 @@ class VideoGenerator {
 
         this.ctx.fillStyle = fillColor;
         this.ctx.fillText(text, x, y);
+    }
+
+    drawEngagement(engagement, progress) {
+        this.ctx.save();
+        this.ctx.globalAlpha = progress;
+
+        // Semi-transparent overlay
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        const centerX = this.width / 2;
+        const imageSize = 300;
+        const spacing = 100;
+
+        if (engagement.type === 'comment' || engagement.type === 'share') {
+            // Two-option engagement (top and bottom)
+            const topY = 250;
+            const bottomY = this.height - 250 - imageSize;
+
+            // Top option
+            const topOption = engagement.data[0];
+            if (topOption.image) {
+                const img = new Image();
+                img.src = topOption.image;
+                this.drawRoundedImage(img, centerX - imageSize / 2, topY, imageSize, imageSize, 20);
+            }
+            let topText = topOption.text;
+            if (engagement.type === 'share' && topOption.selectedCurse) {
+                topText = topOption.selectedCurse;
+            }
+            this.drawStrokedText(topText, centerX, topY + imageSize + 60, 'bold 50px Arial', '#fff', '#000', 6);
+
+            // Bottom option
+            const bottomOption = engagement.data[1];
+            if (bottomOption.image) {
+                const img = new Image();
+                img.src = bottomOption.image;
+                this.drawRoundedImage(img, centerX - imageSize / 2, bottomY, imageSize, imageSize, 20);
+            }
+            this.drawStrokedText(bottomOption.text, centerX, bottomY + imageSize + 60, 'bold 50px Arial', '#fff', '#000', 6);
+
+        } else if (engagement.type === 'follow') {
+            // Single text engagement
+            this.drawStrokedText(engagement.data, centerX, this.height / 2, 'bold 80px Arial', '#fff', '#000', 10);
+        } else if (engagement.type === 'like') {
+            // Single text engagement
+            this.drawStrokedText(engagement.data, centerX, this.height / 2, 'bold 80px Arial', '#fff', '#000', 10);
+        }
+
+        this.ctx.restore();
     }
 
     async downloadVideo() {
