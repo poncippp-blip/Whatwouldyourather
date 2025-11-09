@@ -388,10 +388,22 @@ class VideoGenerator {
                 console.log(`   Options: "${question.option1}" vs "${question.option2}"`);
                 this.updateStatus(`🎬 Generating question ${i + 1}/${totalQuestions}...`, baseProgress);
 
-                // Fetch images
+                // Fetch images (use generic terms for engagement questions)
                 this.updateStatus(`🖼️ Fetching images ${i + 1}/${totalQuestions}...`, baseProgress + progressPerQuestion * 0.2);
                 console.log(`   📸 Fetching images...`);
-                const [img1, img2] = await this.fetchQuestionImages(question.option1, question.option2);
+
+                let searchTerm1, searchTerm2;
+                if (question.isEngagement) {
+                    // Use generic engagement-themed images
+                    const engagementImageTerms = this.getEngagementImageTerms(question.type);
+                    searchTerm1 = engagementImageTerms[0];
+                    searchTerm2 = engagementImageTerms[1];
+                } else {
+                    searchTerm1 = question.option1;
+                    searchTerm2 = question.option2;
+                }
+
+                const [img1, img2] = await this.fetchQuestionImages(searchTerm1, searchTerm2);
                 console.log(`   ✅ Images fetched`);
 
                 // Generate voice
@@ -934,6 +946,17 @@ class VideoGenerator {
             'like': 'rgba(239, 68, 68, 0.9)'       // Red
         };
         return colors[type] || 'rgba(102, 126, 234, 0.9)';
+    }
+
+    getEngagementImageTerms(type) {
+        // Return generic, visually appealing search terms for each engagement type
+        const imageTerms = {
+            'comment': ['conversation', 'discussion'],
+            'share': ['connection', 'together'],
+            'follow': ['community', 'people'],
+            'like': ['heart', 'love']
+        };
+        return imageTerms[type] || ['social media', 'engagement'];
     }
 
     async downloadVideo() {
