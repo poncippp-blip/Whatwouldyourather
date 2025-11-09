@@ -62,6 +62,11 @@ class VideoGenerator {
         this.progressFill = document.getElementById('progressFill');
         this.previewOverlay = document.getElementById('previewOverlay');
 
+        // Config management
+        this.saveConfigBtn = document.getElementById('saveConfigBtn');
+        this.loadConfigBtn = document.getElementById('loadConfigBtn');
+        this.configFileInput = document.getElementById('configFileInput');
+
         // Engagement configuration
         this.commentEngagementCB = document.getElementById('commentEngagement');
         this.commentOption1 = document.getElementById('commentOption1');
@@ -126,6 +131,11 @@ class VideoGenerator {
 
         this.unsplashKeyInput.addEventListener('change', () => this.saveAPIKeys());
         this.elevenlabsKeyInput.addEventListener('change', () => this.saveAPIKeys());
+
+        // Config management
+        this.saveConfigBtn.addEventListener('click', () => this.saveConfig());
+        this.loadConfigBtn.addEventListener('click', () => this.configFileInput.click());
+        this.configFileInput.addEventListener('change', (e) => this.loadConfig(e));
 
         // Prompt source toggle
         this.promptSourceRadios.forEach(radio => {
@@ -244,6 +254,223 @@ class VideoGenerator {
 
         if (this.unsplashKey) localStorage.setItem('unsplashApiKey', this.unsplashKey);
         if (this.elevenlabsKey) localStorage.setItem('elevenlabsApiKey', this.elevenlabsKey);
+    }
+
+    saveConfig() {
+        const config = {
+            version: '1.0',
+            timestamp: new Date().toISOString(),
+            apiKeys: {
+                unsplash: this.unsplashKeyInput.value.trim(),
+                elevenlabs: this.elevenlabsKeyInput.value.trim()
+            },
+            voice: this.voiceSelect.value,
+            musicVolume: this.musicVolume,
+            questionCount: this.questionCount,
+            timing: { ...this.timing },
+            engagement: {
+                comment: {
+                    enabled: this.commentEngagementCB.checked,
+                    option1: this.commentOption1.value.trim(),
+                    option2: this.commentOption2.value.trim(),
+                    insertAfter: parseInt(this.commentInsertAfter.value) || 0
+                },
+                share: {
+                    enabled: this.shareEngagementCB.checked,
+                    option1: this.shareOption1.value.trim(),
+                    option2: this.shareOption2.value.trim(),
+                    insertAfter: parseInt(this.shareInsertAfter.value) || 0
+                },
+                follow: {
+                    enabled: this.followEngagementCB.checked,
+                    option1: this.followOption1.value.trim(),
+                    option2: this.followOption2.value.trim(),
+                    insertAfter: parseInt(this.followInsertAfter.value) || 0
+                },
+                like: {
+                    enabled: this.likeEngagementCB.checked,
+                    option1: this.likeOption1.value.trim(),
+                    option2: this.likeOption2.value.trim(),
+                    insertAfter: parseInt(this.likeInsertAfter.value) || 0
+                }
+            },
+            promptSource: document.querySelector('input[name="promptSource"]:checked').value,
+            customPrompt: {
+                option1: this.customOption1.value.trim(),
+                option2: this.customOption2.value.trim()
+            }
+        };
+
+        // Convert to JSON and download
+        const json = JSON.stringify(config, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wouldyourather-config-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log('✅ Configuration saved!');
+        alert('Configuration saved successfully!');
+    }
+
+    async loadConfig(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const config = JSON.parse(text);
+
+            console.log('📂 Loading configuration:', config);
+
+            // Load API keys
+            if (config.apiKeys) {
+                if (config.apiKeys.unsplash) {
+                    this.unsplashKeyInput.value = config.apiKeys.unsplash;
+                    this.unsplashKey = config.apiKeys.unsplash;
+                    localStorage.setItem('unsplashApiKey', config.apiKeys.unsplash);
+                }
+                if (config.apiKeys.elevenlabs) {
+                    this.elevenlabsKeyInput.value = config.apiKeys.elevenlabs;
+                    this.elevenlabsKey = config.apiKeys.elevenlabs;
+                    localStorage.setItem('elevenlabsApiKey', config.apiKeys.elevenlabs);
+                }
+            }
+
+            // Load voice
+            if (config.voice) {
+                this.voiceSelect.value = config.voice;
+            }
+
+            // Load music volume
+            if (config.musicVolume !== undefined) {
+                this.musicVolume = config.musicVolume;
+                this.musicVolumeSlider.value = Math.round(config.musicVolume * 100);
+                this.volumeValueDisplay.textContent = `${Math.round(config.musicVolume * 100)}%`;
+            }
+
+            // Load question count
+            if (config.questionCount !== undefined) {
+                this.questionCount = config.questionCount;
+                this.questionCountSlider.value = config.questionCount;
+                this.questionCountValue.textContent = config.questionCount;
+            }
+
+            // Load timing settings
+            if (config.timing) {
+                this.timing = { ...this.timing, ...config.timing };
+
+                // Update all timing sliders
+                if (config.timing.questionDelay !== undefined) {
+                    document.getElementById('questionDelay').value = config.timing.questionDelay;
+                    document.getElementById('questionDelayValue').textContent = `${config.timing.questionDelay}s`;
+                }
+                if (config.timing.voiceDelay !== undefined) {
+                    document.getElementById('voiceDelay').value = config.timing.voiceDelay;
+                    document.getElementById('voiceDelayValue').textContent = `${config.timing.voiceDelay}s`;
+                }
+                if (config.timing.option1Delay !== undefined) {
+                    document.getElementById('option1Delay').value = config.timing.option1Delay;
+                    document.getElementById('option1DelayValue').textContent = `${config.timing.option1Delay}s`;
+                }
+                if (config.timing.option2DelayPercent !== undefined) {
+                    document.getElementById('option2Delay').value = config.timing.option2DelayPercent;
+                    document.getElementById('option2DelayValue').textContent = `${config.timing.option2DelayPercent}%`;
+                }
+                if (config.timing.clockDuration !== undefined) {
+                    document.getElementById('clockDuration').value = config.timing.clockDuration;
+                    document.getElementById('clockDurationValue').textContent = `${config.timing.clockDuration}s`;
+                }
+                if (config.timing.percentageDuration !== undefined) {
+                    document.getElementById('percentageDuration').value = config.timing.percentageDuration;
+                    document.getElementById('percentageDurationValue').textContent = `${config.timing.percentageDuration}s`;
+                }
+                if (config.timing.engagementDuration !== undefined) {
+                    document.getElementById('engagementDuration').value = config.timing.engagementDuration;
+                    document.getElementById('engagementDurationValue').textContent = `${config.timing.engagementDuration}s`;
+                }
+                if (config.timing.swooshDuration !== undefined) {
+                    document.getElementById('swooshDuration').value = config.timing.swooshDuration;
+                    document.getElementById('swooshDurationValue').textContent = `${config.timing.swooshDuration}s`;
+                }
+                if (config.timing.fadeInDuration !== undefined) {
+                    document.getElementById('fadeInDuration').value = config.timing.fadeInDuration;
+                    document.getElementById('fadeInDurationValue').textContent = `${config.timing.fadeInDuration}s`;
+                }
+                if (config.timing.afterVoicePause !== undefined) {
+                    document.getElementById('afterVoicePause').value = config.timing.afterVoicePause;
+                    document.getElementById('afterVoicePauseValue').textContent = `${config.timing.afterVoicePause}s`;
+                }
+            }
+
+            // Load engagement settings
+            if (config.engagement) {
+                // Comment
+                if (config.engagement.comment) {
+                    this.commentEngagementCB.checked = config.engagement.comment.enabled;
+                    if (config.engagement.comment.option1) this.commentOption1.value = config.engagement.comment.option1;
+                    if (config.engagement.comment.option2) this.commentOption2.value = config.engagement.comment.option2;
+                    if (config.engagement.comment.insertAfter !== undefined) this.commentInsertAfter.value = config.engagement.comment.insertAfter;
+                }
+
+                // Share
+                if (config.engagement.share) {
+                    this.shareEngagementCB.checked = config.engagement.share.enabled;
+                    if (config.engagement.share.option1) this.shareOption1.value = config.engagement.share.option1;
+                    if (config.engagement.share.option2) this.shareOption2.value = config.engagement.share.option2;
+                    if (config.engagement.share.insertAfter !== undefined) this.shareInsertAfter.value = config.engagement.share.insertAfter;
+                }
+
+                // Follow
+                if (config.engagement.follow) {
+                    this.followEngagementCB.checked = config.engagement.follow.enabled;
+                    if (config.engagement.follow.option1) this.followOption1.value = config.engagement.follow.option1;
+                    if (config.engagement.follow.option2) this.followOption2.value = config.engagement.follow.option2;
+                    if (config.engagement.follow.insertAfter !== undefined) this.followInsertAfter.value = config.engagement.follow.insertAfter;
+                }
+
+                // Like
+                if (config.engagement.like) {
+                    this.likeEngagementCB.checked = config.engagement.like.enabled;
+                    if (config.engagement.like.option1) this.likeOption1.value = config.engagement.like.option1;
+                    if (config.engagement.like.option2) this.likeOption2.value = config.engagement.like.option2;
+                    if (config.engagement.like.insertAfter !== undefined) this.likeInsertAfter.value = config.engagement.like.insertAfter;
+                }
+            }
+
+            // Load prompt source
+            if (config.promptSource) {
+                const radio = document.querySelector(`input[name="promptSource"][value="${config.promptSource}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    if (config.promptSource === 'custom') {
+                        this.customPromptSection.classList.remove('hidden');
+                    } else {
+                        this.customPromptSection.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Load custom prompt
+            if (config.customPrompt) {
+                if (config.customPrompt.option1) this.customOption1.value = config.customPrompt.option1;
+                if (config.customPrompt.option2) this.customOption2.value = config.customPrompt.option2;
+            }
+
+            console.log('✅ Configuration loaded successfully!');
+            alert('Configuration loaded successfully!');
+
+        } catch (error) {
+            console.error('❌ Error loading configuration:', error);
+            alert('Error loading configuration: ' + error.message);
+        }
+
+        // Reset file input
+        event.target.value = '';
     }
 
     drawInitialCanvas() {
