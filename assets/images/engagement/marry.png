@@ -1,0 +1,29 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#grad3)" opacity="0.9"/>
+
+  <!-- Double hearts -->
+  <path d="M 170 190 C 170 190, 155 175, 148 175 C 141 175, 138 179, 138 186 C 138 197, 170 217, 170 217 C 170 217, 202 197, 202 186 C 202 179, 199 175, 192 175 C 185 175, 170 190, 170 190 Z" fill="white" opacity="0.9"/>
+
+  <path d="M 230 190 C 230 190, 215 175, 208 175 C 201 175, 198 179, 198 186 C 198 197, 230 217, 230 217 C 230 217, 262 197, 262 186 C 262 179, 259 175, 252 175 C 245 175, 230 190, 230 190 Z" fill="white" opacity="0.9"/>
+
+  <!-- Ring -->
+  <circle cx="200" cy="250" r="45" fill="none" stroke="white" stroke-width="8"/>
+  <circle cx="200" cy="220" r="15" fill="white"/>
+  <ellipse cx="200" cy="220" rx="15" ry="8" fill="#a855f7"/>
+
+  <!-- Share arrows -->
+  <path d="M 120 290 L 140 280 L 140 300 Z" fill="white" opacity="0.7"/>
+  <path d="M 280 290 L 260 280 L 260 300 Z" fill="white" opacity="0.7"/>
+  <line x1="140" y1="290" x2="260" y2="290" stroke="white" stroke-width="6" opacity="0.7"/>
+
+  <!-- Label -->
+  <text x="200" y="340" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">MARRY</text>
+</svg>
