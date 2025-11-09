@@ -61,11 +61,26 @@ class VideoGenerator {
         this.progressFill = document.getElementById('progressFill');
         this.previewOverlay = document.getElementById('previewOverlay');
 
-        // Engagement checkboxes
+        // Engagement configuration
         this.commentEngagementCB = document.getElementById('commentEngagement');
-        this.followEngagementCB = document.getElementById('followEngagement');
+        this.commentOption1 = document.getElementById('commentOption1');
+        this.commentOption2 = document.getElementById('commentOption2');
+        this.commentInsertAfter = document.getElementById('commentInsertAfter');
+
         this.shareEngagementCB = document.getElementById('shareEngagement');
+        this.shareOption1 = document.getElementById('shareOption1');
+        this.shareOption2 = document.getElementById('shareOption2');
+        this.shareInsertAfter = document.getElementById('shareInsertAfter');
+
+        this.followEngagementCB = document.getElementById('followEngagement');
+        this.followOption1 = document.getElementById('followOption1');
+        this.followOption2 = document.getElementById('followOption2');
+        this.followInsertAfter = document.getElementById('followInsertAfter');
+
         this.likeEngagementCB = document.getElementById('likeEngagement');
+        this.likeOption1 = document.getElementById('likeOption1');
+        this.likeOption2 = document.getElementById('likeOption2');
+        this.likeInsertAfter = document.getElementById('likeInsertAfter');
 
         // Prompt source
         this.promptSourceRadios = document.querySelectorAll('input[name="promptSource"]');
@@ -120,20 +135,6 @@ class VideoGenerator {
                     this.customPromptSection.classList.add('hidden');
                 }
             });
-        });
-
-        // Engagement toggles
-        this.commentEngagementCB.addEventListener('change', (e) => {
-            this.engagementManager.setEngagementEnabled('comment', e.target.checked);
-        });
-        this.followEngagementCB.addEventListener('change', (e) => {
-            this.engagementManager.setEngagementEnabled('follow', e.target.checked);
-        });
-        this.shareEngagementCB.addEventListener('change', (e) => {
-            this.engagementManager.setEngagementEnabled('share', e.target.checked);
-        });
-        this.likeEngagementCB.addEventListener('change', (e) => {
-            this.engagementManager.setEngagementEnabled('like', e.target.checked);
         });
 
         // Volume slider
@@ -279,13 +280,9 @@ class VideoGenerator {
         this.previewOverlay.classList.add('hidden');
 
         try {
-            // Get engagement settings
-            const engagementSettings = this.engagementManager.getEnabledEngagements();
-            console.log('📊 Engagement settings:', engagementSettings);
-
             // Generate prompts based on question count
             const promptSource = document.querySelector('input[name="promptSource"]:checked').value;
-            let allQuestions;
+            let regularQuestions;
 
             if (promptSource === 'custom') {
                 const opt1 = this.customOption1.value.trim();
@@ -299,15 +296,76 @@ class VideoGenerator {
 
                 // Get random prompts + the custom one
                 const randomPrompts = this.promptManager.getRandomPrompts(this.questionCount - 1);
-                allQuestions = [
+                regularQuestions = [
                     { option1: opt1, option2: opt2 },
                     ...randomPrompts
                 ];
             } else {
-                allQuestions = this.promptManager.getRandomPrompts(this.questionCount);
+                regularQuestions = this.promptManager.getRandomPrompts(this.questionCount);
             }
 
-            console.log(`🎯 Generated ${this.questionCount} questions:`, allQuestions);
+            // Collect enabled engagement questions
+            const engagementQuestions = [];
+
+            if (this.commentEngagementCB.checked) {
+                const insertAfter = parseInt(this.commentInsertAfter.value) || 0;
+                engagementQuestions.push({
+                    option1: this.commentOption1.value.trim() || "Comment 'I love God'",
+                    option2: this.commentOption2.value.trim() || "Reject the offer",
+                    insertAfter: insertAfter,
+                    type: 'comment',
+                    isEngagement: true
+                });
+            }
+
+            if (this.shareEngagementCB.checked) {
+                const insertAfter = parseInt(this.shareInsertAfter.value) || 0;
+                engagementQuestions.push({
+                    option1: this.shareOption1.value.trim() || "Always be alone",
+                    option2: this.shareOption2.value.trim() || "Marry the 3rd person who clicks share",
+                    insertAfter: insertAfter,
+                    type: 'share',
+                    isEngagement: true
+                });
+            }
+
+            if (this.followEngagementCB.checked) {
+                const insertAfter = parseInt(this.followInsertAfter.value) || 0;
+                engagementQuestions.push({
+                    option1: this.followOption1.value.trim() || "Follow for more",
+                    option2: this.followOption2.value.trim() || "Skip and regret it",
+                    insertAfter: insertAfter,
+                    type: 'follow',
+                    isEngagement: true
+                });
+            }
+
+            if (this.likeEngagementCB.checked) {
+                const insertAfter = parseInt(this.likeInsertAfter.value) || 0;
+                engagementQuestions.push({
+                    option1: this.likeOption1.value.trim() || "Like if you chose the first option",
+                    option2: this.likeOption2.value.trim() || "Don't like and miss out",
+                    insertAfter: insertAfter,
+                    type: 'like',
+                    isEngagement: true
+                });
+            }
+
+            // Sort engagement questions by insertion point
+            engagementQuestions.sort((a, b) => a.insertAfter - b.insertAfter);
+
+            // Insert engagement questions at specified positions
+            let allQuestions = [...regularQuestions];
+            let offset = 0;
+
+            for (const engQ of engagementQuestions) {
+                const insertPosition = engQ.insertAfter === 0 ? allQuestions.length : engQ.insertAfter + offset;
+                allQuestions.splice(insertPosition, 0, engQ);
+                offset++;
+            }
+
+            const totalQuestions = allQuestions.length;
+            console.log(`🎯 Generated ${regularQuestions.length} regular + ${engagementQuestions.length} engagement questions = ${totalQuestions} total`);
 
             // Step 1: Load background image
             this.updateStatus('🎨 Loading background...', 3);
@@ -317,26 +375,27 @@ class VideoGenerator {
             this.updateStatus('🔊 Loading audio assets...', 8);
             await this.loadAudioAssets();
 
-            // Step 3+: Generate all questions
+            // Step 3+: Generate all questions (regular + engagement)
             this.assets.questions = [];
-            const progressPerQuestion = 85 / this.questionCount; // 85% total for all questions (10-95%)
+            const progressPerQuestion = 85 / totalQuestions; // 85% total for all questions (10-95%)
 
-            for (let i = 0; i < this.questionCount; i++) {
+            for (let i = 0; i < totalQuestions; i++) {
                 const question = allQuestions[i];
                 const baseProgress = 10 + (i * progressPerQuestion);
+                const questionType = question.isEngagement ? `${question.type} engagement` : 'regular';
 
-                console.log(`\n🎬 === Processing Question ${i + 1}/${this.questionCount} ===`);
+                console.log(`\n🎬 === Processing Question ${i + 1}/${totalQuestions} (${questionType}) ===`);
                 console.log(`   Options: "${question.option1}" vs "${question.option2}"`);
-                this.updateStatus(`🎬 Generating question ${i + 1}/${this.questionCount}...`, baseProgress);
+                this.updateStatus(`🎬 Generating question ${i + 1}/${totalQuestions}...`, baseProgress);
 
                 // Fetch images
-                this.updateStatus(`🖼️ Fetching images ${i + 1}/${this.questionCount}...`, baseProgress + progressPerQuestion * 0.2);
+                this.updateStatus(`🖼️ Fetching images ${i + 1}/${totalQuestions}...`, baseProgress + progressPerQuestion * 0.2);
                 console.log(`   📸 Fetching images...`);
                 const [img1, img2] = await this.fetchQuestionImages(question.option1, question.option2);
                 console.log(`   ✅ Images fetched`);
 
                 // Generate voice
-                this.updateStatus(`🎤 Generating voice ${i + 1}/${this.questionCount}...`, baseProgress + progressPerQuestion * 0.6);
+                this.updateStatus(`🎤 Generating voice ${i + 1}/${totalQuestions}...`, baseProgress + progressPerQuestion * 0.6);
                 console.log(`   🎤 Generating voice...`);
                 const voice = await this.generateQuestionVoice(question.option1, question.option2);
                 console.log(`   ✅ Voice generated`);
@@ -344,9 +403,6 @@ class VideoGenerator {
                 // Generate percentages
                 const percentage1 = Math.floor(Math.random() * 40) + 30; // 30-70
                 const percentage2 = 100 - percentage1;
-
-                // Get engagement for this question (last question gets engagement)
-                const engagement = this.engagementManager.getEngagementForQuestion(i, this.questionCount);
 
                 this.assets.questions.push({
                     option1: question.option1,
@@ -356,23 +412,22 @@ class VideoGenerator {
                     voice: voice,
                     percentage1: percentage1,
                     percentage2: percentage2,
-                    engagement: engagement
+                    isEngagement: question.isEngagement || false,
+                    engagementType: question.type || null
                 });
 
-                console.log(`   ✅ Question ${i + 1} complete! (${percentage1}% vs ${percentage2}%)`);
-                if (engagement) {
-                    console.log(`   🎯 Engagement: ${engagement.type}`);
-                }
+                console.log(`   ✅ Question ${i + 1} complete! (${percentage1}% vs ${percentage2}%)${question.isEngagement ? ' [ENGAGEMENT: ' + question.type + ']' : ''}`);
             }
 
-            console.log(`\n✨ All ${this.questionCount} questions generated successfully!`);
+            console.log(`\n✨ All ${totalQuestions} questions generated successfully!`);
+            console.log(`   📊 ${regularQuestions.length} regular + ${engagementQuestions.length} engagement questions`);
 
             // Step 6: Calculate timeline
             this.updateStatus('⏱️ Building timeline...', 95);
             this.calculateTimeline();
 
             // Step 7: Ready to play
-            this.updateStatus(`✅ Video ready! (${this.questionCount} question${this.questionCount > 1 ? 's' : ''})`, 100);
+            this.updateStatus(`✅ Video ready! (${totalQuestions} question${totalQuestions > 1 ? 's' : ''})`, 100);
 
             this.playBtn.disabled = false;
             this.pauseBtn.disabled = false;
@@ -550,8 +605,6 @@ class VideoGenerator {
         for (let i = 0; i < this.assets.questions.length; i++) {
             const question = this.assets.questions[i];
             const voiceDuration = question.voice.duration;
-            const isLastQuestion = i === this.assets.questions.length - 1;
-            const hasEngagement = isLastQuestion && question.engagement;
 
             // Calculate option 2 delay based on percentage of voice duration
             const option2Delay = (voiceDuration * this.timing.option2DelayPercent) / 100;
@@ -564,9 +617,8 @@ class VideoGenerator {
                 clockStart: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause,
                 dingStart: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration,
                 percentageReveal: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration,
-                engagementStart: hasEngagement ? currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration : null,
-                swooshStart: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration + (hasEngagement ? this.timing.engagementDuration : 0),
-                endTime: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration + (hasEngagement ? this.timing.engagementDuration : 0) + this.timing.swooshDuration
+                swooshStart: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration,
+                endTime: currentTime + this.timing.voiceDelay + voiceDuration + this.timing.afterVoicePause + this.timing.clockDuration + this.timing.percentageDuration + this.timing.swooshDuration
             };
 
             this.timeline.questions.push(questionTimeline);
@@ -746,15 +798,12 @@ class VideoGenerator {
             );
         }
 
-        // Draw engagement hooks (only for last question)
-        if (question.engagement && questionTimeline.engagementStart && time >= questionTimeline.engagementStart) {
-            const elapsed = time - questionTimeline.engagementStart;
-            const progress = Math.min(elapsed / 0.5, 1); // 0.5s fade in
-
-            this.drawEngagement(question.engagement, progress);
-        }
-
         this.ctx.restore();
+
+        // Draw engagement indicator if this is an engagement question
+        if (question.isEngagement && time >= questionTimeline.option1Appear) {
+            this.drawEngagementIndicator(question.engagementType);
+        }
     }
 
     drawOption(image, text, percentage, position, progress, slideFrom, showPercentage) {
@@ -828,54 +877,63 @@ class VideoGenerator {
         this.ctx.fillText(text, x, y);
     }
 
-    drawEngagement(engagement, progress) {
+    drawEngagementIndicator(engagementType) {
         this.ctx.save();
-        this.ctx.globalAlpha = progress;
 
-        // Semi-transparent overlay
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(0, 0, this.width, this.height);
-
+        // Draw engagement badge at top of screen
+        const badgeText = `${this.getEngagementEmoji(engagementType)} ${engagementType.toUpperCase()} ENGAGEMENT`;
+        const badgeY = 60;
         const centerX = this.width / 2;
-        const imageSize = 300;
-        const spacing = 100;
 
-        if (engagement.type === 'comment' || engagement.type === 'share') {
-            // Two-option engagement (top and bottom)
-            const topY = 250;
-            const bottomY = this.height - 250 - imageSize;
+        // Background for badge
+        this.ctx.fillStyle = this.getEngagementColor(engagementType);
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.shadowBlur = 15;
+        this.ctx.shadowOffsetY = 3;
 
-            // Top option
-            const topOption = engagement.data[0];
-            if (topOption.image) {
-                const img = new Image();
-                img.src = topOption.image;
-                this.drawRoundedImage(img, centerX - imageSize / 2, topY, imageSize, imageSize, 20);
-            }
-            let topText = topOption.text;
-            if (engagement.type === 'share' && topOption.selectedCurse) {
-                topText = topOption.selectedCurse;
-            }
-            this.drawStrokedText(topText, centerX, topY + imageSize + 60, 'bold 50px Arial', '#fff', '#000', 6);
+        const padding = 30;
+        const tempFont = this.ctx.font;
+        this.ctx.font = 'bold 45px Arial';
+        const textWidth = this.ctx.measureText(badgeText).width;
+        const badgeWidth = textWidth + padding * 2;
+        const badgeHeight = 60;
 
-            // Bottom option
-            const bottomOption = engagement.data[1];
-            if (bottomOption.image) {
-                const img = new Image();
-                img.src = bottomOption.image;
-                this.drawRoundedImage(img, centerX - imageSize / 2, bottomY, imageSize, imageSize, 20);
-            }
-            this.drawStrokedText(bottomOption.text, centerX, bottomY + imageSize + 60, 'bold 50px Arial', '#fff', '#000', 6);
+        // Rounded rectangle for badge
+        const badgeX = centerX - badgeWidth / 2;
+        this.ctx.beginPath();
+        this.ctx.roundRect(badgeX, badgeY - badgeHeight / 2, badgeWidth, badgeHeight, 15);
+        this.ctx.fill();
 
-        } else if (engagement.type === 'follow') {
-            // Single text engagement
-            this.drawStrokedText(engagement.data, centerX, this.height / 2, 'bold 80px Arial', '#fff', '#000', 10);
-        } else if (engagement.type === 'like') {
-            // Single text engagement
-            this.drawStrokedText(engagement.data, centerX, this.height / 2, 'bold 80px Arial', '#fff', '#000', 10);
-        }
+        // Reset shadow for text
+        this.ctx.shadowColor = 'transparent';
+        this.ctx.shadowBlur = 0;
+        this.ctx.shadowOffsetY = 0;
 
+        // Badge text
+        this.drawStrokedText(badgeText, centerX, badgeY, 'bold 45px Arial', '#fff', '#000', 5);
+
+        this.ctx.font = tempFont;
         this.ctx.restore();
+    }
+
+    getEngagementEmoji(type) {
+        const emojis = {
+            'comment': '💬',
+            'share': '🔄',
+            'follow': '👤',
+            'like': '❤️'
+        };
+        return emojis[type] || '⭐';
+    }
+
+    getEngagementColor(type) {
+        const colors = {
+            'comment': 'rgba(59, 130, 246, 0.9)',  // Blue
+            'share': 'rgba(139, 92, 246, 0.9)',    // Purple
+            'follow': 'rgba(236, 72, 153, 0.9)',   // Pink
+            'like': 'rgba(239, 68, 68, 0.9)'       // Red
+        };
+        return colors[type] || 'rgba(102, 126, 234, 0.9)';
     }
 
     async downloadVideo() {

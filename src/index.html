@@ -97,29 +97,75 @@
                     <!-- Engagement Features -->
                     <div class="card mb-lg">
                         <div class="card-header">
-                            <h3 class="card-title">Engagement Hooks</h3>
-                            <p class="card-description">Boost viewer interaction with engagement prompts</p>
+                            <h3 class="card-title">Engagement Questions</h3>
+                            <p class="card-description">Insert custom engagement "Would You Rather" questions anywhere in your video</p>
                         </div>
                         <div class="card-body">
-                            <div class="toggle-group mb-md">
-                                <label class="toggle-card">
-                                    <input type="checkbox" id="commentEngagement" checked>
-                                    <span class="toggle-card-label">💬 Comment</span>
-                                </label>
-                                <label class="toggle-card">
-                                    <input type="checkbox" id="followEngagement" checked>
-                                    <span class="toggle-card-label">👤 Follow</span>
-                                </label>
-                                <label class="toggle-card">
-                                    <input type="checkbox" id="shareEngagement" checked>
-                                    <span class="toggle-card-label">🔄 Share</span>
-                                </label>
-                                <label class="toggle-card">
-                                    <input type="checkbox" id="likeEngagement" checked>
-                                    <span class="toggle-card-label">❤️ Like</span>
-                                </label>
+                            <!-- Comment Engagement -->
+                            <div class="form-group mb-md" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="commentEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">💬 Comment Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="commentInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="commentOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Comment 'I love God')" value="Comment 'I love God'">
+                                <input type="text" id="commentOption2" class="form-input" placeholder="Option 2 (e.g., Reject the offer)" value="Reject the offer">
                             </div>
-                            <p class="form-hint">These engagement hooks appear at the end of videos to increase viewer interaction</p>
+
+                            <!-- Share Engagement -->
+                            <div class="form-group mb-md" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="shareEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">🔄 Share Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="shareInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="shareOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Get cursed forever)" value="Always be alone">
+                                <input type="text" id="shareOption2" class="form-input" placeholder="Option 2 (e.g., Marry 3rd person who clicks share)" value="Marry the 3rd person who clicks share">
+                            </div>
+
+                            <!-- Follow Engagement -->
+                            <div class="form-group mb-md" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="followEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">👤 Follow Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="followInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="followOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Follow for more)" value="Follow for more">
+                                <input type="text" id="followOption2" class="form-input" placeholder="Option 2 (e.g., Skip)" value="Skip and regret it">
+                            </div>
+
+                            <!-- Like Engagement -->
+                            <div class="form-group mb-0" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="likeEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">❤️ Like Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="likeInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="likeOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Like if you chose option 1)" value="Like if you chose the first option">
+                                <input type="text" id="likeOption2" class="form-input" placeholder="Option 2 (e.g., Don't like)" value="Don't like and miss out">
+                            </div>
+
+                            <p class="form-hint" style="margin-top: var(--space-md);">Set "Insert after question" to 0 to place at the end. Otherwise, specify which question number (1-15) to insert after.</p>
                         </div>
                     </div>
 
