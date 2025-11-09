@@ -22,7 +22,8 @@ class VideoGenerator {
             clockSound: null,
             dingSound: null,
             swooshSound: null,
-            questions: [] // Array of 3 questions with images, voice, data
+            questions: [], // Array of questions with images, voice, data
+            engagementImages: {} // Pre-loaded engagement images
         };
 
         // Animation state
@@ -371,7 +372,11 @@ class VideoGenerator {
             this.updateStatus('🎨 Loading background...', 3);
             await this.loadBackgroundImage();
 
-            // Step 2: Load audio assets
+            // Step 2: Load engagement images
+            this.updateStatus('🖼️ Loading engagement images...', 5);
+            await this.loadEngagementImages();
+
+            // Step 3: Load audio assets
             this.updateStatus('🔊 Loading audio assets...', 8);
             await this.loadAudioAssets();
 
@@ -388,23 +393,22 @@ class VideoGenerator {
                 console.log(`   Options: "${question.option1}" vs "${question.option2}"`);
                 this.updateStatus(`🎬 Generating question ${i + 1}/${totalQuestions}...`, baseProgress);
 
-                // Fetch images (use generic terms for engagement questions)
+                // Fetch images (use local images for engagement questions)
                 this.updateStatus(`🖼️ Fetching images ${i + 1}/${totalQuestions}...`, baseProgress + progressPerQuestion * 0.2);
                 console.log(`   📸 Fetching images...`);
 
-                let searchTerm1, searchTerm2;
+                let img1, img2;
                 if (question.isEngagement) {
-                    // Use generic engagement-themed images
-                    const engagementImageTerms = this.getEngagementImageTerms(question.type);
-                    searchTerm1 = engagementImageTerms[0];
-                    searchTerm2 = engagementImageTerms[1];
+                    // Use pre-loaded local engagement images
+                    const engagementImages = this.getEngagementImages(question.type);
+                    img1 = engagementImages[0];
+                    img2 = engagementImages[1];
+                    console.log(`   ✅ Using local engagement images for ${question.type}`);
                 } else {
-                    searchTerm1 = question.option1;
-                    searchTerm2 = question.option2;
+                    // Fetch from Unsplash for regular questions
+                    [img1, img2] = await this.fetchQuestionImages(question.option1, question.option2);
+                    console.log(`   ✅ Images fetched from Unsplash`);
                 }
-
-                const [img1, img2] = await this.fetchQuestionImages(searchTerm1, searchTerm2);
-                console.log(`   ✅ Images fetched`);
 
                 // Generate voice
                 this.updateStatus(`🎤 Generating voice ${i + 1}/${totalQuestions}...`, baseProgress + progressPerQuestion * 0.6);
@@ -477,6 +481,28 @@ class VideoGenerator {
         } catch (error) {
             console.warn('Background image not found, using solid color:', error.message);
             this.assets.background = null;
+        }
+    }
+
+    async loadEngagementImages() {
+        try {
+            const imagesToLoad = {
+                'comment': '../assets/images/engagement/comment.png',
+                'reject': '../assets/images/engagement/reject.png',
+                'marry': '../assets/images/engagement/marry.png'
+            };
+
+            for (const [key, path] of Object.entries(imagesToLoad)) {
+                try {
+                    const img = await this.loadImage(path);
+                    this.assets.engagementImages[key] = img;
+                    console.log(`✅ Loaded engagement image: ${key}`);
+                } catch (error) {
+                    console.warn(`⚠️ Failed to load engagement image ${key}:`, error.message);
+                }
+            }
+        } catch (error) {
+            console.warn('Some engagement images could not be loaded:', error.message);
         }
     }
 
@@ -948,15 +974,17 @@ class VideoGenerator {
         return colors[type] || 'rgba(102, 126, 234, 0.9)';
     }
 
-    getEngagementImageTerms(type) {
-        // Return generic, visually appealing search terms for each engagement type
-        const imageTerms = {
-            'comment': ['conversation', 'discussion'],
-            'share': ['connection', 'together'],
-            'follow': ['community', 'people'],
-            'like': ['heart', 'love']
+    getEngagementImages(type) {
+        // Map engagement types to local pre-loaded images
+        const imageMapping = {
+            'comment': [this.assets.engagementImages.comment, this.assets.engagementImages.reject],
+            'share': [this.assets.engagementImages.reject, this.assets.engagementImages.marry],
+            'follow': [this.assets.engagementImages.comment, this.assets.engagementImages.marry],
+            'like': [this.assets.engagementImages.marry, this.assets.engagementImages.comment]
         };
-        return imageTerms[type] || ['social media', 'engagement'];
+
+        // Return mapped images or fallback to comment/reject
+        return imageMapping[type] || [this.assets.engagementImages.comment, this.assets.engagementImages.reject];
     }
 
     async downloadVideo() {
