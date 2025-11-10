@@ -2387,17 +2387,23 @@ class VideoGenerator {
             const audioContext = new AudioContext();
             const audioDestination = audioContext.createMediaStreamDestination();
 
-            // NOTE: Music is NOT included in export to prevent duration issues
-            // Background music duration was causing video to stop at music length instead of timeline duration
-            // Music will still play during preview, but not be exported to final video
-
-            // Add question voices to mix
+            // Connect all voice audio to BOTH recording AND speakers
+            const voiceSources = [];
             for (const question of this.assets.questions) {
                 if (question.voice) {
                     const voiceSource = audioContext.createMediaElementSource(question.voice);
-                    voiceSource.connect(audioDestination);
+                    const gainNode = audioContext.createGain();
+                    gainNode.gain.value = this.voiceVolume;
+
+                    voiceSource.connect(gainNode);
+                    gainNode.connect(audioDestination); // To recording
+                    gainNode.connect(audioContext.destination); // To speakers
+
+                    voiceSources.push({ element: question.voice, source: voiceSource });
                 }
             }
+
+            console.log(`🎤 Connected ${voiceSources.length} voice tracks to recording`);
 
             // Combine video and audio streams
             const combinedStream = new MediaStream([
@@ -2459,14 +2465,18 @@ class VideoGenerator {
             this.startTime = Date.now();
             this.animate();
 
-            // NOTE: Music playback disabled during export to prevent duration issues
-            // The video export will only include voice audio, not background music
+            // Create audio sources for sound effects
+            const effectGain = audioContext.createGain();
+            effectGain.gain.value = this.effectsVolume;
+            effectGain.connect(audioDestination); // To recording
+            effectGain.connect(audioContext.destination); // To speakers
 
             // Schedule all audio events
             for (let i = 0; i < this.timeline.questions.length; i++) {
                 const qt = this.timeline.questions[i];
                 const question = this.assets.questions[i];
 
+                // Schedule voice
                 if (question.voice) {
                     setTimeout(() => {
                         if (this.isPlaying) {
@@ -2475,28 +2485,37 @@ class VideoGenerator {
                     }, qt.voiceStart * 1000);
                 }
 
+                // Schedule clock sound with proper audio routing
                 if (this.assets.clockSound) {
                     setTimeout(() => {
                         if (this.isPlaying) {
                             const clockClone = this.assets.clockSound.cloneNode();
+                            const clockSource = audioContext.createMediaElementSource(clockClone);
+                            clockSource.connect(effectGain);
                             clockClone.play().catch(e => console.log('Clock play error:', e));
                         }
                     }, qt.clockStart * 1000);
                 }
 
+                // Schedule ding sound with proper audio routing
                 if (this.assets.dingSound) {
                     setTimeout(() => {
                         if (this.isPlaying) {
                             const dingClone = this.assets.dingSound.cloneNode();
+                            const dingSource = audioContext.createMediaElementSource(dingClone);
+                            dingSource.connect(effectGain);
                             dingClone.play().catch(e => console.log('Ding play error:', e));
                         }
                     }, qt.dingStart * 1000);
                 }
 
+                // Schedule swoosh sound with proper audio routing
                 if (this.assets.swooshSound) {
                     setTimeout(() => {
                         if (this.isPlaying) {
                             const swooshClone = this.assets.swooshSound.cloneNode();
+                            const swooshSource = audioContext.createMediaElementSource(swooshClone);
+                            swooshSource.connect(effectGain);
                             swooshClone.play().catch(e => console.log('Swoosh play error:', e));
                         }
                     }, qt.swooshStart * 1000);
@@ -2517,6 +2536,7 @@ class VideoGenerator {
                 this.pause();
                 mediaRecorder.stop();
                 audioContext.close();
+                console.log('✅ Recording completed');
             }, this.timeline.totalDuration * 1000 + 500);
 
         } catch (error) {
