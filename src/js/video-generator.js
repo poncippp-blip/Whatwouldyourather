@@ -709,6 +709,9 @@ class VideoGenerator {
         // NEW: Prompt Manager Button
         document.getElementById('promptManagerBtn')?.addEventListener('click', () => this.openPromptManager());
 
+        // NEW: Favorites Manager Button
+        document.getElementById('favoritesManagerBtn')?.addEventListener('click', () => this.openFavoritesManager());
+
         // NEW: Additional functional buttons
         document.getElementById('exportStatsBtn')?.addEventListener('click', () => this.exportStats());
         document.getElementById('resetAllBtn')?.addEventListener('click', () => this.resetAllSettings());
@@ -3191,6 +3194,210 @@ class VideoGenerator {
             }
         };
         input.click();
+    }
+
+    // NEW: Open Favorites Manager
+    openFavoritesManager() {
+        const favoritesCount = this.favorites.length;
+
+        let favoritesListHtml = '';
+        if (favoritesCount === 0) {
+            favoritesListHtml = '<p style="text-align: center; color: var(--text-tertiary); padding: 2rem;">No favorites saved yet. Use "💾 Duplicate" to save your current settings!</p>';
+        } else {
+            favoritesListHtml = this.favorites.map((fav, index) => `
+                <div style="background: rgba(0, 217, 255, 0.03); border: 1px solid var(--border-matte); border-radius: 8px; padding: 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+                    <div style="flex: 1; min-width: 0;">
+                        <h4 style="margin: 0 0 0.25rem; font-size: 0.95rem; color: var(--primary-accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ⭐ ${fav.name}
+                        </h4>
+                        <p style="margin: 0; font-size: 0.75rem; color: var(--text-tertiary);">
+                            ${fav.timestamp ? new Date(fav.timestamp).toLocaleString() : 'Unknown date'}
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 0.3rem; flex-shrink: 0;">
+                        <button class="btn btn-sm btn-primary" onclick="videoGenerator.loadFavorite(${index})" title="Load">📂</button>
+                        <button class="btn btn-sm btn-ghost" onclick="videoGenerator.renameFavorite(${index})" title="Rename">✏️</button>
+                        <button class="btn btn-sm btn-ghost" onclick="videoGenerator.exportFavorite(${index})" title="Export">💾</button>
+                        <button class="btn btn-sm btn-ghost" onclick="videoGenerator.deleteFavorite(${index})" title="Delete">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const modal = `
+            <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+                <div style="background: var(--bg-matte); border: 1px solid var(--border-strong); border-radius: 12px; padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                    <h2 style="margin: 0 0 1rem; color: var(--primary-accent); font-size: 1.5rem;">⭐ Favorites Manager</h2>
+
+                    <div style="background: rgba(0, 217, 255, 0.05); border-left: 3px solid var(--primary-accent); padding: 1rem; margin-bottom: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">Statistics</h3>
+                        <p style="margin: 0.25rem 0; font-size: 0.9rem;">📊 Total Favorites: <strong>${favoritesCount}</strong></p>
+                        <p style="margin: 0.25rem 0; font-size: 0.75rem; color: var(--text-tertiary);">💡 Tip: Use "💾 Duplicate" in Quick Tools to save your current settings as a favorite</p>
+                    </div>
+
+                    <div style="display: grid; gap: 0.5rem; margin-bottom: 1.5rem;">
+                        ${favoritesListHtml}
+                    </div>
+
+                    <div style="display: grid; gap: 0.75rem;">
+                        <button class="btn btn-primary btn-block" onclick="videoGenerator.duplicateCurrentSettings(); videoGenerator.openFavoritesManager();">➕ Save Current as Favorite</button>
+                        <button class="btn btn-ghost btn-block" onclick="this.closest('[style*=\"position: fixed\"]').remove()">✖ Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modal);
+    }
+
+    // NEW: Load Favorite
+    loadFavorite(index) {
+        if (index < 0 || index >= this.favorites.length) {
+            this.showToast('Invalid favorite index', 'error');
+            return;
+        }
+
+        const favorite = this.favorites[index];
+
+        // Apply all settings from favorite
+        if (favorite.timing) Object.assign(this.timing, favorite.timing);
+        if (favorite.playbackSpeed !== undefined) this.playbackSpeed = favorite.playbackSpeed;
+        if (favorite.foodOnlyMode !== undefined) this.foodOnlyMode = favorite.foodOnlyMode;
+        if (favorite.backgroundColor) this.backgroundColor = favorite.backgroundColor;
+        if (favorite.textFont) this.textFont = favorite.textFont;
+        if (favorite.keyboardShortcutsEnabled !== undefined) this.keyboardShortcutsEnabled = favorite.keyboardShortcutsEnabled;
+        if (favorite.textAnimation) Object.assign(this.textAnimation, favorite.textAnimation);
+        if (favorite.textStyle) Object.assign(this.textStyle, favorite.textStyle);
+        if (favorite.customColors) Object.assign(this.customColors, favorite.customColors);
+        if (favorite.canvasFilters) Object.assign(this.canvasFilters, favorite.canvasFilters);
+
+        // Update all UI elements
+        this.updateUIFromSettings();
+
+        this.showToast(`Loaded favorite: ${favorite.name}`, 'success');
+        console.log('✅ Loaded favorite:', favorite);
+
+        // Close modal and refresh
+        document.querySelector('[style*="position: fixed"]')?.remove();
+    }
+
+    // NEW: Update UI from current settings
+    updateUIFromSettings() {
+        // Update all sliders and inputs to match current settings
+        const updateSlider = (id, value, displayId) => {
+            const slider = document.getElementById(id);
+            const display = document.getElementById(displayId);
+            if (slider) slider.value = value;
+            if (display) {
+                if (id.includes('Volume')) {
+                    display.textContent = `${Math.round(value * 100)}%`;
+                } else {
+                    display.textContent = `${value}s`;
+                }
+            }
+        };
+
+        // Timing sliders
+        updateSlider('questionDelaySlider', this.timing.questionDelay, 'questionDelayValue');
+        updateSlider('voiceDelaySlider', this.timing.voiceDelay, 'voiceDelayValue');
+        updateSlider('option1DelaySlider', this.timing.option1Delay, 'option1DelayValue');
+        updateSlider('option2DelaySlider', this.timing.option2Delay, 'option2DelayValue');
+        updateSlider('clockDurationSlider', this.timing.clockDuration, 'clockDurationValue');
+        updateSlider('percentageDurationSlider', this.timing.percentageDuration, 'percentageDurationValue');
+        updateSlider('swooshDurationSlider', this.timing.swooshDuration, 'swooshDurationValue');
+
+        // Checkboxes
+        const foodOnlyCheckbox = document.getElementById('foodOnlyMode');
+        if (foodOnlyCheckbox) foodOnlyCheckbox.checked = this.foodOnlyMode;
+
+        const keyboardShortcutsCheckbox = document.getElementById('keyboardShortcutsToggle');
+        if (keyboardShortcutsCheckbox) keyboardShortcutsCheckbox.checked = this.keyboardShortcutsEnabled;
+
+        // Text animation
+        const textAnimationEnabled = document.getElementById('textAnimationEnabled');
+        if (textAnimationEnabled) textAnimationEnabled.checked = this.textAnimation.enabled;
+
+        const textAnimationType = document.getElementById('textAnimationType');
+        if (textAnimationType) textAnimationType.value = this.textAnimation.type;
+
+        // Text style
+        const useGlow = document.getElementById('useGlow');
+        if (useGlow) useGlow.checked = this.textStyle.useGlow;
+
+        const useShadow = document.getElementById('useShadow');
+        if (useShadow) useShadow.checked = this.textStyle.useShadow;
+
+        const useStroke = document.getElementById('useStroke');
+        if (useStroke) useStroke.checked = this.textStyle.useStroke;
+
+        // Color pickers
+        const bgColorPicker = document.getElementById('bgColorPicker');
+        if (bgColorPicker) bgColorPicker.value = this.backgroundColor;
+
+        console.log('✅ UI updated from settings');
+    }
+
+    // NEW: Delete Favorite
+    deleteFavorite(index) {
+        if (index < 0 || index >= this.favorites.length) {
+            this.showToast('Invalid favorite index', 'error');
+            return;
+        }
+
+        const favorite = this.favorites[index];
+        const confirmed = confirm(`Delete favorite "${favorite.name}"?`);
+
+        if (confirmed) {
+            this.favorites.splice(index, 1);
+            localStorage.setItem('favorites', JSON.stringify(this.favorites));
+            this.showToast(`Deleted: ${favorite.name}`, 'success');
+
+            // Refresh the modal
+            document.querySelector('[style*="position: fixed"]')?.remove();
+            this.openFavoritesManager();
+        }
+    }
+
+    // NEW: Rename Favorite
+    renameFavorite(index) {
+        if (index < 0 || index >= this.favorites.length) {
+            this.showToast('Invalid favorite index', 'error');
+            return;
+        }
+
+        const favorite = this.favorites[index];
+        const newName = prompt(`Rename favorite "${favorite.name}" to:`, favorite.name);
+
+        if (newName && newName.trim() && newName !== favorite.name) {
+            favorite.name = newName.trim();
+            localStorage.setItem('favorites', JSON.stringify(this.favorites));
+            this.showToast(`Renamed to: ${newName}`, 'success');
+
+            // Refresh the modal
+            document.querySelector('[style*="position: fixed"]')?.remove();
+            this.openFavoritesManager();
+        }
+    }
+
+    // NEW: Export Single Favorite
+    exportFavorite(index) {
+        if (index < 0 || index >= this.favorites.length) {
+            this.showToast('Invalid favorite index', 'error');
+            return;
+        }
+
+        const favorite = this.favorites[index];
+        const json = JSON.stringify(favorite, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `favorite-${favorite.name.replace(/\s+/g, '-')}-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this.showToast(`Exported: ${favorite.name}`, 'success');
     }
 
     // NEW: Export Stats
