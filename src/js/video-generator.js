@@ -1092,10 +1092,125 @@ class VideoGenerator {
         }
     }
 
+    // Smart keyword translation for better Unsplash results
+    translateToSearchKeyword(promptText) {
+        const text = promptText.toLowerCase();
+
+        // Keyword mapping for better Unsplash search results
+        const keywordMap = {
+            // Time-based
+            'wake up early': 'sunrise morning', 'morning person': 'sunrise', 'early bird': 'morning coffee',
+            'stay up late': 'night city', 'night owl': 'moon night', 'sleep in late': 'sleeping',
+
+            // Tech & Media
+            'watch dubbed': 'cinema', 'read subtitles': 'movie theater', 'dark mode': 'dark screen',
+            'light mode': 'bright screen', 'send gifs': 'phone texting', 'send emojis': 'smartphone',
+            'watch memes': 'smartphone laughing', 'watch videos': 'video streaming',
+
+            // Food
+            'extremely spicy': 'chili peppers', 'super mild': 'bland food', 'extra cheese': 'cheese',
+            'no cheese': 'salad', 'extra mayo': 'sandwich', 'extra hot sauce': 'hot sauce',
+            'pizza with pineapple': 'pizza', 'pizza without pineapple': 'pepperoni pizza',
+            'thin crust pizza': 'pizza', 'deep dish pizza': 'chicago pizza',
+
+            // Lifestyle
+            'cozy night in': 'cozy home', 'fancy date out': 'restaurant', 'party every weekend': 'party',
+            'relax at home': 'relaxing sofa', 'quiet nights in': 'cozy evening',
+
+            // Daily life
+            'clean as you go': 'cleaning', 'deep clean weekly': 'cleaning', 'make bed daily': 'bed',
+            'leave it messy': 'messy room', 'organized closet': 'organized', 'messy pile': 'clutter',
+
+            // Relationships
+            'know all passwords': 'password', 'respect privacy': 'privacy', 'attached at hip': 'couple',
+            'healthy independence': 'independent', 'say i love you daily': 'love', 'show it with actions': 'helping',
+            'big fancy wedding': 'wedding', 'intimate elopement': 'couple beach',
+
+            // Career & Money
+            'follow your passion': 'artist', 'follow the money': 'money', 'work to live': 'vacation',
+            'live to work': 'office desk', 'hustle culture': 'busy office', 'work-life balance': 'balance',
+            'minimum wage happy job': 'happy worker', 'six figures miserable job': 'stressed',
+            'entrepreneur risk': 'startup', 'employee security': 'office', '$1 million right now': 'money cash',
+            '$10k every month forever': 'passive income', 'dream job low salary': 'creative work',
+            'boring job high salary': 'corporate office',
+
+            // Philosophy
+            'create your path': 'hiking path', 'believe in destiny': 'fortune', 'everything connected': 'network',
+            'everything separate': 'alone', 'know how you die': 'hourglass', 'know when you die': 'calendar',
+            'edit your past': 'old photo', 'see your future': 'future', 'restart life from birth': 'baby',
+            'continue from now': 'forward', 'always 5 minutes early': 'clock punctual',
+            'always 5 minutes late': 'late running',
+
+            // More concepts
+            'debt free average': 'simple living', 'luxury life with debt': 'luxury', 'rich but alone': 'mansion',
+            'poor but loved': 'family', 'brutally honest': 'honest', 'tactfully kind': 'kindness',
+            'logic over emotion': 'logic', 'emotion over logic': 'emotion', 'organized chaos': 'creative',
+            'everything has place': 'organized', '5 year plan': 'planning', 'present moment': 'meditation',
+            'go with flow': 'river', 'never hungover': 'healthy', 'worth the hangover': 'party',
+            'track everything': 'fitness tracker', 'live freely': 'freedom',
+
+            // More specific prompts
+            'physical paper books': 'books', 'digital e-books': 'ebook reader', 'public library': 'library',
+            'buy at bookstore': 'bookstore', 'online college courses': 'online learning',
+            'traditional campus': 'university campus', 'study alone quietly': 'studying',
+            'study group sessions': 'study group', 'handwritten notes': 'writing notes',
+            'laptop typing': 'laptop', 'coffee while studying': 'coffee study',
+            'tea while learning': 'tea studying',
+
+            // Drinks
+            'iced coffee': 'iced coffee', 'hot coffee': 'hot coffee', 'black coffee': 'black coffee',
+            'sweet latte': 'latte', 'expensive coffee shop': 'coffee shop', 'home brewed': 'coffee maker',
+            'never drink alcohol': 'water', 'drink socially': 'drinks', 'wine connoisseur': 'wine',
+            'beer enthusiast': 'beer', 'craft beer': 'craft beer', 'cheap beer': 'beer',
+
+            // Personality traits
+            'minimalist lifestyle': 'minimalist', 'collector of things': 'collection',
+            'spontaneous plans': 'spontaneous', 'organized schedule': 'planner',
+            'risk taker': 'adventure', 'play it safe': 'safety',
+
+            // Entertainment
+            'marvel movies': 'marvel', 'dc comics': 'dc comics', 'star wars': 'star wars',
+            'star trek': 'star trek', 'harry potter': 'harry potter', 'lord of the rings': 'lotr',
+            'scary horror': 'horror', 'funny comedy': 'comedy', 'binge entire season': 'binge watching',
+            'watch weekly episodes': 'tv watching',
+
+            // Gaming
+            'single player story': 'gaming', 'online multiplayer': 'multiplayer gaming',
+            'role-playing rpg': 'rpg game', 'first person shooter': 'fps gaming',
+            'mobile phone games': 'mobile gaming', 'console gaming': 'console',
+        };
+
+        // Check exact match
+        if (keywordMap[text]) {
+            return keywordMap[text];
+        }
+
+        // Extract meaningful words (remove common words)
+        const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+                            'of', 'with', 'by', 'from', 'up', 'all', 'your', 'you', 'it', 'every',
+                            'vs', 'versus', 'always', 'never'];
+
+        const words = text.split(/\s+/).filter(word =>
+            word.length > 2 && !commonWords.includes(word)
+        );
+
+        // Use first 2 meaningful words
+        if (words.length > 0) {
+            return words.slice(0, 2).join(' ');
+        }
+
+        // Fallback
+        return promptText;
+    }
+
     async fetchQuestionImages(option1, option2) {
         const fetchImage = async (query) => {
+            // Translate to better search keyword
+            const searchKeyword = this.translateToSearchKeyword(query);
+            console.log(`🔍 Image search: "${query}" → "${searchKeyword}"`);
+
             const url = new URL('https://api.unsplash.com/search/photos');
-            url.searchParams.append('query', query);
+            url.searchParams.append('query', searchKeyword);
             url.searchParams.append('per_page', 1);
             url.searchParams.append('orientation', 'squarish');
 
@@ -1106,13 +1221,13 @@ class VideoGenerator {
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to fetch image for "${query}"`);
+                throw new Error(`Failed to fetch image for "${searchKeyword}"`);
             }
 
             const data = await response.json();
 
             if (data.results.length === 0) {
-                throw new Error(`No images found for "${query}"`);
+                throw new Error(`No images found for "${searchKeyword}" (original: "${query}")`);
             }
 
             return data.results[0].urls.regular;
