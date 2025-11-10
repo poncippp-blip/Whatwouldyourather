@@ -19,6 +19,7 @@
                     </div>
                 </div>
                 <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle">🌓 Deep Black</button>
                     <button class="btn btn-ghost btn-sm" id="saveConfigBtn">
                         💾 Save Config
                     </button>
@@ -348,6 +349,104 @@
                         </div>
                     </div>
 
+                    <!-- Canvas Filters -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">🎨 Canvas Filters</h3>
+                            <p class="card-description">Apply real-time visual effects</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="filter-grid">
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Brightness</label>
+                                        <span class="slider-value" id="filterBrightnessValue">100%</span>
+                                    </div>
+                                    <input type="range" min="0" max="200" value="100" class="slider" id="filterBrightness">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Contrast</label>
+                                        <span class="slider-value" id="filterContrastValue">100%</span>
+                                    </div>
+                                    <input type="range" min="0" max="200" value="100" class="slider" id="filterContrast">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Saturation</label>
+                                        <span class="slider-value" id="filterSaturationValue">100%</span>
+                                    </div>
+                                    <input type="range" min="0" max="200" value="100" class="slider" id="filterSaturation">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Blur</label>
+                                        <span class="slider-value" id="filterBlurValue">0px</span>
+                                    </div>
+                                    <input type="range" min="0" max="20" value="0" class="slider" id="filterBlur">
+                                </div>
+                            </div>
+                            <button class="btn btn-ghost btn-sm btn-block" id="resetFiltersBtn" style="margin-top: 1rem;">Reset Filters</button>
+                        </div>
+                    </div>
+
+                    <!-- Color Customization -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">🎨 Color Customization</h3>
+                            <p class="card-description">Customize text and glow colors</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="color-picker-group">
+                                <div class="color-picker-item">
+                                    <label class="form-label">Text Color</label>
+                                    <input type="color" value="#00d4ff" class="color-picker-input" id="textColor">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label class="form-label">Glow Color</label>
+                                    <input type="color" value="#00d4ff" class="color-picker-input" id="glowColor">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label class="form-label">Percentage Win</label>
+                                    <input type="color" value="#00ff88" class="color-picker-input" id="percentageWinColor">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label class="form-label">Percentage Lose</label>
+                                    <input type="color" value="#ff3366" class="color-picker-input" id="percentageLoseColor">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Animation Easing -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Animation Easing</h3>
+                            <p class="card-description">Control animation curves</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group mb-md">
+                                <label class="form-label">Slide Animation</label>
+                                <select class="form-select" id="slideEasing">
+                                    <option value="linear">Linear</option>
+                                    <option value="ease" selected>Ease</option>
+                                    <option value="ease-in">Ease In</option>
+                                    <option value="ease-out">Ease Out</option>
+                                    <option value="bounce">Bounce</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Fade Animation</label>
+                                <select class="form-select" id="fadeEasing">
+                                    <option value="linear">Linear</option>
+                                    <option value="ease" selected>Ease</option>
+                                    <option value="ease-in">Ease In</option>
+                                    <option value="ease-out">Ease Out</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Generate Button -->
                     <div class="card">
                         <div class="card-body">
@@ -387,22 +486,35 @@
                         </div>
                         <!-- Enhanced Preview Controls -->
                         <div class="preview-controls">
+                            <button class="btn btn-secondary btn-sm" id="framePrevBtn" disabled title="Previous Frame">⏮️</button>
                             <button class="btn btn-secondary btn-sm" id="playBtn" disabled>▶️ Play</button>
                             <button class="btn btn-secondary btn-sm" id="pauseBtn" disabled>⏸️ Pause</button>
                             <button class="btn btn-secondary btn-sm" id="restartBtn" disabled>🔄 Restart</button>
+                            <button class="btn btn-secondary btn-sm" id="frameNextBtn" disabled title="Next Frame">⏭️</button>
+                            <button class="btn btn-secondary btn-sm" id="bookmarkBtn" disabled title="Bookmark">⭐</button>
                             <button class="btn btn-secondary btn-sm" id="loopBtn" title="Loop playback">🔁</button>
                             <button class="btn btn-secondary btn-sm" id="muteBtn" title="Mute all">🔇</button>
                             <button class="btn btn-secondary btn-sm" id="fullscreenBtn" title="Fullscreen">⛶</button>
                         </div>
 
-                        <!-- Timeline Scrubber -->
-                        <div style="padding: 1rem; background: var(--surface-glass); border-top: 1px solid var(--border);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                <span id="currentTimeDisplay" style="font-size: 0.875rem; color: var(--text-secondary);">0:00</span>
-                                <span id="questionCounter" style="font-size: 0.875rem; color: var(--text-tertiary);">0 / 0</span>
-                                <span id="totalTimeDisplay" style="font-size: 0.875rem; color: var(--text-secondary);">0:00</span>
+                        <!-- Enhanced Timeline with Markers -->
+                        <div class="timeline-container">
+                            <div class="timeline-info">
+                                <span class="timeline-time" id="currentTimeDisplay">0:00</span>
+                                <span class="timeline-question" id="questionCounter">0 / 0</span>
+                                <span class="timeline-time" id="totalTimeDisplay">0:00</span>
                             </div>
-                            <input type="range" min="0" max="100" value="0" class="slider" id="timelineScrubber" disabled style="width: 100%;">
+                            <div class="timeline-track">
+                                <div class="timeline-markers" id="timelineMarkers"></div>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="timelineScrubber" disabled style="width: 100%; position: absolute; top: 0; left: 0; background: transparent;">
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; align-items: center;">
+                                <label style="font-size: 0.8125rem; color: var(--text-tertiary);">
+                                    <input type="checkbox" id="snapToQuestion" style="margin-right: 0.25rem;">
+                                    Snap to Question
+                                </label>
+                                <button class="btn btn-ghost" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-left: auto;" id="clearBookmarksBtn">Clear Bookmarks</button>
+                            </div>
                         </div>
 
                         <!-- Playback & Volume Controls -->
@@ -488,13 +600,49 @@
                                     <option value="ultra">Ultra (12 Mbps)</option>
                                 </select>
                             </div>
-                            <div class="form-group mb-0">
+                            <div class="form-group">
                                 <label class="form-label">Frame Rate</label>
                                 <select id="exportFPS" class="form-input">
                                     <option value="24">24 FPS (Cinematic)</option>
                                     <option value="30" selected>30 FPS (Standard)</option>
                                     <option value="60">60 FPS (Smooth)</option>
                                 </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Export Format</label>
+                                <select id="exportFormat" class="form-input">
+                                    <option value="webm" selected>WebM</option>
+                                    <option value="mp4">MP4 (experimental)</option>
+                                </select>
+                            </div>
+                            <!-- Export Progress -->
+                            <div class="hidden" id="exportProgress" style="margin-top: 1rem; padding: 1rem; background: var(--bg-darker); border-radius: var(--radius-sm);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Exporting...</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--primary-accent);" id="exportPercentage">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="exportProgressFill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Player Features -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Advanced Features</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="autoPauseOnBlur" checked>
+                                    <span style="font-size: 0.9375rem; color: var(--text-secondary);">Auto-pause when tab unfocused</span>
+                                </label>
+                            </div>
+                            <div class="form-group mb-0">
+                                <button class="btn btn-ghost btn-sm btn-block" id="undoBtn" disabled title="Undo last change">⟲ Undo</button>
+                                <button class="btn btn-ghost btn-sm btn-block" id="redoBtn" disabled title="Redo last change" style="margin-top: 0.5rem;">⟳ Redo</button>
                             </div>
                         </div>
                     </div>

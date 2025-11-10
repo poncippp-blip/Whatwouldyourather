@@ -141,8 +141,33 @@ class VideoGenerator {
         this.isMuted = false;
         this.exportQuality = 'high';
         this.exportFPS = 30;
+        this.exportFormat = 'webm';
         this.autoSaveEnabled = true;
         this.autoSaveTimer = null;
+
+        // New advanced features
+        this.canvasFilters = {
+            brightness: 100,
+            contrast: 100,
+            saturation: 100,
+            blur: 0
+        };
+        this.customColors = {
+            text: '#00d4ff',
+            glow: '#00d4ff',
+            percentageWin: '#00ff88',
+            percentageLose: '#ff3366'
+        };
+        this.animationEasing = {
+            slide: 'ease',
+            fade: 'ease'
+        };
+        this.bookmarks = [];
+        this.snapToQuestion = false;
+        this.autoPauseOnBlur = true;
+        this.settingsHistory = [];
+        this.historyIndex = -1;
+        this.maxHistorySize = 50;
 
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
@@ -392,6 +417,90 @@ class VideoGenerator {
                 shortcutsPanel.classList.toggle('hidden');
             });
         }
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => this.toggleTheme());
+        }
+
+        // Canvas filters
+        this.setupFilter('filterBrightness', 'filterBrightnessValue', 'brightness', '%');
+        this.setupFilter('filterContrast', 'filterContrastValue', 'contrast', '%');
+        this.setupFilter('filterSaturation', 'filterSaturationValue', 'saturation', '%');
+        this.setupFilter('filterBlur', 'filterBlurValue', 'blur', 'px');
+
+        document.getElementById('resetFiltersBtn')?.addEventListener('click', () => this.resetFilters());
+
+        // Color pickers
+        document.getElementById('textColor')?.addEventListener('change', (e) => {
+            this.customColors.text = e.target.value;
+            this.triggerAutoSave();
+        });
+        document.getElementById('glowColor')?.addEventListener('change', (e) => {
+            this.customColors.glow = e.target.value;
+            this.triggerAutoSave();
+        });
+        document.getElementById('percentageWinColor')?.addEventListener('change', (e) => {
+            this.customColors.percentageWin = e.target.value;
+            this.triggerAutoSave();
+        });
+        document.getElementById('percentageLoseColor')?.addEventListener('change', (e) => {
+            this.customColors.percentageLose = e.target.value;
+            this.triggerAutoSave();
+        });
+
+        // Animation easing
+        document.getElementById('slideEasing')?.addEventListener('change', (e) => {
+            this.animationEasing.slide = e.target.value;
+            this.triggerAutoSave();
+        });
+        document.getElementById('fadeEasing')?.addEventListener('change', (e) => {
+            this.animationEasing.fade = e.target.value;
+            this.triggerAutoSave();
+        });
+
+        // Frame navigation
+        document.getElementById('framePrevBtn')?.addEventListener('click', () => this.framePrevious());
+        document.getElementById('frameNextBtn')?.addEventListener('click', () => this.frameNext());
+
+        // Bookmark system
+        document.getElementById('bookmarkBtn')?.addEventListener('click', () => this.toggleBookmark());
+        document.getElementById('clearBookmarksBtn')?.addEventListener('click', () => this.clearBookmarks());
+
+        // Snap to question
+        document.getElementById('snapToQuestion')?.addEventListener('change', (e) => {
+            this.snapToQuestion = e.target.checked;
+        });
+
+        // Export format
+        document.getElementById('exportFormat')?.addEventListener('change', (e) => {
+            this.exportFormat = e.target.value;
+            this.triggerAutoSave();
+        });
+
+        // Auto-pause on blur
+        document.getElementById('autoPauseOnBlur')?.addEventListener('change', (e) => {
+            this.autoPauseOnBlur = e.target.checked;
+        });
+
+        window.addEventListener('blur', () => {
+            if (this.autoPauseOnBlur && this.isPlaying) {
+                this.pause();
+                this.wasPlayingBeforeBlur = true;
+            }
+        });
+
+        window.addEventListener('focus', () => {
+            if (this.wasPlayingBeforeBlur && this.assets.questions.length > 0) {
+                this.play();
+                this.wasPlayingBeforeBlur = false;
+            }
+        });
+
+        // Undo/Redo
+        document.getElementById('undoBtn')?.addEventListener('click', () => this.undo());
+        document.getElementById('redoBtn')?.addEventListener('click', () => this.redo());
 
         // Load saved settings
         this.loadEnhancedSettings();
@@ -911,12 +1020,20 @@ class VideoGenerator {
             this.restartBtn.disabled = false;
             this.downloadBtn.disabled = false;
 
-            // Enable timeline scrubber
+            // Enable timeline scrubber and frame navigation
             const timelineScrubber = document.getElementById('timelineScrubber');
             if (timelineScrubber) timelineScrubber.disabled = false;
 
-            // Update displays
+            const framePrevBtn = document.getElementById('framePrevBtn');
+            const frameNextBtn = document.getElementById('frameNextBtn');
+            const bookmarkBtn = document.getElementById('bookmarkBtn');
+            if (framePrevBtn) framePrevBtn.disabled = false;
+            if (frameNextBtn) frameNextBtn.disabled = false;
+            if (bookmarkBtn) bookmarkBtn.disabled = false;
+
+            // Update displays and timeline markers
             this.updateTimeDisplay();
+            this.updateTimelineMarkers();
 
             setTimeout(() => {
                 this.statusPanel.classList.add('hidden');
@@ -1378,18 +1495,18 @@ class VideoGenerator {
 
         const textY = y + imageSize + 80;
 
-        // Add vibrant glow to option text
+        // Add vibrant glow to option text (using custom colors)
         this.ctx.save();
-        this.ctx.shadowColor = '#00d4ff'; // Bright cyan glow
+        this.ctx.shadowColor = this.customColors.glow;
         this.ctx.shadowBlur = 25;
 
         // Use wrapped text with max width of 950px and line height of 85px
-        this.drawStrokedTextWrapped(text, this.width / 2, textY, 'bold 70px Arial', '#fff', '#000', 8, 950, 85);
+        this.drawStrokedTextWrapped(text, this.width / 2, textY, 'bold 70px Arial', this.customColors.text, '#000', 8, 950, 85);
 
         this.ctx.restore();
 
         if (showPercentage) {
-            const color = percentage >= 50 ? '#00ff88' : '#ff3366'; // More vibrant green and red
+            const color = percentage >= 50 ? this.customColors.percentageWin : this.customColors.percentageLose;
             const percentY = textY + 100;
 
             // Add glow effect for percentages
@@ -1975,5 +2092,191 @@ class VideoGenerator {
         setTimeout(() => {
             indicator.style.opacity = '0';
         }, 2000);
+    }
+
+    // Theme Toggle
+    toggleTheme() {
+        document.body.classList.toggle('theme-deep-black');
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            const isDeepBlack = document.body.classList.contains('theme-deep-black');
+            themeToggle.textContent = isDeepBlack ? '🌓 Matte Black' : '🌓 Deep Black';
+        }
+        localStorage.setItem('theme', document.body.classList.contains('theme-deep-black') ? 'deep-black' : 'matte-black');
+    }
+
+    // Canvas Filters
+    setupFilter(sliderId, valueId, filterName, unit) {
+        const slider = document.getElementById(sliderId);
+        const valueDisplay = document.getElementById(valueId);
+
+        if (slider && valueDisplay) {
+            slider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                this.canvasFilters[filterName] = value;
+                valueDisplay.textContent = `${value}${unit}`;
+                this.applyCanvasFilters();
+                this.triggerAutoSave();
+            });
+        }
+    }
+
+    resetFilters() {
+        this.canvasFilters = { brightness: 100, contrast: 100, saturation: 100, blur: 0 };
+
+        document.getElementById('filterBrightness').value = 100;
+        document.getElementById('filterBrightnessValue').textContent = '100%';
+        document.getElementById('filterContrast').value = 100;
+        document.getElementById('filterContrastValue').textContent = '100%';
+        document.getElementById('filterSaturation').value = 100;
+        document.getElementById('filterSaturationValue').textContent = '100%';
+        document.getElementById('filterBlur').value = 0;
+        document.getElementById('filterBlurValue').textContent = '0px';
+
+        this.applyCanvasFilters();
+        this.triggerAutoSave();
+    }
+
+    applyCanvasFilters() {
+        const canvas = document.getElementById('previewCanvas');
+        if (!canvas) return;
+
+        const filterString = `brightness(${this.canvasFilters.brightness}%) contrast(${this.canvasFilters.contrast}%) saturate(${this.canvasFilters.saturation}%) blur(${this.canvasFilters.blur}px)`;
+        canvas.style.filter = filterString;
+    }
+
+    // Frame Navigation
+    framePrevious() {
+        if (this.assets.questions.length === 0) return;
+        const frameTime = 1 / 30; // 30 FPS
+        this.seekTo(Math.max(0, this.currentTime - frameTime));
+    }
+
+    frameNext() {
+        if (this.assets.questions.length === 0) return;
+        const frameTime = 1 / 30; // 30 FPS
+        this.seekTo(Math.min(this.timeline.totalDuration, this.currentTime + frameTime));
+    }
+
+    // Bookmark System
+    toggleBookmark() {
+        const currentTime = this.currentTime;
+        const index = this.bookmarks.indexOf(currentTime);
+
+        if (index > -1) {
+            this.bookmarks.splice(index, 1);
+        } else {
+            this.bookmarks.push(currentTime);
+            this.bookmarks.sort((a, b) => a - b);
+        }
+
+        this.updateTimelineMarkers();
+        this.triggerAutoSave();
+    }
+
+    clearBookmarks() {
+        this.bookmarks = [];
+        this.updateTimelineMarkers();
+        this.triggerAutoSave();
+    }
+
+    updateTimelineMarkers() {
+        const markersContainer = document.getElementById('timelineMarkers');
+        if (!markersContainer || !this.timeline.totalDuration) return;
+
+        markersContainer.innerHTML = '';
+
+        // Add question markers
+        for (let i = 0; i < this.timeline.questions.length; i++) {
+            const qt = this.timeline.questions[i];
+            const marker = document.createElement('div');
+            marker.className = 'timeline-marker';
+            marker.title = `Question ${i + 1}`;
+            marker.addEventListener('click', () => {
+                this.seekTo(qt.startTime);
+            });
+            markersContainer.appendChild(marker);
+        }
+
+        // Add bookmark indicators
+        for (const bookmarkTime of this.bookmarks) {
+            const percent = (bookmarkTime / this.timeline.totalDuration) * 100;
+            const indicator = document.createElement('div');
+            indicator.className = 'bookmark-indicator';
+            indicator.style.left = `${percent}%`;
+            indicator.title = `Bookmark at ${this.formatTime(bookmarkTime)}`;
+            markersContainer.appendChild(indicator);
+        }
+    }
+
+    // Undo/Redo System
+    saveStateToHistory() {
+        const state = {
+            timing: { ...this.timing },
+            imageShadow: { ...this.imageShadow },
+            canvasFilters: { ...this.canvasFilters },
+            customColors: { ...this.customColors },
+            animationEasing: { ...this.animationEasing }
+        };
+
+        // Remove any states after current index
+        this.settingsHistory = this.settingsHistory.slice(0, this.historyIndex + 1);
+
+        // Add new state
+        this.settingsHistory.push(state);
+
+        // Limit history size
+        if (this.settingsHistory.length > this.maxHistorySize) {
+            this.settingsHistory.shift();
+        } else {
+            this.historyIndex++;
+        }
+
+        this.updateUndoRedoButtons();
+    }
+
+    undo() {
+        if (this.historyIndex <= 0) return;
+
+        this.historyIndex--;
+        const state = this.settingsHistory[this.historyIndex];
+        this.applyHistoryState(state);
+        this.updateUndoRedoButtons();
+    }
+
+    redo() {
+        if (this.historyIndex >= this.settingsHistory.length - 1) return;
+
+        this.historyIndex++;
+        const state = this.settingsHistory[this.historyIndex];
+        this.applyHistoryState(state);
+        this.updateUndoRedoButtons();
+    }
+
+    applyHistoryState(state) {
+        Object.assign(this.timing, state.timing);
+        Object.assign(this.imageShadow, state.imageShadow);
+        Object.assign(this.canvasFilters, state.canvasFilters);
+        Object.assign(this.customColors, state.customColors);
+        Object.assign(this.animationEasing, state.animationEasing);
+
+        // Update UI elements
+        this.applyCanvasFilters();
+
+        // Update color pickers
+        document.getElementById('textColor').value = this.customColors.text;
+        document.getElementById('glowColor').value = this.customColors.glow;
+        document.getElementById('percentageWinColor').value = this.customColors.percentageWin;
+        document.getElementById('percentageLoseColor').value = this.customColors.percentageLose;
+
+        console.log('✅ Settings restored from history');
+    }
+
+    updateUndoRedoButtons() {
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+
+        if (undoBtn) undoBtn.disabled = this.historyIndex <= 0;
+        if (redoBtn) redoBtn.disabled = this.historyIndex >= this.settingsHistory.length - 1;
     }
 }
