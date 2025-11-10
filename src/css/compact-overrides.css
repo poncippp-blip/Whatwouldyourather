@@ -224,14 +224,18 @@
 .p-md { padding: 0.4rem !important; }
 .p-lg { padding: 0.6rem !important; }
 
-/* Two column layout for settings on ultrawide */
-@media (min-width: 2560px) {
-    .settings-sidebar {
+/* Horizontal grid layout for standard wide screens (1920px+) */
+@media (min-width: 1920px) {
+    .dashboard-grid {
         display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+
+    .control-panel {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
         gap: 0.5rem !important;
-        width: auto !important;
-        max-width: 900px !important;
     }
 
     .card {
@@ -239,11 +243,40 @@
     }
 }
 
-/* Three column layout for massive ultrawides */
+/* Two column layout for settings on ultrawide */
+@media (min-width: 2560px) {
+    .control-panel {
+        grid-template-columns: repeat(3, 1fr) !important;
+        max-width: none !important;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 2fr 1fr !important;
+        max-width: 3200px !important;
+    }
+}
+
+/* Three column layout for massive ultrawides (49" Odyssey, etc.) */
 @media (min-width: 3440px) {
-    .settings-sidebar {
-        grid-template-columns: 1fr 1fr 1fr !important;
-        max-width: 1350px !important;
+    .control-panel {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 2fr 1fr !important;
+        max-width: 4800px !important;
+    }
+}
+
+/* Super ultrawide (5120px+) */
+@media (min-width: 5120px) {
+    .control-panel {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 3fr 2fr !important;
+        gap: 1rem !important;
     }
 }
 
@@ -263,4 +296,74 @@
 
 .settings-sidebar::-webkit-scrollbar-thumb:hover {
     background: var(--surface-hover);
+}
+
+/* Toast animations */
+@keyframes slideInUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+}
+
+/* Keyboard shortcuts help text */
+.shortcuts-help {
+    font-size: 0.7rem !important;
+    color: var(--text-tertiary) !important;
+    margin-top: 0.3rem !important;
+    line-height: 1.4 !important;
+}
+
+/* Preset buttons active state */
+.btn-primary {
+    background: var(--primary-accent) !important;
+    color: #000 !important;
+}
+
+/* Quick action grid styling */
+.quick-tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem;
+}
+
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.3rem;
+}
+
+/* Ensure cards don't overflow in grid */
+.card.grid-item {
+    overflow: hidden;
+}
+
+/* Responsive font scaling for ultrawide */
+@media (min-width: 3440px) {
+    body {
+        font-size: 14px;
+    }
+
+    .card-title {
+        font-size: 1rem !important;
+    }
+
+    .btn {
+        font-size: 0.85rem !important;
+    }
 }

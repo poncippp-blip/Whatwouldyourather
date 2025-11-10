@@ -2702,7 +2702,15 @@ class VideoGenerator {
             exportQuality: this.exportQuality,
             exportFPS: this.exportFPS,
             imageShadow: this.imageShadow,
-            timing: this.timing
+            timing: this.timing,
+            foodOnlyMode: this.foodOnlyMode,
+            backgroundColor: this.backgroundColor,
+            textFont: this.textFont,
+            keyboardShortcutsEnabled: this.keyboardShortcutsEnabled,
+            textAnimation: this.textAnimation,
+            textStyle: this.textStyle,
+            customColors: this.customColors,
+            canvasFilters: this.canvasFilters
         };
 
         localStorage.setItem('wouldYouRatherSettings', JSON.stringify(settings));
@@ -2727,9 +2735,64 @@ class VideoGenerator {
             if (settings.imageShadow) Object.assign(this.imageShadow, settings.imageShadow);
             if (settings.timing) Object.assign(this.timing, settings.timing);
 
+            // Load new settings
+            if (settings.foodOnlyMode !== undefined) this.foodOnlyMode = settings.foodOnlyMode;
+            if (settings.backgroundColor) this.backgroundColor = settings.backgroundColor;
+            if (settings.textFont) this.textFont = settings.textFont;
+            if (settings.keyboardShortcutsEnabled !== undefined) this.keyboardShortcutsEnabled = settings.keyboardShortcutsEnabled;
+            if (settings.textAnimation) Object.assign(this.textAnimation, settings.textAnimation);
+            if (settings.textStyle) Object.assign(this.textStyle, settings.textStyle);
+            if (settings.customColors) Object.assign(this.customColors, settings.customColors);
+            if (settings.canvasFilters) Object.assign(this.canvasFilters, settings.canvasFilters);
+
+            // Update UI elements
+            const foodOnlyCheckbox = document.getElementById('foodOnlyMode');
+            if (foodOnlyCheckbox) foodOnlyCheckbox.checked = this.foodOnlyMode;
+
+            const keyboardShortcutsCheckbox = document.getElementById('keyboardShortcutsToggle');
+            if (keyboardShortcutsCheckbox) keyboardShortcutsCheckbox.checked = this.keyboardShortcutsEnabled;
+
+            // Update text animation UI
+            const textAnimationEnabled = document.getElementById('textAnimationEnabled');
+            if (textAnimationEnabled) textAnimationEnabled.checked = this.textAnimation.enabled;
+
+            const textAnimationType = document.getElementById('textAnimationType');
+            if (textAnimationType) textAnimationType.value = this.textAnimation.type;
+
+            // Update text styling UI
+            const textUseGlow = document.getElementById('textUseGlow');
+            if (textUseGlow) textUseGlow.checked = this.textStyle.useGlow;
+
+            const textUseShadow = document.getElementById('textUseShadow');
+            if (textUseShadow) textUseShadow.checked = this.textStyle.useShadow;
+
+            const textUseStroke = document.getElementById('textUseStroke');
+            if (textUseStroke) textUseStroke.checked = this.textStyle.useStroke;
+
+            // Update color pickers
+            const textColor = document.getElementById('textColor');
+            if (textColor) textColor.value = this.customColors.text;
+
+            const glowColor = document.getElementById('glowColor');
+            if (glowColor) glowColor.value = this.customColors.glow;
+
+            // Apply canvas filters
+            this.applyCanvasFilters();
+
             // Update UI
             document.getElementById('playbackSpeed')?.setAttribute('value', this.playbackSpeed);
             document.getElementById('canvasZoom')?.setAttribute('value', this.canvasZoom);
+
+        // Load favorites from localStorage
+        const savedFavorites = localStorage.getItem('favorites');
+        if (savedFavorites) {
+            try {
+                this.favorites = JSON.parse(savedFavorites);
+                console.log(`✅ Loaded ${this.favorites.length} favorites`);
+            } catch (e) {
+                console.error('Failed to load favorites:', e);
+            }
+        }
             document.getElementById('musicVolSlider')?.setAttribute('value', this.musicVolume * 100);
             document.getElementById('voiceVolSlider')?.setAttribute('value', this.voiceVolume * 100);
             document.getElementById('effectsVolSlider')?.setAttribute('value', this.effectsVolume * 100);
