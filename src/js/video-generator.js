@@ -706,6 +706,16 @@ class VideoGenerator {
         document.getElementById('undoBtn')?.addEventListener('click', () => this.undo());
         document.getElementById('redoBtn')?.addEventListener('click', () => this.redo());
 
+        // NEW: Prompt Manager Button
+        document.getElementById('promptManagerBtn')?.addEventListener('click', () => this.openPromptManager());
+
+        // NEW: Additional functional buttons
+        document.getElementById('exportStatsBtn')?.addEventListener('click', () => this.exportStats());
+        document.getElementById('resetAllBtn')?.addEventListener('click', () => this.resetAllSettings());
+        document.getElementById('duplicateSettingsBtn')?.addEventListener('click', () => this.duplicateCurrentSettings());
+        document.getElementById('exportMetadataBtn')?.addEventListener('click', () => this.exportVideoMetadata());
+        document.getElementById('quickExportBtn')?.addEventListener('click', () => this.quickExportVideo());
+
         // Load saved settings
         this.loadEnhancedSettings();
     }
@@ -3092,6 +3102,215 @@ class VideoGenerator {
 
         // Re-generate with same settings but different random prompts
         await this.generateVideo();
+    }
+
+    // NEW: Open Prompt Manager
+    openPromptManager() {
+        const totalPrompts = this.promptManager.getAllPrompts().length;
+        const foodPrompts = this.promptManager.getFoodOnlyPrompts().length;
+        const customPrompts = this.promptManager.customPrompts.length;
+
+        const modal = `
+            <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+                <div style="background: var(--bg-matte); border: 1px solid var(--border-strong); border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                    <h2 style="margin: 0 0 1rem; color: var(--primary-accent); font-size: 1.5rem;">📝 Prompt Manager</h2>
+
+                    <div style="background: rgba(0, 217, 255, 0.05); border-left: 3px solid var(--primary-accent); padding: 1rem; margin-bottom: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">Statistics</h3>
+                        <p style="margin: 0.25rem 0; font-size: 0.9rem;">📊 Total Prompts: <strong>${totalPrompts}</strong></p>
+                        <p style="margin: 0.25rem 0; font-size: 0.9rem;">🍕 Food Prompts: <strong>${foodPrompts}</strong></p>
+                        <p style="margin: 0.25rem 0; font-size: 0.9rem;">✨ Custom Prompts: <strong>${customPrompts}</strong></p>
+                    </div>
+
+                    <div style="display: grid; gap: 0.75rem;">
+                        <button class="btn btn-primary btn-block" onclick="videoGenerator.addCustomPrompt()">➕ Add Custom Prompt</button>
+                        <button class="btn btn-secondary btn-block" onclick="videoGenerator.exportAllPrompts()">💾 Export All Prompts</button>
+                        <button class="btn btn-secondary btn-block" onclick="videoGenerator.importPrompts()">📥 Import Prompts</button>
+                        <button class="btn btn-ghost btn-block" onclick="this.closest('[style*=\"position: fixed\"]').remove()">✖ Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modal);
+    }
+
+    // NEW: Add Custom Prompt
+    addCustomPrompt() {
+        const option1 = prompt('Enter first option:');
+        if (!option1) return;
+
+        const option2 = prompt('Enter second option:');
+        if (!option2) return;
+
+        this.promptManager.addPrompt(option1, option2);
+        this.showToast(`Added: ${option1} vs ${option2}`, 'success');
+
+        // Refresh the modal
+        document.querySelector('[style*="position: fixed"]')?.remove();
+        this.openPromptManager();
+    }
+
+    // NEW: Export All Prompts
+    exportAllPrompts() {
+        const prompts = this.promptManager.getAllPrompts();
+        const json = JSON.stringify(prompts, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `prompts-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this.showToast('Prompts exported successfully!', 'success');
+    }
+
+    // NEW: Import Prompts
+    importPrompts() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = async (e) => {
+            try {
+                const file = e.target.files[0];
+                const text = await file.text();
+                const prompts = JSON.parse(text);
+
+                if (!Array.isArray(prompts)) {
+                    throw new Error('Invalid prompts format');
+                }
+
+                this.promptManager.bulkAddPrompts(prompts);
+                this.showToast(`Imported ${prompts.length} prompts!`, 'success');
+                document.querySelector('[style*="position: fixed"]')?.remove();
+                this.openPromptManager();
+            } catch (err) {
+                this.showToast('Failed to import prompts: ' + err.message, 'error');
+            }
+        };
+        input.click();
+    }
+
+    // NEW: Export Stats
+    exportStats() {
+        const stats = {
+            timestamp: new Date().toISOString(),
+            videoCount: this.assets.questions.length,
+            totalDuration: this.timeline.totalDuration,
+            settings: {
+                questionCount: this.questionCount,
+                voice: this.voiceSelect?.value,
+                foodOnlyMode: this.foodOnlyMode,
+                exportQuality: this.exportQuality,
+                exportFPS: this.exportFPS
+            },
+            timing: this.timing,
+            favorites: this.favorites.length
+        };
+
+        const json = JSON.stringify(stats, null, 2);
+        navigator.clipboard.writeText(json).then(() => {
+            this.showToast('Stats copied to clipboard!', 'success');
+        });
+    }
+
+    // NEW: Reset All Settings
+    resetAllSettings() {
+        if (!confirm('Are you sure you want to reset ALL settings to defaults? This cannot be undone.')) {
+            return;
+        }
+
+        // Clear localStorage
+        localStorage.removeItem('wouldYouRatherSettings');
+        localStorage.removeItem('favorites');
+
+        this.showToast('All settings reset! Reloading...', 'info');
+
+        // Reload page after 1 second
+        setTimeout(() => location.reload(), 1000);
+    }
+
+    // NEW: Duplicate Current Settings
+    duplicateCurrentSettings() {
+        const settings = {
+            timing: { ...this.timing },
+            textAnimation: { ...this.textAnimation },
+            textStyle: { ...this.textStyle },
+            customColors: { ...this.customColors },
+            canvasFilters: { ...this.canvasFilters },
+            foodOnlyMode: this.foodOnlyMode,
+            questionCount: this.questionCount
+        };
+
+        const name = prompt('Enter name for this configuration:', `Config ${Date.now()}`);
+        if (!name) return;
+
+        const config = {
+            name,
+            timestamp: Date.now(),
+            settings
+        };
+
+        // Save to favorites
+        this.favorites.push(config);
+        localStorage.setItem('favorites', JSON.stringify(this.favorites));
+        this.showToast(`Configuration "${name}" saved!`, 'success');
+    }
+
+    // NEW: Export Video Metadata
+    exportVideoMetadata() {
+        if (this.assets.questions.length === 0) {
+            this.showToast('Generate a video first!', 'error');
+            return;
+        }
+
+        const metadata = {
+            title: 'Would You Rather Video',
+            timestamp: new Date().toISOString(),
+            duration: this.timeline.totalDuration,
+            questions: this.assets.questions.map((q, i) => ({
+                index: i + 1,
+                option1: q.option1,
+                option2: q.option2,
+                isEngagement: q.isEngagement || false,
+                type: q.type || 'regular'
+            })),
+            timeline: {
+                totalDuration: this.timeline.totalDuration,
+                questionCount: this.timeline.questions.length,
+                engagementCount: this.assets.questions.filter(q => q.isEngagement).length
+            },
+            settings: {
+                resolution: this.exportResolution,
+                fps: this.exportFPS,
+                quality: this.exportQuality
+            }
+        };
+
+        const json = JSON.stringify(metadata, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `video-metadata-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this.showToast('Metadata exported!', 'success');
+    }
+
+    // NEW: Quick Export Video (with default settings)
+    async quickExportVideo() {
+        if (this.assets.questions.length === 0) {
+            this.showToast('Generate a video first!', 'error');
+            return;
+        }
+
+        this.showToast('Starting quick export...', 'info');
+        await this.downloadVideo();
     }
 
     // Frame Navigation

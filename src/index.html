@@ -66,9 +66,13 @@
                                 <label class="form-label">Quick Tools</label>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
                                     <button class="btn btn-sm btn-ghost" onclick="videoGenerator.shuffleQuestions()">🔀 Shuffle</button>
-                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.copySettingsToClipboard()">📋 Copy Settings</button>
-                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.pasteSettingsFromClipboard()">📥 Paste Settings</button>
-                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.saveToFavorites(prompt('Enter name for this favorite:'))">⭐ Save Favorite</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.copySettingsToClipboard()">📋 Copy</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.pasteSettingsFromClipboard()">📥 Paste</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.duplicateCurrentSettings()">💾 Duplicate</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.exportStats()">📊 Stats</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.exportVideoMetadata()">📄 Metadata</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.resetAllSettings()">🔄 Reset All</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.quickExportVideo()">⚡ Quick Export</button>
                                 </div>
                             </div>
 
