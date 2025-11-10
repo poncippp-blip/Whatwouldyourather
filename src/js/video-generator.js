@@ -31,6 +31,7 @@ class VideoGenerator {
         this.isPlaying = false;
         this.startTime = 0;
         this.currentTime = 0;
+        this.scheduledTimeouts = []; // Track timeouts for cleanup
 
         // Timeline for all 3 questions
         this.timeline = {
@@ -221,6 +222,26 @@ class VideoGenerator {
                 imageShadowOffsetYValue.textContent = `${e.target.value}px`;
             });
         }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (this.isPlaying) {
+                    this.pause();
+                } else if (this.assets.questions.length > 0) {
+                    this.play();
+                }
+            } else if (e.code === 'KeyR') {
+                e.preventDefault();
+                if (this.assets.questions.length > 0) {
+                    this.restart();
+                }
+            }
+        });
     }
 
     setupTimingSlider(sliderId, valueId, formatter, timingKey = null) {
@@ -964,54 +985,77 @@ class VideoGenerator {
         this.startTime = Date.now() - (this.currentTime * 1000);
         this.animate();
 
-        if (this.assets.music && this.currentTime < this.timeline.totalDuration) {
+        // Start or resume music
+        if (this.assets.music) {
             this.assets.music.loop = true;
             this.assets.music.volume = this.musicVolume;
-            this.assets.music.play();
+            this.assets.music.currentTime = this.currentTime; // Seek to correct position
+            this.assets.music.play().catch(e => console.log('Music play error:', e));
         }
 
+        // Schedule audio events only for future events
         for (let i = 0; i < this.timeline.questions.length; i++) {
             const qt = this.timeline.questions[i];
             const question = this.assets.questions[i];
 
-            if (question.voice && this.currentTime < qt.voiceStart + question.voice.duration) {
-                const timeUntilVoice = Math.max(0, qt.voiceStart - this.currentTime);
-                setTimeout(() => {
-                    if (this.isPlaying) {
-                        question.voice.currentTime = Math.max(0, this.currentTime - qt.voiceStart);
+            // Voice audio
+            if (question.voice) {
+                const voiceStart = qt.voiceStart;
+                const voiceEnd = voiceStart + question.voice.duration;
+
+                if (this.currentTime < voiceEnd) {
+                    if (this.currentTime >= voiceStart) {
+                        // Already started, resume from current position
+                        question.voice.currentTime = this.currentTime - voiceStart;
                         question.voice.play().catch(e => console.log('Voice play error:', e));
+                    } else {
+                        // Schedule for future
+                        const delay = (voiceStart - this.currentTime) * 1000;
+                        const timeoutId = setTimeout(() => {
+                            if (this.isPlaying) {
+                                question.voice.currentTime = 0;
+                                question.voice.play().catch(e => console.log('Voice play error:', e));
+                            }
+                        }, delay);
+                        this.scheduledTimeouts.push(timeoutId);
                     }
-                }, timeUntilVoice * 1000);
+                }
             }
 
-            if (this.assets.clockSound && this.currentTime < qt.clockStart + 3) {
-                const timeUntilClock = Math.max(0, qt.clockStart - this.currentTime);
-                setTimeout(() => {
+            // Clock sound
+            if (this.assets.clockSound && this.currentTime < qt.clockStart) {
+                const delay = (qt.clockStart - this.currentTime) * 1000;
+                const timeoutId = setTimeout(() => {
                     if (this.isPlaying) {
                         const clockClone = this.assets.clockSound.cloneNode();
                         clockClone.play().catch(e => console.log('Clock play error:', e));
                     }
-                }, timeUntilClock * 1000);
+                }, delay);
+                this.scheduledTimeouts.push(timeoutId);
             }
 
-            if (this.assets.dingSound && this.currentTime < qt.dingStart + 0.5) {
-                const timeUntilDing = Math.max(0, qt.dingStart - this.currentTime);
-                setTimeout(() => {
+            // Ding sound
+            if (this.assets.dingSound && this.currentTime < qt.dingStart) {
+                const delay = (qt.dingStart - this.currentTime) * 1000;
+                const timeoutId = setTimeout(() => {
                     if (this.isPlaying) {
                         const dingClone = this.assets.dingSound.cloneNode();
                         dingClone.play().catch(e => console.log('Ding play error:', e));
                     }
-                }, timeUntilDing * 1000);
+                }, delay);
+                this.scheduledTimeouts.push(timeoutId);
             }
 
-            if (this.assets.swooshSound && this.currentTime < qt.swooshStart + 1) {
-                const timeUntilSwoosh = Math.max(0, qt.swooshStart - this.currentTime);
-                setTimeout(() => {
+            // Swoosh sound
+            if (this.assets.swooshSound && this.currentTime < qt.swooshStart) {
+                const delay = (qt.swooshStart - this.currentTime) * 1000;
+                const timeoutId = setTimeout(() => {
                     if (this.isPlaying) {
                         const swooshClone = this.assets.swooshSound.cloneNode();
                         swooshClone.play().catch(e => console.log('Swoosh play error:', e));
                     }
-                }, timeUntilSwoosh * 1000);
+                }, delay);
+                this.scheduledTimeouts.push(timeoutId);
             }
         }
     }
@@ -1019,12 +1063,20 @@ class VideoGenerator {
     pause() {
         this.isPlaying = false;
 
+        // Clear all scheduled timeouts
+        for (const timeoutId of this.scheduledTimeouts) {
+            clearTimeout(timeoutId);
+        }
+        this.scheduledTimeouts = [];
+
+        // Pause all audio
         if (this.assets.music) this.assets.music.pause();
 
         for (const question of this.assets.questions) {
             if (question.voice) question.voice.pause();
         }
 
+        // Cancel animation frame
         cancelAnimationFrame(this.animationFrame);
     }
 
@@ -1048,8 +1100,11 @@ class VideoGenerator {
         this.currentTime = (Date.now() - this.startTime) / 1000;
 
         if (this.currentTime >= this.timeline.totalDuration) {
+            // Video completed
+            this.currentTime = this.timeline.totalDuration;
+            this.renderFrame(this.currentTime);
             this.pause();
-            this.currentTime = 0;
+            console.log('✅ Video playback completed');
             return;
         }
 
