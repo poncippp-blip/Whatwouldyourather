@@ -1203,34 +1203,148 @@ class VideoGenerator {
         return promptText;
     }
 
+    getFallbackKeywords(originalQuery, translatedKeyword) {
+        const text = originalQuery.toLowerCase();
+
+        // Context-aware fallbacks based on common themes
+        const contextFallbacks = {
+            // Sleep/Time related
+            'wake up early': ['sunrise', 'morning', 'dawn', 'breakfast'],
+            'stay up late': ['night', 'moon', 'stars', 'city lights'],
+            'morning person': ['sunrise', 'coffee', 'morning'],
+            'night owl': ['moon', 'night sky', 'stars'],
+
+            // Food related
+            'unsweetened': ['tea', 'coffee', 'drink', 'beverage'],
+            'sweetened': ['dessert', 'candy', 'sugar'],
+            'pizza': ['food', 'italian', 'dinner'],
+            'burger': ['food', 'restaurant', 'meal'],
+
+            // Entertainment
+            'watch dubbed': ['cinema', 'theater', 'movie', 'film'],
+            'read subtitles': ['movie theater', 'cinema', 'screen'],
+            'watch subbed': ['cinema', 'movie', 'screen'],
+
+            // Technology
+            'know all passwords': ['security', 'computer', 'digital'],
+            'respect privacy': ['privacy', 'security', 'protection'],
+            'type': ['keyboard', 'computer', 'typing'],
+            'handwrite': ['pen', 'paper', 'writing'],
+
+            // Lifestyle
+            'work to live': ['beach', 'vacation', 'relaxation'],
+            'live to work': ['office', 'desk', 'work'],
+            'rich but alone': ['mansion', 'luxury', 'wealth'],
+            'poor but loved': ['family', 'friends', 'together'],
+            'city life': ['city', 'urban', 'skyline'],
+            'country life': ['nature', 'countryside', 'rural'],
+
+            // Social
+            'introvert': ['alone', 'solitude', 'quiet'],
+            'extrovert': ['party', 'people', 'social'],
+            'alone': ['solitude', 'peaceful', 'quiet'],
+            'company': ['friends', 'people', 'group'],
+
+            // Travel
+            'beach vacation': ['beach', 'ocean', 'sand'],
+            'mountain vacation': ['mountain', 'hiking', 'nature'],
+            'travel': ['adventure', 'journey', 'explore'],
+            'staycation': ['home', 'cozy', 'comfort'],
+
+            // Seasons
+            'summer': ['sun', 'beach', 'warm'],
+            'winter': ['snow', 'cold', 'ice'],
+            'spring': ['flowers', 'bloom', 'nature'],
+            'fall': ['autumn', 'leaves', 'orange'],
+
+            // Activities
+            'read': ['book', 'library', 'reading'],
+            'watch': ['screen', 'television', 'movie'],
+            'exercise': ['gym', 'fitness', 'workout'],
+            'relax': ['peaceful', 'calm', 'rest'],
+
+            // General concepts
+            'win': ['victory', 'success', 'champion'],
+            'lose': ['defeat', 'failure', 'sad'],
+            'love': ['heart', 'romance', 'couple'],
+            'hate': ['angry', 'frustration', 'rage']
+        };
+
+        // Try to find specific fallbacks
+        for (const [key, fallbacks] of Object.entries(contextFallbacks)) {
+            if (text.includes(key)) {
+                return fallbacks;
+            }
+        }
+
+        // Extract individual words as fallbacks
+        const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'be', 'all', 'your'];
+        const words = text.split(/\s+/).filter(word =>
+            word.length > 3 && !commonWords.includes(word)
+        );
+
+        // Generic fallbacks that usually work
+        const genericFallbacks = ['abstract', 'minimal', 'texture', 'pattern', 'color', 'background'];
+
+        return [...words, ...genericFallbacks];
+    }
+
     async fetchQuestionImages(option1, option2) {
         const fetchImage = async (query) => {
             // Translate to better search keyword
             const searchKeyword = this.translateToSearchKeyword(query);
-            console.log(`🔍 Image search: "${query}" → "${searchKeyword}"`);
+            const fallbacks = this.getFallbackKeywords(query, searchKeyword);
 
-            const url = new URL('https://api.unsplash.com/search/photos');
-            url.searchParams.append('query', searchKeyword);
-            url.searchParams.append('per_page', 1);
-            url.searchParams.append('orientation', 'squarish');
+            console.log(`🔍 Image search for "${query}": primary="${searchKeyword}", fallbacks=[${fallbacks.slice(0, 3).join(', ')}...]`);
 
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Client-ID ${this.unsplashKey}`
+            // Try primary keyword and fallbacks
+            const keywordsToTry = [searchKeyword, ...fallbacks];
+
+            for (let i = 0; i < keywordsToTry.length; i++) {
+                const keyword = keywordsToTry[i];
+
+                try {
+                    const url = new URL('https://api.unsplash.com/search/photos');
+                    url.searchParams.append('query', keyword);
+                    url.searchParams.append('per_page', 1);
+                    url.searchParams.append('orientation', 'squarish');
+
+                    const response = await fetch(url, {
+                        headers: {
+                            'Authorization': `Client-ID ${this.unsplashKey}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        console.warn(`⚠️ API error for "${keyword}": ${response.status}`);
+                        continue;
+                    }
+
+                    const data = await response.json();
+
+                    if (data.results.length === 0) {
+                        console.warn(`⚠️ No results for "${keyword}", trying next fallback...`);
+                        continue;
+                    }
+
+                    // Success!
+                    if (i > 0) {
+                        console.log(`✅ Found image using fallback "${keyword}" (attempt ${i + 1})`);
+                    } else {
+                        console.log(`✅ Found image using primary keyword "${keyword}"`);
+                    }
+
+                    return data.results[0].urls.regular;
+
+                } catch (error) {
+                    console.warn(`⚠️ Error trying "${keyword}":`, error.message);
+                    if (i === keywordsToTry.length - 1) {
+                        throw new Error(`Failed to find image for "${query}" after trying ${keywordsToTry.length} keywords`);
+                    }
                 }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch image for "${searchKeyword}"`);
             }
 
-            const data = await response.json();
-
-            if (data.results.length === 0) {
-                throw new Error(`No images found for "${searchKeyword}" (original: "${query}")`);
-            }
-
-            return data.results[0].urls.regular;
+            throw new Error(`No images found for "${query}" after trying all fallbacks`);
         };
 
         const [img1Url, img2Url] = await Promise.all([
