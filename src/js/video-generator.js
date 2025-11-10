@@ -122,6 +122,15 @@ class VideoGenerator {
             afterVoicePause: 0.325   // Pause after voice before clock (35% faster)
         };
 
+        // Image shadow settings
+        this.imageShadow = {
+            enabled: true,
+            blur: 40,
+            offsetX: 0,
+            offsetY: 15,
+            color: 'rgba(0, 0, 0, 0.6)'
+        };
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -185,6 +194,33 @@ class VideoGenerator {
         this.setupTimingSlider('swooshDuration', 'swooshDurationValue', (val) => `${val}s`);
         this.setupTimingSlider('fadeInDuration', 'fadeInDurationValue', (val) => `${val}s`);
         this.setupTimingSlider('afterVoicePause', 'afterVoicePauseValue', (val) => `${val}s`);
+
+        // Image shadow controls
+        const imageShadowEnabled = document.getElementById('imageShadowEnabled');
+        const imageShadowBlur = document.getElementById('imageShadowBlur');
+        const imageShadowBlurValue = document.getElementById('imageShadowBlurValue');
+        const imageShadowOffsetY = document.getElementById('imageShadowOffsetY');
+        const imageShadowOffsetYValue = document.getElementById('imageShadowOffsetYValue');
+
+        if (imageShadowEnabled) {
+            imageShadowEnabled.addEventListener('change', (e) => {
+                this.imageShadow.enabled = e.target.checked;
+            });
+        }
+
+        if (imageShadowBlur && imageShadowBlurValue) {
+            imageShadowBlur.addEventListener('input', (e) => {
+                this.imageShadow.blur = parseInt(e.target.value);
+                imageShadowBlurValue.textContent = `${e.target.value}px`;
+            });
+        }
+
+        if (imageShadowOffsetY && imageShadowOffsetYValue) {
+            imageShadowOffsetY.addEventListener('input', (e) => {
+                this.imageShadow.offsetY = parseInt(e.target.value);
+                imageShadowOffsetYValue.textContent = `${e.target.value}px`;
+            });
+        }
     }
 
     setupTimingSlider(sliderId, valueId, formatter, timingKey = null) {
@@ -298,7 +334,8 @@ class VideoGenerator {
             customPrompt: {
                 option1: this.customOption1.value.trim(),
                 option2: this.customOption2.value.trim()
-            }
+            },
+            imageShadow: { ...this.imageShadow }
         };
 
         // Convert to JSON and download
@@ -459,6 +496,29 @@ class VideoGenerator {
             if (config.customPrompt) {
                 if (config.customPrompt.option1) this.customOption1.value = config.customPrompt.option1;
                 if (config.customPrompt.option2) this.customOption2.value = config.customPrompt.option2;
+            }
+
+            // Load image shadow settings
+            if (config.imageShadow) {
+                this.imageShadow = { ...this.imageShadow, ...config.imageShadow };
+
+                const imageShadowEnabled = document.getElementById('imageShadowEnabled');
+                const imageShadowBlur = document.getElementById('imageShadowBlur');
+                const imageShadowBlurValue = document.getElementById('imageShadowBlurValue');
+                const imageShadowOffsetY = document.getElementById('imageShadowOffsetY');
+                const imageShadowOffsetYValue = document.getElementById('imageShadowOffsetYValue');
+
+                if (imageShadowEnabled && config.imageShadow.enabled !== undefined) {
+                    imageShadowEnabled.checked = config.imageShadow.enabled;
+                }
+                if (imageShadowBlur && imageShadowBlurValue && config.imageShadow.blur !== undefined) {
+                    imageShadowBlur.value = config.imageShadow.blur;
+                    imageShadowBlurValue.textContent = `${config.imageShadow.blur}px`;
+                }
+                if (imageShadowOffsetY && imageShadowOffsetYValue && config.imageShadow.offsetY !== undefined) {
+                    imageShadowOffsetY.value = config.imageShadow.offsetY;
+                    imageShadowOffsetYValue.textContent = `${config.imageShadow.offsetY}px`;
+                }
             }
 
             console.log('✅ Configuration loaded successfully!');
@@ -693,7 +753,7 @@ class VideoGenerator {
     async loadBackgroundImage() {
         try {
             const img = new Image();
-            img.crossOrigin = 'anonymous'; // Enable CORS for canvas export
+            // Don't use crossOrigin for local images - it breaks them!
             await new Promise((resolve, reject) => {
                 img.onload = () => {
                     console.log('✅ Background image loaded successfully');
@@ -827,7 +887,10 @@ class VideoGenerator {
     loadImage(url) {
         return new Promise((resolve, reject) => {
             const img = new Image();
-            img.crossOrigin = 'anonymous';
+            // Only use crossOrigin for external URLs (like Unsplash)
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                img.crossOrigin = 'anonymous';
+            }
             img.onload = () => resolve(img);
             img.onerror = () => reject(new Error('Failed to load image'));
             img.src = url;
@@ -1128,6 +1191,15 @@ class VideoGenerator {
 
     drawRoundedImage(image, x, y, width, height, radius) {
         this.ctx.save();
+
+        // Apply shadow if enabled
+        if (this.imageShadow.enabled) {
+            this.ctx.shadowColor = this.imageShadow.color;
+            this.ctx.shadowBlur = this.imageShadow.blur;
+            this.ctx.shadowOffsetX = this.imageShadow.offsetX;
+            this.ctx.shadowOffsetY = this.imageShadow.offsetY;
+        }
+
         this.ctx.beginPath();
         this.ctx.moveTo(x + radius, y);
         this.ctx.lineTo(x + width - radius, y);
