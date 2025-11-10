@@ -444,6 +444,8 @@ body::before {
     width: 100%;
     aspect-ratio: 9 / 16;
     background: #000;
+    max-height: 750px; /* Constrain height for 1920x1080 displays */
+    margin: 0 auto;
 }
 
 .preview-canvas {
@@ -570,7 +572,8 @@ body::before {
     }
 
     .canvas-container {
-        max-width: 700px; /* Larger preview canvas */
+        max-width: 500px; /* Compact canvas for 1920x1080 */
+        max-height: 888px; /* Maintain 9:16 ratio */
         margin: 0 auto;
     }
 }

@@ -775,9 +775,9 @@ class VideoGenerator {
     async loadEngagementImages() {
         try {
             const imagesToLoad = {
-                'comment': '../assets/images/engagement/comment.png',
-                'reject': '../assets/images/engagement/reject.png',
-                'marry': '../assets/images/engagement/marry.png'
+                'comment': '../assets/images/engagement/comment.svg',
+                'reject': '../assets/images/engagement/reject.svg',
+                'marry': '../assets/images/engagement/marry.svg'
             };
 
             for (const [key, path] of Object.entries(imagesToLoad)) {
