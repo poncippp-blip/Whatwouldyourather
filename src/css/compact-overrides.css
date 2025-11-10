@@ -1,205 +1,217 @@
-/* Compact UI Overrides for 49" Ultrawide - Ultra-tight spacing */
+/* Compact UI Overrides for 49" Ultrawide - ULTRA-TIGHT spacing */
 
 /* Reduce all spacing dramatically */
 .app-header {
-    padding: 0.5rem 1rem !important;
+    padding: 0.3rem 0.75rem !important;
 }
 
 .header-content {
     max-width: 3200px !important;
-    gap: 0.5rem !important;
+    gap: 0.3rem !important;
 }
 
 .brand {
-    gap: 0.5rem !important;
+    gap: 0.3rem !important;
 }
 
 .brand-logo {
-    font-size: 1.5rem !important;
+    font-size: 1.3rem !important;
 }
 
 .brand-title {
-    font-size: 1.25rem !important;
+    font-size: 1.1rem !important;
 }
 
 .brand-tagline {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
 }
 
 /* Main content ultra-compact */
 .main-layout {
     max-width: 3200px !important;
-    padding: 0.5rem 1rem !important;
-    gap: 0.75rem !important;
+    padding: 0.3rem 0.75rem !important;
+    gap: 0.5rem !important;
 }
 
 /* Sidebar ultra-compact */
 .settings-sidebar {
     width: 340px !important;
-    gap: 0.5rem !important;
-    max-height: calc(100vh - 80px) !important;
+    gap: 0.3rem !important;
+    max-height: calc(100vh - 70px) !important;
     overflow-y: auto !important;
 }
 
-/* Card spacing ultra-compact */
+/* Card spacing ultra-compact - EVEN TIGHTER */
 .card {
-    padding: 0.5rem 0.75rem !important;
-    margin-bottom: 0.4rem !important;
+    padding: 0.3rem 0.5rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 .card-header {
-    padding: 0.4rem 0.5rem !important;
-    gap: 0.25rem !important;
+    padding: 0.3rem 0.4rem !important;
+    gap: 0.2rem !important;
 }
 
 .card-title {
-    font-size: 0.9rem !important;
+    font-size: 0.85rem !important;
     font-weight: 600 !important;
+    line-height: 1.2 !important;
 }
 
 .card-description {
-    font-size: 0.7rem !important;
-    margin-top: 0.1rem !important;
+    font-size: 0.65rem !important;
+    margin-top: 0.05rem !important;
+    line-height: 1.2 !important;
 }
 
 .card-body {
-    padding: 0.5rem 0.5rem !important;
+    padding: 0.3rem 0.4rem !important;
 }
 
-/* Form elements ultra-compact */
+/* Form elements ultra-compact - EVEN TIGHTER */
 .form-group {
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 .form-label {
-    font-size: 0.75rem !important;
-    margin-bottom: 0.2rem !important;
+    font-size: 0.7rem !important;
+    margin-bottom: 0.15rem !important;
+    line-height: 1.2 !important;
 }
 
 .form-hint {
-    font-size: 0.65rem !important;
-    margin-top: 0.15rem !important;
+    font-size: 0.6rem !important;
+    margin-top: 0.1rem !important;
+    line-height: 1.2 !important;
 }
 
 .form-input, .form-select {
-    padding: 0.35rem 0.5rem !important;
-    font-size: 0.8rem !important;
+    padding: 0.3rem 0.4rem !important;
+    font-size: 0.75rem !important;
+    height: auto !important;
 }
 
-/* Buttons ultra-compact */
+/* Buttons ultra-compact - EVEN SMALLER */
 .btn {
-    padding: 0.4rem 0.75rem !important;
-    font-size: 0.8rem !important;
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
 }
 
 .btn-sm {
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.65rem !important;
+    line-height: 1.2 !important;
 }
 
 .btn-lg {
-    padding: 0.6rem 1rem !important;
-    font-size: 0.9rem !important;
+    padding: 0.5rem 0.8rem !important;
+    font-size: 0.85rem !important;
+    line-height: 1.2 !important;
 }
 
 /* Slider groups ultra-compact */
 .slider-group {
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 .slider-header {
-    margin-bottom: 0.2rem !important;
+    margin-bottom: 0.15rem !important;
 }
 
 .slider-value {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
 }
 
-/* Controls ultra-compact */
+/* Controls ultra-compact - EVEN TIGHTER */
 .controls {
-    gap: 0.4rem !important;
-    padding: 0.5rem !important;
+    gap: 0.3rem !important;
+    padding: 0.3rem !important;
 }
 
 .control-group {
-    gap: 0.3rem !important;
+    gap: 0.2rem !important;
 }
 
 /* Filter grid ultra-compact */
 .filter-grid {
-    gap: 0.4rem !important;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 0.3rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
 }
 
 .filter-item {
-    gap: 0.25rem !important;
-    padding: 0.4rem !important;
+    gap: 0.2rem !important;
+    padding: 0.3rem !important;
 }
 
 /* Color pickers ultra-compact */
 .color-picker-group {
-    gap: 0.4rem !important;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+    gap: 0.3rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
 }
 
 .color-picker-item {
-    gap: 0.25rem !important;
+    gap: 0.2rem !important;
 }
 
 .color-picker-input {
     width: 100% !important;
-    height: 32px !important;
+    height: 28px !important;
 }
 
 /* Timeline ultra-compact */
 .timeline-container {
-    padding: 0.4rem !important;
-    gap: 0.3rem !important;
+    padding: 0.3rem !important;
+    gap: 0.2rem !important;
 }
 
 /* Checkbox containers ultra-compact */
 .checkbox-container {
-    padding: 0.3rem 0 !important;
-    gap: 0.4rem !important;
+    padding: 0.2rem 0 !important;
+    gap: 0.3rem !important;
 }
 
 .checkbox-label {
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
 }
 
-/* Engagement cards ultra-compact */
+/* Engagement cards ultra-compact - EVEN TIGHTER */
 .engagement-card {
-    padding: 0.5rem !important;
-    gap: 0.4rem !important;
+    padding: 0.3rem !important;
+    gap: 0.3rem !important;
 }
 
 /* Radio group ultra-compact */
 .radio-group {
-    gap: 0.5rem !important;
+    gap: 0.3rem !important;
 }
 
 .radio-label {
-    padding: 0.4rem 0.6rem !important;
-    font-size: 0.75rem !important;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.7rem !important;
+    line-height: 1.2 !important;
 }
 
 /* Stats ultra-compact */
 .stats-grid {
-    gap: 0.4rem !important;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+    gap: 0.3rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
 }
 
 .stat-card {
-    padding: 0.4rem 0.5rem !important;
-    gap: 0.2rem !important;
+    padding: 0.3rem 0.4rem !important;
+    gap: 0.15rem !important;
 }
 
 .stat-value {
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important;
+    line-height: 1.2 !important;
 }
 
 .stat-label {
-    font-size: 0.65rem !important;
+    font-size: 0.6rem !important;
+    line-height: 1.2 !important;
 }
 
 /* Content area - wider for ultrawide */
@@ -213,70 +225,77 @@
     border-radius: 8px !important;
 }
 
-/* Utility spacing classes ultra-compact */
-.mb-sm { margin-bottom: 0.25rem !important; }
-.mb-md { margin-bottom: 0.4rem !important; }
-.mb-lg { margin-bottom: 0.6rem !important; }
-.mt-sm { margin-top: 0.25rem !important; }
-.mt-md { margin-top: 0.4rem !important; }
-.mt-lg { margin-top: 0.6rem !important; }
-.p-sm { padding: 0.25rem !important; }
-.p-md { padding: 0.4rem !important; }
-.p-lg { padding: 0.6rem !important; }
+/* Utility spacing classes ultra-compact - EVEN TIGHTER */
+.mb-sm { margin-bottom: 0.2rem !important; }
+.mb-md { margin-bottom: 0.3rem !important; }
+.mb-lg { margin-bottom: 0.5rem !important; }
+.mt-sm { margin-top: 0.2rem !important; }
+.mt-md { margin-top: 0.3rem !important; }
+.mt-lg { margin-top: 0.5rem !important; }
+.p-sm { padding: 0.2rem !important; }
+.p-md { padding: 0.3rem !important; }
+.p-lg { padding: 0.5rem !important; }
 
-/* Horizontal grid layout for standard wide screens (1920px+) */
+/* Horizontal grid layout for standard wide screens (1920px+) - TIGHTER */
 @media (min-width: 1920px) {
     .dashboard-grid {
         display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
-        gap: 0.75rem !important;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        gap: 0.5rem !important;
     }
 
     .control-panel {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
-        gap: 0.5rem !important;
+        gap: 0.3rem !important;
+        align-items: start !important;
     }
 
     .card {
         height: fit-content !important;
+        align-self: start !important;
     }
 }
 
-/* Two column layout for settings on ultrawide */
+/* Two column layout for settings on ultrawide - BETTER ALIGNMENT */
 @media (min-width: 2560px) {
     .control-panel {
         grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.4rem !important;
         max-width: none !important;
     }
 
     .dashboard-grid {
         grid-template-columns: 2fr 1fr !important;
+        gap: 0.5rem !important;
         max-width: 3200px !important;
     }
 }
 
-/* Three column layout for massive ultrawides (49" Odyssey, etc.) */
+/* Three column layout for massive ultrawides (49" Odyssey, etc.) - OPTIMIZED */
 @media (min-width: 3440px) {
     .control-panel {
         grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.4rem !important;
     }
 
     .dashboard-grid {
-        grid-template-columns: 2fr 1fr !important;
+        grid-template-columns: 2.5fr 1fr !important;
+        gap: 0.5rem !important;
         max-width: 4800px !important;
     }
 }
 
-/* Super ultrawide (5120px+) */
+/* Super ultrawide (5120px+) - MAXIMUM DENSITY */
 @media (min-width: 5120px) {
     .control-panel {
         grid-template-columns: repeat(5, 1fr) !important;
+        gap: 0.5rem !important;
     }
 
     .dashboard-grid {
         grid-template-columns: 3fr 2fr !important;
-        gap: 1rem !important;
+        gap: 0.75rem !important;
     }
 }
 

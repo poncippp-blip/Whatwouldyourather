@@ -181,8 +181,8 @@ class VideoGenerator {
 
         // NEW: Text styling (glow vs shadow/stroke)
         this.textStyle = {
-            useGlow: true,
-            useShadow: false,
+            useGlow: false,  // Glow disabled by default
+            useShadow: true, // Shadow enabled for better readability
             useStroke: true,
             shadowBlur: 15,
             shadowOffsetX: 3,
@@ -2290,11 +2290,11 @@ class VideoGenerator {
         const badgeY = 60;
         const centerX = this.width / 2;
 
-        // Background for badge with vibrant glow
+        // Background for badge (glow disabled)
         const badgeColor = this.getEngagementColor(engagementType);
         this.ctx.fillStyle = badgeColor;
-        this.ctx.shadowColor = badgeColor;
-        this.ctx.shadowBlur = 40;
+        this.ctx.shadowColor = 'transparent';
+        this.ctx.shadowBlur = 0;
         this.ctx.shadowOffsetY = 0;
 
         const padding = 30;
@@ -2381,12 +2381,9 @@ class VideoGenerator {
             const audioContext = new AudioContext();
             const audioDestination = audioContext.createMediaStreamDestination();
 
-            // Add music to mix
-            if (this.assets.music) {
-                const musicSource = audioContext.createMediaElementSource(this.assets.music);
-                musicSource.connect(audioDestination);
-                musicSource.connect(audioContext.destination); // Also play through speakers
-            }
+            // NOTE: Music is NOT included in export to prevent duration issues
+            // Background music duration was causing video to stop at music length instead of timeline duration
+            // Music will still play during preview, but not be exported to final video
 
             // Add question voices to mix
             for (const question of this.assets.questions) {
@@ -2456,12 +2453,8 @@ class VideoGenerator {
             this.startTime = Date.now();
             this.animate();
 
-            // Start all audio
-            if (this.assets.music) {
-                this.assets.music.loop = true;
-                this.assets.music.volume = this.musicVolume;
-                this.assets.music.play();
-            }
+            // NOTE: Music playback disabled during export to prevent duration issues
+            // The video export will only include voice audio, not background music
 
             // Schedule all audio events
             for (let i = 0; i < this.timeline.questions.length; i++) {
