@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WouldYouRather.ai - Video Generator SaaS</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/compact-overrides.css">
 </head>
 <body>
     <div class="app-container">
@@ -42,6 +43,43 @@
             <div class="dashboard-grid">
                 <!-- Control Panel -->
                 <div class="control-panel">
+                    <!-- Quick Actions - NEW -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Quick Actions</h3>
+                            <p class="card-description">Presets, shortcuts & quick tools</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- Presets -->
+                            <div class="form-group mb-md">
+                                <label class="form-label">Timing Presets</label>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem;">
+                                    <button class="btn btn-sm btn-secondary" onclick="videoGenerator.applyPreset('fast')">⚡ Fast</button>
+                                    <button class="btn btn-sm btn-primary" onclick="videoGenerator.applyPreset('balanced')">⚖️ Balanced</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="videoGenerator.applyPreset('cinematic')">🎬 Cinematic</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="videoGenerator.applyPreset('viral')">🔥 Viral</button>
+                                </div>
+                            </div>
+
+                            <!-- Quick Tools -->
+                            <div class="form-group mb-md">
+                                <label class="form-label">Quick Tools</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.shuffleQuestions()">🔀 Shuffle</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.copySettingsToClipboard()">📋 Copy Settings</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.pasteSettingsFromClipboard()">📥 Paste Settings</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.saveToFavorites(prompt('Enter name for this favorite:'))">⭐ Save Favorite</button>
+                                </div>
+                            </div>
+
+                            <!-- Keyboard Shortcuts Toggle -->
+                            <label class="checkbox-container mb-0">
+                                <input type="checkbox" id="keyboardShortcutsToggle" checked>
+                                <span class="checkbox-label">Enable Keyboard Shortcuts (Space, R, F, B, M, etc.)</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- API Configuration -->
                     <div class="card mb-lg">
                         <div class="card-header">

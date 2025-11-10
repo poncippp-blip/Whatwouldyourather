@@ -192,6 +192,40 @@ class VideoGenerator {
             strokeColor: '#000000'
         };
 
+        // NEW: 20+ Quality of Life Features
+        this.backgroundColor = '#0a0a0a';
+        this.useBackgroundGradient = false;
+        this.backgroundGradient = {
+            color1: '#0a0a0a',
+            color2: '#1a1a1a',
+            angle: 180
+        };
+        this.textFont = 'Arial';
+        this.imageBorder = {
+            enabled: false,
+            width: 4,
+            color: '#00d9ff'
+        };
+        this.watermark = {
+            enabled: false,
+            text: '',
+            position: 'bottom-right', // bottom-right, bottom-left, top-right, top-left
+            fontSize: 24,
+            color: '#ffffff',
+            opacity: 0.7
+        };
+        this.exportResolution = '1080p'; // 720p, 1080p, 4K
+        this.previewSpeed = 1.0; // 0.5x, 1x, 1.5x, 2x
+        this.performanceMode = false; // Lower quality for faster preview
+        this.compactMode = false; // Hide advanced settings
+        this.favorites = []; // Saved favorite configurations
+        this.recentHistory = []; // Last 10 video settings
+        this.maxHistoryItems = 10;
+        this.currentPreset = 'balanced'; // fast, balanced, cinematic, viral
+
+        // Keyboard shortcuts enabled
+        this.keyboardShortcutsEnabled = true;
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -513,6 +547,12 @@ class VideoGenerator {
             this.triggerAutoSave();
         });
 
+        // NEW: Keyboard shortcuts toggle
+        document.getElementById('keyboardShortcutsToggle')?.addEventListener('change', (e) => {
+            this.keyboardShortcutsEnabled = e.target.checked;
+            console.log(`⌨️ Keyboard shortcuts ${e.target.checked ? 'enabled' : 'disabled'}`);
+        });
+
         // NEW: Text animation
         document.getElementById('textAnimationEnabled')?.addEventListener('change', (e) => {
             this.textAnimation.enabled = e.target.checked;
@@ -596,6 +636,69 @@ class VideoGenerator {
             if (this.wasPlayingBeforeBlur && this.assets.questions.length > 0) {
                 this.play();
                 this.wasPlayingBeforeBlur = false;
+            }
+        });
+
+        // NEW: Keyboard shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (!this.keyboardShortcutsEnabled) return;
+
+            // Ignore if user is typing in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+            switch(e.key.toLowerCase()) {
+                case ' ': // Space - Play/Pause
+                    e.preventDefault();
+                    if (this.isPlaying) this.pause();
+                    else this.play();
+                    break;
+                case 'r': // R - Restart
+                    if (e.ctrlKey || e.metaKey) return; // Don't intercept Ctrl+R (reload)
+                    e.preventDefault();
+                    this.restart();
+                    break;
+                case 'f': // F - Frame forward
+                    e.preventDefault();
+                    this.frameNext();
+                    break;
+                case 'b': // B - Frame backward
+                    e.preventDefault();
+                    this.framePrevious();
+                    break;
+                case 'm': // M - Toggle mute
+                    e.preventDefault();
+                    this.toggleMute();
+                    break;
+                case 's': // S - Save config (Ctrl+S)
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.saveConfig();
+                    }
+                    break;
+                case 'g': // G - Generate video
+                    if (e.ctrlKey || e.metaKey) return;
+                    e.preventDefault();
+                    this.generateVideo();
+                    break;
+                case 'arrowleft': // Left arrow - Seek backward 5s
+                    e.preventDefault();
+                    this.seekTo(Math.max(0, this.currentTime - 5));
+                    break;
+                case 'arrowright': // Right arrow - Seek forward 5s
+                    e.preventDefault();
+                    this.seekTo(Math.min(this.timeline.totalDuration, this.currentTime + 5));
+                    break;
+                case 'k': // K - Toggle bookmark
+                    e.preventDefault();
+                    this.toggleBookmark();
+                    break;
+                case '0': case '1': case '2': case '3': case '4':
+                case '5': case '6': case '7': case '8': case '9':
+                    // Number keys - Jump to percentage (0=0%, 1=10%, ..., 9=90%)
+                    e.preventDefault();
+                    const percent = parseInt(e.key) * 10;
+                    this.seekTo((this.timeline.totalDuration * percent) / 100);
+                    break;
             }
         });
 
@@ -2703,6 +2806,229 @@ class VideoGenerator {
 
         const filterString = `brightness(${this.canvasFilters.brightness}%) contrast(${this.canvasFilters.contrast}%) saturate(${this.canvasFilters.saturation}%) blur(${this.canvasFilters.blur}px)`;
         canvas.style.filter = filterString;
+    }
+
+    // NEW: Preset System
+    applyPreset(presetName) {
+        this.currentPreset = presetName;
+
+        const presets = {
+            fast: {
+                questionDelay: 0.2,
+                voiceDelay: 0.2,
+                option1Delay: 0.1,
+                clockDuration: 2.0,
+                percentageDuration: 1.5,
+                swooshDuration: 0.7,
+                fadeInDuration: 0.3,
+                afterVoicePause: 0.2
+            },
+            balanced: {
+                questionDelay: 0.325,
+                voiceDelay: 0.325,
+                option1Delay: 0.13,
+                clockDuration: 2.7,
+                percentageDuration: 1.8,
+                swooshDuration: 0.9,
+                fadeInDuration: 0.45,
+                afterVoicePause: 0.325
+            },
+            cinematic: {
+                questionDelay: 0.6,
+                voiceDelay: 0.5,
+                option1Delay: 0.3,
+                clockDuration: 3.5,
+                percentageDuration: 2.5,
+                swooshDuration: 1.2,
+                fadeInDuration: 0.7,
+                afterVoicePause: 0.5
+            },
+            viral: {
+                questionDelay: 0.15,
+                voiceDelay: 0.15,
+                option1Delay: 0.08,
+                clockDuration: 1.8,
+                percentageDuration: 1.2,
+                swooshDuration: 0.5,
+                fadeInDuration: 0.25,
+                afterVoicePause: 0.15
+            }
+        };
+
+        const preset = presets[presetName];
+        if (!preset) return;
+
+        // Apply timing settings
+        Object.assign(this.timing, preset);
+
+        // Update UI sliders
+        Object.keys(preset).forEach(key => {
+            const element = document.getElementById(key);
+            const valueElement = document.getElementById(key + 'Value');
+            if (element && valueElement) {
+                element.value = preset[key];
+                valueElement.textContent = preset[key] + 's';
+            }
+        });
+
+        console.log(`✨ Applied preset: ${presetName}`);
+        alert(`Preset "${presetName}" applied successfully!`);
+        this.triggerAutoSave();
+    }
+
+    // NEW: Copy Settings to Clipboard
+    copySettingsToClipboard() {
+        const settings = {
+            timing: this.timing,
+            backgroundColor: this.backgroundColor,
+            textFont: this.textFont,
+            customColors: this.customColors,
+            textAnimation: this.textAnimation,
+            textStyle: this.textStyle,
+            canvasFilters: this.canvasFilters,
+            watermark: this.watermark
+        };
+
+        const json = JSON.stringify(settings, null, 2);
+        navigator.clipboard.writeText(json).then(() => {
+            console.log('✅ Settings copied to clipboard');
+            this.showToast('Settings copied to clipboard!', 'success');
+        }).catch(err => {
+            console.error('❌ Failed to copy settings:', err);
+            this.showToast('Failed to copy settings', 'error');
+        });
+    }
+
+    // NEW: Paste Settings from Clipboard
+    async pasteSettingsFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            const settings = JSON.parse(text);
+
+            // Apply settings
+            if (settings.timing) Object.assign(this.timing, settings.timing);
+            if (settings.backgroundColor) this.backgroundColor = settings.backgroundColor;
+            if (settings.textFont) this.textFont = settings.textFont;
+            if (settings.customColors) Object.assign(this.customColors, settings.customColors);
+            if (settings.textAnimation) Object.assign(this.textAnimation, settings.textAnimation);
+            if (settings.textStyle) Object.assign(this.textStyle, settings.textStyle);
+            if (settings.canvasFilters) Object.assign(this.canvasFilters, settings.canvasFilters);
+            if (settings.watermark) Object.assign(this.watermark, settings.watermark);
+
+            // Update UI to reflect pasted settings
+            this.updateUIFromSettings();
+
+            console.log('✅ Settings pasted from clipboard');
+            this.showToast('Settings pasted successfully!', 'success');
+            this.triggerAutoSave();
+        } catch (err) {
+            console.error('❌ Failed to paste settings:', err);
+            this.showToast('Failed to paste settings. Make sure clipboard contains valid settings.', 'error');
+        }
+    }
+
+    // NEW: Update UI from current settings
+    updateUIFromSettings() {
+        // Update timing sliders
+        Object.keys(this.timing).forEach(key => {
+            const element = document.getElementById(key);
+            const valueElement = document.getElementById(key + 'Value');
+            if (element && valueElement) {
+                element.value = this.timing[key];
+                valueElement.textContent = this.timing[key] + (key.includes('Percent') ? '%' : 's');
+            }
+        });
+
+        // Update canvas filters
+        this.applyCanvasFilters();
+    }
+
+    // NEW: Show Toast Notification
+    showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: ${type === 'success' ? '#00ff88' : type === 'error' ? '#ff4466' : '#00d9ff'};
+            color: #000;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideInUp 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.9);
+        `;
+
+        document.body.appendChild(toast);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOutDown 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // NEW: Save to Favorites
+    saveToFavorites(name) {
+        const favorite = {
+            name: name || `Favorite ${this.favorites.length + 1}`,
+            timestamp: Date.now(),
+            settings: {
+                timing: { ...this.timing },
+                backgroundColor: this.backgroundColor,
+                textFont: this.textFont,
+                customColors: { ...this.customColors },
+                textAnimation: { ...this.textAnimation },
+                textStyle: { ...this.textStyle },
+                watermark: { ...this.watermark },
+                questionCount: this.questionCount
+            }
+        };
+
+        this.favorites.push(favorite);
+        localStorage.setItem('favorites', JSON.stringify(this.favorites));
+        this.showToast(`Saved to favorites: ${favorite.name}`, 'success');
+        console.log('✅ Saved to favorites:', favorite);
+    }
+
+    // NEW: Load from Favorites
+    loadFromFavorites(index) {
+        if (index < 0 || index >= this.favorites.length) return;
+
+        const favorite = this.favorites[index];
+        const settings = favorite.settings;
+
+        // Apply all settings
+        if (settings.timing) Object.assign(this.timing, settings.timing);
+        if (settings.backgroundColor) this.backgroundColor = settings.backgroundColor;
+        if (settings.textFont) this.textFont = settings.textFont;
+        if (settings.customColors) Object.assign(this.customColors, settings.customColors);
+        if (settings.textAnimation) Object.assign(this.textAnimation, settings.textAnimation);
+        if (settings.textStyle) Object.assign(this.textStyle, settings.textStyle);
+        if (settings.watermark) Object.assign(this.watermark, settings.watermark);
+        if (settings.questionCount) this.questionCount = settings.questionCount;
+
+        this.updateUIFromSettings();
+        this.showToast(`Loaded: ${favorite.name}`, 'success');
+        console.log('✅ Loaded favorite:', favorite);
+    }
+
+    // NEW: Shuffle Questions (regenerate with same settings)
+    async shuffleQuestions() {
+        if (this.assets.questions.length === 0) {
+            alert('Generate a video first before shuffling!');
+            return;
+        }
+
+        console.log('🔀 Shuffling questions...');
+        this.showToast('Shuffling questions...', 'info');
+
+        // Re-generate with same settings but different random prompts
+        await this.generateVideo();
     }
 
     // Frame Navigation

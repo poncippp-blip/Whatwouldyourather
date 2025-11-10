@@ -1,0 +1,266 @@
+/* Compact UI Overrides for 49" Ultrawide - Ultra-tight spacing */
+
+/* Reduce all spacing dramatically */
+.app-header {
+    padding: 0.5rem 1rem !important;
+}
+
+.header-content {
+    max-width: 3200px !important;
+    gap: 0.5rem !important;
+}
+
+.brand {
+    gap: 0.5rem !important;
+}
+
+.brand-logo {
+    font-size: 1.5rem !important;
+}
+
+.brand-title {
+    font-size: 1.25rem !important;
+}
+
+.brand-tagline {
+    font-size: 0.7rem !important;
+}
+
+/* Main content ultra-compact */
+.main-layout {
+    max-width: 3200px !important;
+    padding: 0.5rem 1rem !important;
+    gap: 0.75rem !important;
+}
+
+/* Sidebar ultra-compact */
+.settings-sidebar {
+    width: 340px !important;
+    gap: 0.5rem !important;
+    max-height: calc(100vh - 80px) !important;
+    overflow-y: auto !important;
+}
+
+/* Card spacing ultra-compact */
+.card {
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0.4rem !important;
+}
+
+.card-header {
+    padding: 0.4rem 0.5rem !important;
+    gap: 0.25rem !important;
+}
+
+.card-title {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+}
+
+.card-description {
+    font-size: 0.7rem !important;
+    margin-top: 0.1rem !important;
+}
+
+.card-body {
+    padding: 0.5rem 0.5rem !important;
+}
+
+/* Form elements ultra-compact */
+.form-group {
+    margin-bottom: 0.4rem !important;
+}
+
+.form-label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.2rem !important;
+}
+
+.form-hint {
+    font-size: 0.65rem !important;
+    margin-top: 0.15rem !important;
+}
+
+.form-input, .form-select {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.8rem !important;
+}
+
+/* Buttons ultra-compact */
+.btn {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.8rem !important;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.7rem !important;
+}
+
+.btn-lg {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+}
+
+/* Slider groups ultra-compact */
+.slider-group {
+    margin-bottom: 0.4rem !important;
+}
+
+.slider-header {
+    margin-bottom: 0.2rem !important;
+}
+
+.slider-value {
+    font-size: 0.75rem !important;
+}
+
+/* Controls ultra-compact */
+.controls {
+    gap: 0.4rem !important;
+    padding: 0.5rem !important;
+}
+
+.control-group {
+    gap: 0.3rem !important;
+}
+
+/* Filter grid ultra-compact */
+.filter-grid {
+    gap: 0.4rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+}
+
+.filter-item {
+    gap: 0.25rem !important;
+    padding: 0.4rem !important;
+}
+
+/* Color pickers ultra-compact */
+.color-picker-group {
+    gap: 0.4rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+}
+
+.color-picker-item {
+    gap: 0.25rem !important;
+}
+
+.color-picker-input {
+    width: 100% !important;
+    height: 32px !important;
+}
+
+/* Timeline ultra-compact */
+.timeline-container {
+    padding: 0.4rem !important;
+    gap: 0.3rem !important;
+}
+
+/* Checkbox containers ultra-compact */
+.checkbox-container {
+    padding: 0.3rem 0 !important;
+    gap: 0.4rem !important;
+}
+
+.checkbox-label {
+    font-size: 0.8rem !important;
+}
+
+/* Engagement cards ultra-compact */
+.engagement-card {
+    padding: 0.5rem !important;
+    gap: 0.4rem !important;
+}
+
+/* Radio group ultra-compact */
+.radio-group {
+    gap: 0.5rem !important;
+}
+
+.radio-label {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* Stats ultra-compact */
+.stats-grid {
+    gap: 0.4rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+}
+
+.stat-card {
+    padding: 0.4rem 0.5rem !important;
+    gap: 0.2rem !important;
+}
+
+.stat-value {
+    font-size: 1.2rem !important;
+}
+
+.stat-label {
+    font-size: 0.65rem !important;
+}
+
+/* Content area - wider for ultrawide */
+.content-area {
+    flex: 1 !important;
+    min-width: 800px !important;
+}
+
+/* Preview canvas compact */
+.canvas-wrapper {
+    border-radius: 8px !important;
+}
+
+/* Utility spacing classes ultra-compact */
+.mb-sm { margin-bottom: 0.25rem !important; }
+.mb-md { margin-bottom: 0.4rem !important; }
+.mb-lg { margin-bottom: 0.6rem !important; }
+.mt-sm { margin-top: 0.25rem !important; }
+.mt-md { margin-top: 0.4rem !important; }
+.mt-lg { margin-top: 0.6rem !important; }
+.p-sm { padding: 0.25rem !important; }
+.p-md { padding: 0.4rem !important; }
+.p-lg { padding: 0.6rem !important; }
+
+/* Two column layout for settings on ultrawide */
+@media (min-width: 2560px) {
+    .settings-sidebar {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.5rem !important;
+        width: auto !important;
+        max-width: 900px !important;
+    }
+
+    .card {
+        height: fit-content !important;
+    }
+}
+
+/* Three column layout for massive ultrawides */
+@media (min-width: 3440px) {
+    .settings-sidebar {
+        grid-template-columns: 1fr 1fr 1fr !important;
+        max-width: 1350px !important;
+    }
+}
+
+/* Scrollbar styling for compact view */
+.settings-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.settings-sidebar::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+.settings-sidebar::-webkit-scrollbar-thumb {
+    background: var(--surface-matte);
+    border-radius: 3px;
+}
+
+.settings-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--surface-hover);
+}
