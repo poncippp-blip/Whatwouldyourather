@@ -1,9 +1,9 @@
 // Main Video Generator Class - Refactored for SaaS
 class VideoGenerator {
     constructor() {
-        // API Keys
-        this.unsplashKey = '';
-        this.elevenlabsKey = '';
+        // API Keys - DEFAULT VALUES
+        this.unsplashKey = 'B5K8dASmtv-P2uJNn7zNSmuxhgdHrAw3dwALvuSn1i0';
+        this.elevenlabsKey = 'sk_9295844b74284aae4eed3ecf03eb41ddead9e78de1b8a785';
 
         // Managers
         this.promptManager = new PromptManager();
@@ -98,12 +98,12 @@ class VideoGenerator {
         // Volume control
         this.musicVolumeSlider = document.getElementById('musicVolume');
         this.volumeValueDisplay = document.getElementById('volumeValue');
-        this.musicVolume = 0.3; // Default 30%
+        this.musicVolume = 0.15; // Default 15%
 
         // Question count
         this.questionCountSlider = document.getElementById('questionCount');
         this.questionCountValue = document.getElementById('questionCountValue');
-        this.questionCount = 3; // Default 3 questions
+        this.questionCount = 7; // Default 7 questions
 
         // Advanced timing controls
         this.advancedTimingBtn = document.getElementById('advancedTimingBtn');
@@ -149,14 +149,14 @@ class VideoGenerator {
         this.canvasFilters = {
             brightness: 100,
             contrast: 100,
-            saturation: 100,
+            saturation: 142,
             blur: 0
         };
         this.customColors = {
-            text: '#00d4ff',
-            glow: '#00d4ff',
-            percentageWin: '#00ff88',
-            percentageLose: '#ff3366'
+            text: '#ffffff',
+            glow: '#ffffff',
+            percentageWin: '#11ff00',
+            percentageLose: '#ff0040'
         };
         this.animationEasing = {
             slide: 'ease',
@@ -170,12 +170,12 @@ class VideoGenerator {
         this.maxHistorySize = 50;
 
         // NEW: Food-only mode (500+ delicious food prompts)
-        this.foodOnlyMode = false;
+        this.foodOnlyMode = true;
 
         // NEW: Text animation settings
         this.textAnimation = {
             enabled: true,
-            type: 'bounce',  // bounce, fade, slide, scale, none
+            type: 'slide',  // bounce, fade, slide, scale, none
             intensity: 1.0
         };
 
@@ -757,7 +757,27 @@ class VideoGenerator {
     }
 
     loadAPIKeys() {
-        // Load from config file first
+        // Load from localStorage first
+        const savedUnsplash = localStorage.getItem('unsplashApiKey');
+        const savedElevenlabs = localStorage.getItem('elevenlabsApiKey');
+
+        if (savedUnsplash) {
+            this.unsplashKey = savedUnsplash;
+            this.unsplashKeyInput.value = savedUnsplash;
+        } else {
+            // Set default API keys if none saved
+            this.unsplashKeyInput.value = this.unsplashKey;
+        }
+
+        if (savedElevenlabs) {
+            this.elevenlabsKey = savedElevenlabs;
+            this.elevenlabsKeyInput.value = savedElevenlabs;
+        } else {
+            // Set default API keys if none saved
+            this.elevenlabsKeyInput.value = this.elevenlabsKey;
+        }
+
+        // Load from config file (can override)
         if (typeof CONFIG !== 'undefined') {
             if (CONFIG.unsplashAccessKey && CONFIG.unsplashAccessKey !== 'YOUR_ACCESS_KEY_HERE') {
                 this.unsplashKey = CONFIG.unsplashAccessKey;
@@ -767,20 +787,6 @@ class VideoGenerator {
                 this.elevenlabsKey = CONFIG.elevenlabsApiKey;
                 this.elevenlabsKeyInput.value = this.elevenlabsKey;
             }
-        }
-
-        // Load from localStorage
-        const savedUnsplash = localStorage.getItem('unsplashApiKey');
-        const savedElevenlabs = localStorage.getItem('elevenlabsApiKey');
-
-        if (savedUnsplash) {
-            this.unsplashKey = savedUnsplash;
-            this.unsplashKeyInput.value = savedUnsplash;
-        }
-
-        if (savedElevenlabs) {
-            this.elevenlabsKey = savedElevenlabs;
-            this.elevenlabsKeyInput.value = savedElevenlabs;
         }
     }
 
@@ -2722,9 +2728,102 @@ class VideoGenerator {
         localStorage.setItem('wouldYouRatherSettings', JSON.stringify(settings));
     }
 
+    setDefaultUIValues() {
+        // Set voice selection to Adam (pNInz6obpgDQGcFmaJgB)
+        if (this.voiceSelect) {
+            this.voiceSelect.value = 'pNInz6obpgDQGcFmaJgB';
+        }
+
+        // Set music volume slider
+        if (this.musicVolumeSlider) {
+            this.musicVolumeSlider.value = 15;
+            if (this.volumeValueDisplay) {
+                this.volumeValueDisplay.textContent = '15%';
+            }
+        }
+
+        // Set question count
+        if (this.questionCountSlider) {
+            this.questionCountSlider.value = 7;
+            if (this.questionCountValue) {
+                this.questionCountValue.textContent = '7';
+            }
+        }
+
+        // Set engagement settings
+        // Comment engagement - ENABLED by default
+        if (this.commentEngagementCB) this.commentEngagementCB.checked = true;
+        if (this.commentOption1) this.commentOption1.value = "Comment 'I love God'";
+        if (this.commentOption2) this.commentOption2.value = "Reject the offer";
+        if (this.commentInsertAfter) this.commentInsertAfter.value = "2";
+
+        // Share engagement - ENABLED by default
+        if (this.shareEngagementCB) this.shareEngagementCB.checked = true;
+        if (this.shareOption1) this.shareOption1.value = "Always be alone";
+        if (this.shareOption2) this.shareOption2.value = "Marry the 3rd person who clicks share and more";
+        if (this.shareInsertAfter) this.shareInsertAfter.value = "4";
+
+        // Follow engagement - DISABLED by default
+        if (this.followEngagementCB) this.followEngagementCB.checked = false;
+
+        // Like engagement - DISABLED by default
+        if (this.likeEngagementCB) this.likeEngagementCB.checked = false;
+
+        // Set food-only mode checkbox
+        const foodOnlyCheckbox = document.getElementById('foodOnlyMode');
+        if (foodOnlyCheckbox) foodOnlyCheckbox.checked = true;
+
+        // Set text animation settings
+        const textAnimationEnabled = document.getElementById('textAnimationEnabled');
+        if (textAnimationEnabled) textAnimationEnabled.checked = true;
+
+        const textAnimationType = document.getElementById('textAnimationType');
+        if (textAnimationType) textAnimationType.value = 'slide';
+
+        // Set text styling
+        const textUseGlow = document.getElementById('textUseGlow');
+        if (textUseGlow) textUseGlow.checked = false;
+
+        const textUseShadow = document.getElementById('textUseShadow');
+        if (textUseShadow) textUseShadow.checked = true;
+
+        const textUseStroke = document.getElementById('textUseStroke');
+        if (textUseStroke) textUseStroke.checked = true;
+
+        // Set custom colors
+        const textColor = document.getElementById('textColor');
+        if (textColor) textColor.value = '#ffffff';
+
+        const glowColor = document.getElementById('glowColor');
+        if (glowColor) glowColor.value = '#ffffff';
+
+        const percentWinColor = document.getElementById('percentageWinColor');
+        if (percentWinColor) percentWinColor.value = '#11ff00';
+
+        const percentLoseColor = document.getElementById('percentageLoseColor');
+        if (percentLoseColor) percentLoseColor.value = '#ff0040';
+
+        // Set canvas filters
+        const saturationSlider = document.getElementById('saturationSlider');
+        if (saturationSlider) {
+            saturationSlider.value = 142;
+            const saturationValue = document.getElementById('saturationValue');
+            if (saturationValue) saturationValue.textContent = '142%';
+        }
+
+        // Apply canvas filters
+        this.applyCanvasFilters();
+
+        console.log('✅ Set default UI values (no saved settings found)');
+    }
+
     loadEnhancedSettings() {
         const saved = localStorage.getItem('wouldYouRatherSettings');
-        if (!saved) return;
+        if (!saved) {
+            // Set default UI values when no saved settings exist
+            this.setDefaultUIValues();
+            return;
+        }
 
         try {
             const settings = JSON.parse(saved);
