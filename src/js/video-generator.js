@@ -169,6 +169,29 @@ class VideoGenerator {
         this.historyIndex = -1;
         this.maxHistorySize = 50;
 
+        // NEW: Food-only mode (500+ delicious food prompts)
+        this.foodOnlyMode = false;
+
+        // NEW: Text animation settings
+        this.textAnimation = {
+            enabled: true,
+            type: 'bounce',  // bounce, fade, slide, scale, none
+            intensity: 1.0
+        };
+
+        // NEW: Text styling (glow vs shadow/stroke)
+        this.textStyle = {
+            useGlow: true,
+            useShadow: false,
+            useStroke: true,
+            shadowBlur: 15,
+            shadowOffsetX: 3,
+            shadowOffsetY: 3,
+            shadowColor: '#000000',
+            strokeWidth: 8,
+            strokeColor: '#000000'
+        };
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -484,6 +507,84 @@ class VideoGenerator {
             this.autoPauseOnBlur = e.target.checked;
         });
 
+        // NEW: Food-only mode
+        document.getElementById('foodOnlyMode')?.addEventListener('change', (e) => {
+            this.foodOnlyMode = e.target.checked;
+            this.triggerAutoSave();
+        });
+
+        // NEW: Text animation
+        document.getElementById('textAnimationEnabled')?.addEventListener('change', (e) => {
+            this.textAnimation.enabled = e.target.checked;
+            this.triggerAutoSave();
+        });
+
+        document.getElementById('textAnimationType')?.addEventListener('change', (e) => {
+            this.textAnimation.type = e.target.value;
+            this.triggerAutoSave();
+        });
+
+        this.setupSlider('textAnimationIntensity', 'textAnimationIntensityValue', (value) => {
+            this.textAnimation.intensity = parseFloat(value);
+            this.triggerAutoSave();
+        }, '', 1);
+
+        // NEW: Text styling
+        document.getElementById('textUseGlow')?.addEventListener('change', (e) => {
+            this.textStyle.useGlow = e.target.checked;
+            this.triggerAutoSave();
+        });
+
+        document.getElementById('textUseShadow')?.addEventListener('change', (e) => {
+            this.textStyle.useShadow = e.target.checked;
+            const shadowSettings = document.getElementById('shadowSettings');
+            if (shadowSettings) {
+                shadowSettings.style.display = e.target.checked ? 'block' : 'none';
+            }
+            this.triggerAutoSave();
+        });
+
+        document.getElementById('textUseStroke')?.addEventListener('change', (e) => {
+            this.textStyle.useStroke = e.target.checked;
+            const strokeSettings = document.getElementById('strokeSettings');
+            if (strokeSettings) {
+                strokeSettings.style.display = e.target.checked ? 'block' : 'none';
+            }
+            this.triggerAutoSave();
+        });
+
+        // Shadow settings
+        this.setupSlider('textShadowBlur', 'textShadowBlurValue', (value) => {
+            this.textStyle.shadowBlur = parseInt(value);
+            this.triggerAutoSave();
+        }, 'px');
+
+        this.setupSlider('textShadowOffsetX', 'textShadowOffsetXValue', (value) => {
+            this.textStyle.shadowOffsetX = parseInt(value);
+            this.triggerAutoSave();
+        }, 'px');
+
+        this.setupSlider('textShadowOffsetY', 'textShadowOffsetYValue', (value) => {
+            this.textStyle.shadowOffsetY = parseInt(value);
+            this.triggerAutoSave();
+        }, 'px');
+
+        document.getElementById('textShadowColor')?.addEventListener('change', (e) => {
+            this.textStyle.shadowColor = e.target.value;
+            this.triggerAutoSave();
+        });
+
+        // Stroke settings
+        this.setupSlider('textStrokeWidth', 'textStrokeWidthValue', (value) => {
+            this.textStyle.strokeWidth = parseInt(value);
+            this.triggerAutoSave();
+        }, 'px');
+
+        document.getElementById('textStrokeColor')?.addEventListener('change', (e) => {
+            this.textStyle.strokeColor = e.target.value;
+            this.triggerAutoSave();
+        });
+
         window.addEventListener('blur', () => {
             if (this.autoPauseOnBlur && this.isPlaying) {
                 this.pause();
@@ -618,7 +719,12 @@ class VideoGenerator {
                 option1: this.customOption1.value.trim(),
                 option2: this.customOption2.value.trim()
             },
-            imageShadow: { ...this.imageShadow }
+            imageShadow: { ...this.imageShadow },
+            foodOnlyMode: this.foodOnlyMode,
+            textAnimation: { ...this.textAnimation },
+            textStyle: { ...this.textStyle },
+            customColors: { ...this.customColors },
+            canvasFilters: { ...this.canvasFilters }
         };
 
         // Convert to JSON and download
@@ -804,6 +910,165 @@ class VideoGenerator {
                 }
             }
 
+            // Load food-only mode
+            if (config.foodOnlyMode !== undefined) {
+                this.foodOnlyMode = config.foodOnlyMode;
+                const foodOnlyModeCheckbox = document.getElementById('foodOnlyMode');
+                if (foodOnlyModeCheckbox) {
+                    foodOnlyModeCheckbox.checked = config.foodOnlyMode;
+                }
+            }
+
+            // Load text animation settings
+            if (config.textAnimation) {
+                this.textAnimation = { ...this.textAnimation, ...config.textAnimation };
+
+                const textAnimationEnabled = document.getElementById('textAnimationEnabled');
+                const textAnimationType = document.getElementById('textAnimationType');
+                const textAnimationIntensity = document.getElementById('textAnimationIntensity');
+                const textAnimationIntensityValue = document.getElementById('textAnimationIntensityValue');
+
+                if (textAnimationEnabled && config.textAnimation.enabled !== undefined) {
+                    textAnimationEnabled.checked = config.textAnimation.enabled;
+                }
+                if (textAnimationType && config.textAnimation.type) {
+                    textAnimationType.value = config.textAnimation.type;
+                }
+                if (textAnimationIntensity && textAnimationIntensityValue && config.textAnimation.intensity !== undefined) {
+                    textAnimationIntensity.value = config.textAnimation.intensity;
+                    textAnimationIntensityValue.textContent = config.textAnimation.intensity.toFixed(1);
+                }
+            }
+
+            // Load text styling settings
+            if (config.textStyle) {
+                this.textStyle = { ...this.textStyle, ...config.textStyle };
+
+                const textUseGlow = document.getElementById('textUseGlow');
+                const textUseShadow = document.getElementById('textUseShadow');
+                const textUseStroke = document.getElementById('textUseStroke');
+                const shadowSettings = document.getElementById('shadowSettings');
+                const strokeSettings = document.getElementById('strokeSettings');
+
+                if (textUseGlow && config.textStyle.useGlow !== undefined) {
+                    textUseGlow.checked = config.textStyle.useGlow;
+                }
+                if (textUseShadow && config.textStyle.useShadow !== undefined) {
+                    textUseShadow.checked = config.textStyle.useShadow;
+                    if (shadowSettings) {
+                        shadowSettings.style.display = config.textStyle.useShadow ? 'block' : 'none';
+                    }
+                }
+                if (textUseStroke && config.textStyle.useStroke !== undefined) {
+                    textUseStroke.checked = config.textStyle.useStroke;
+                    if (strokeSettings) {
+                        strokeSettings.style.display = config.textStyle.useStroke ? 'block' : 'none';
+                    }
+                }
+
+                // Shadow settings
+                if (config.textStyle.shadowBlur !== undefined) {
+                    const textShadowBlur = document.getElementById('textShadowBlur');
+                    const textShadowBlurValue = document.getElementById('textShadowBlurValue');
+                    if (textShadowBlur && textShadowBlurValue) {
+                        textShadowBlur.value = config.textStyle.shadowBlur;
+                        textShadowBlurValue.textContent = `${config.textStyle.shadowBlur}px`;
+                    }
+                }
+                if (config.textStyle.shadowOffsetX !== undefined) {
+                    const textShadowOffsetX = document.getElementById('textShadowOffsetX');
+                    const textShadowOffsetXValue = document.getElementById('textShadowOffsetXValue');
+                    if (textShadowOffsetX && textShadowOffsetXValue) {
+                        textShadowOffsetX.value = config.textStyle.shadowOffsetX;
+                        textShadowOffsetXValue.textContent = `${config.textStyle.shadowOffsetX}px`;
+                    }
+                }
+                if (config.textStyle.shadowOffsetY !== undefined) {
+                    const textShadowOffsetY = document.getElementById('textShadowOffsetY');
+                    const textShadowOffsetYValue = document.getElementById('textShadowOffsetYValue');
+                    if (textShadowOffsetY && textShadowOffsetYValue) {
+                        textShadowOffsetY.value = config.textStyle.shadowOffsetY;
+                        textShadowOffsetYValue.textContent = `${config.textStyle.shadowOffsetY}px`;
+                    }
+                }
+                if (config.textStyle.shadowColor) {
+                    const textShadowColor = document.getElementById('textShadowColor');
+                    if (textShadowColor) {
+                        textShadowColor.value = config.textStyle.shadowColor;
+                    }
+                }
+
+                // Stroke settings
+                if (config.textStyle.strokeWidth !== undefined) {
+                    const textStrokeWidth = document.getElementById('textStrokeWidth');
+                    const textStrokeWidthValue = document.getElementById('textStrokeWidthValue');
+                    if (textStrokeWidth && textStrokeWidthValue) {
+                        textStrokeWidth.value = config.textStyle.strokeWidth;
+                        textStrokeWidthValue.textContent = `${config.textStyle.strokeWidth}px`;
+                    }
+                }
+                if (config.textStyle.strokeColor) {
+                    const textStrokeColor = document.getElementById('textStrokeColor');
+                    if (textStrokeColor) {
+                        textStrokeColor.value = config.textStyle.strokeColor;
+                    }
+                }
+            }
+
+            // Load custom colors
+            if (config.customColors) {
+                this.customColors = { ...this.customColors, ...config.customColors };
+
+                const textColor = document.getElementById('textColor');
+                const glowColor = document.getElementById('glowColor');
+                const percentageWinColor = document.getElementById('percentageWinColor');
+                const percentageLoseColor = document.getElementById('percentageLoseColor');
+
+                if (textColor && config.customColors.text) textColor.value = config.customColors.text;
+                if (glowColor && config.customColors.glow) glowColor.value = config.customColors.glow;
+                if (percentageWinColor && config.customColors.percentageWin) percentageWinColor.value = config.customColors.percentageWin;
+                if (percentageLoseColor && config.customColors.percentageLose) percentageLoseColor.value = config.customColors.percentageLose;
+            }
+
+            // Load canvas filters
+            if (config.canvasFilters) {
+                this.canvasFilters = { ...this.canvasFilters, ...config.canvasFilters };
+                this.applyCanvasFilters();
+
+                if (config.canvasFilters.brightness !== undefined) {
+                    const filterBrightness = document.getElementById('filterBrightness');
+                    const filterBrightnessValue = document.getElementById('filterBrightnessValue');
+                    if (filterBrightness && filterBrightnessValue) {
+                        filterBrightness.value = config.canvasFilters.brightness;
+                        filterBrightnessValue.textContent = `${config.canvasFilters.brightness}%`;
+                    }
+                }
+                if (config.canvasFilters.contrast !== undefined) {
+                    const filterContrast = document.getElementById('filterContrast');
+                    const filterContrastValue = document.getElementById('filterContrastValue');
+                    if (filterContrast && filterContrastValue) {
+                        filterContrast.value = config.canvasFilters.contrast;
+                        filterContrastValue.textContent = `${config.canvasFilters.contrast}%`;
+                    }
+                }
+                if (config.canvasFilters.saturation !== undefined) {
+                    const filterSaturation = document.getElementById('filterSaturation');
+                    const filterSaturationValue = document.getElementById('filterSaturationValue');
+                    if (filterSaturation && filterSaturationValue) {
+                        filterSaturation.value = config.canvasFilters.saturation;
+                        filterSaturationValue.textContent = `${config.canvasFilters.saturation}%`;
+                    }
+                }
+                if (config.canvasFilters.blur !== undefined) {
+                    const filterBlur = document.getElementById('filterBlur');
+                    const filterBlurValue = document.getElementById('filterBlurValue');
+                    if (filterBlur && filterBlurValue) {
+                        filterBlur.value = config.canvasFilters.blur;
+                        filterBlurValue.textContent = `${config.canvasFilters.blur}px`;
+                    }
+                }
+            }
+
             console.log('✅ Configuration loaded successfully!');
             alert('Configuration loaded successfully!');
 
@@ -866,13 +1131,13 @@ class VideoGenerator {
                 }
 
                 // Get random prompts + the custom one
-                const randomPrompts = this.promptManager.getRandomPrompts(this.questionCount - 1);
+                const randomPrompts = this.promptManager.getRandomPrompts(this.questionCount - 1, this.foodOnlyMode);
                 regularQuestions = [
                     { option1: opt1, option2: opt2 },
                     ...randomPrompts
                 ];
             } else {
-                regularQuestions = this.promptManager.getRandomPrompts(this.questionCount);
+                regularQuestions = this.promptManager.getRandomPrompts(this.questionCount, this.foodOnlyMode);
             }
 
             // Collect enabled engagement questions
@@ -1724,13 +1989,68 @@ class VideoGenerator {
 
         const textY = y + imageSize + 80;
 
-        // Add vibrant glow to option text (using custom colors)
+        // NEW: Apply text animation
         this.ctx.save();
-        this.ctx.shadowColor = this.customColors.glow;
-        this.ctx.shadowBlur = 25;
+        if (this.textAnimation.enabled && progress < 1) {
+            const animProgress = progress * this.textAnimation.intensity;
 
-        // Use wrapped text with max width of 950px and line height of 85px
-        this.drawStrokedTextWrapped(text, this.width / 2, textY, 'bold 70px Arial', this.customColors.text, '#000', 8, 950, 85);
+            switch (this.textAnimation.type) {
+                case 'bounce':
+                    // Bounce effect - text bounces in from above
+                    const bounceOffset = Math.sin((1 - animProgress) * Math.PI) * 50 * this.textAnimation.intensity;
+                    this.ctx.translate(0, -bounceOffset);
+                    break;
+
+                case 'scale':
+                    // Scale effect - text grows from small to normal
+                    const scale = 0.5 + (animProgress * 0.5);
+                    this.ctx.translate(this.width / 2, textY);
+                    this.ctx.scale(scale, scale);
+                    this.ctx.translate(-this.width / 2, -textY);
+                    break;
+
+                case 'fade':
+                    // Fade effect - text fades in (already handled by globalAlpha)
+                    break;
+
+                case 'slide':
+                    // Slide effect - text slides from side (already handled above)
+                    break;
+            }
+        }
+
+        // NEW: Apply text styling (glow vs shadow/stroke)
+        this.ctx.save();
+
+        // Apply glow if enabled
+        if (this.textStyle.useGlow) {
+            this.ctx.shadowColor = this.customColors.glow;
+            this.ctx.shadowBlur = 25;
+        }
+
+        // Apply shadow if enabled
+        if (this.textStyle.useShadow) {
+            this.ctx.shadowColor = this.textStyle.shadowColor;
+            this.ctx.shadowBlur = this.textStyle.shadowBlur;
+            this.ctx.shadowOffsetX = this.textStyle.shadowOffsetX;
+            this.ctx.shadowOffsetY = this.textStyle.shadowOffsetY;
+        }
+
+        // Use wrapped text with stroke settings
+        const strokeWidth = this.textStyle.useStroke ? this.textStyle.strokeWidth : 0;
+        const strokeColor = this.textStyle.useStroke ? this.textStyle.strokeColor : '#000';
+
+        this.drawStrokedTextWrapped(
+            text,
+            this.width / 2,
+            textY,
+            'bold 70px Arial',
+            this.customColors.text,
+            strokeColor,
+            strokeWidth,
+            950,
+            85
+        );
 
         this.ctx.restore();
 
@@ -1738,10 +2058,20 @@ class VideoGenerator {
             const color = percentage >= 50 ? this.customColors.percentageWin : this.customColors.percentageLose;
             const percentY = textY + 100;
 
-            // Add glow effect for percentages
+            // Apply percentage styling
             this.ctx.save();
-            this.ctx.shadowColor = color;
-            this.ctx.shadowBlur = 30;
+
+            if (this.textStyle.useGlow) {
+                this.ctx.shadowColor = color;
+                this.ctx.shadowBlur = 30;
+            }
+
+            if (this.textStyle.useShadow) {
+                this.ctx.shadowColor = this.textStyle.shadowColor;
+                this.ctx.shadowBlur = this.textStyle.shadowBlur;
+                this.ctx.shadowOffsetX = this.textStyle.shadowOffsetX;
+                this.ctx.shadowOffsetY = this.textStyle.shadowOffsetY;
+            }
 
             this.drawStrokedText(
                 `${percentage}%`,
@@ -1749,14 +2079,15 @@ class VideoGenerator {
                 percentY,
                 'bold 90px Arial',
                 color,
-                '#000',
-                10
+                strokeColor,
+                strokeWidth
             );
 
             this.ctx.restore();
         }
 
-        this.ctx.restore();
+        this.ctx.restore(); // Restore animation transform
+        this.ctx.restore(); // Restore slide transform
     }
 
     drawRoundedImage(image, x, y, width, height, radius) {

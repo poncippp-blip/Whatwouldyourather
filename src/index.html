@@ -418,6 +418,137 @@
                         </div>
                     </div>
 
+                    <!-- Food Only Mode -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">🍕 Food Only Mode</h3>
+                            <p class="card-description">Use 500+ delicious food prompts only</p>
+                        </div>
+                        <div class="card-body">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="foodOnlyMode">
+                                <span class="checkbox-label">Enable Food Only Mode (500+ Food Prompts)</span>
+                            </label>
+                            <p class="form-hint" style="margin-top: 0.5rem;">When enabled, all questions will be about delicious foods, drinks, and meals</p>
+                        </div>
+                    </div>
+
+                    <!-- Text Animation -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">✨ Text Animation</h3>
+                            <p class="card-description">Animate text appearance</p>
+                        </div>
+                        <div class="card-body">
+                            <label class="checkbox-container mb-md">
+                                <input type="checkbox" id="textAnimationEnabled" checked>
+                                <span class="checkbox-label">Enable Text Animation</span>
+                            </label>
+
+                            <div class="form-group mb-md">
+                                <label class="form-label">Animation Type</label>
+                                <select class="form-select" id="textAnimationType">
+                                    <option value="none">None</option>
+                                    <option value="bounce" selected>Bounce</option>
+                                    <option value="fade">Fade</option>
+                                    <option value="slide">Slide</option>
+                                    <option value="scale">Scale</option>
+                                </select>
+                            </div>
+
+                            <div class="slider-group mb-0">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Animation Intensity</label>
+                                    <span class="slider-value" id="textAnimationIntensityValue">1.0</span>
+                                </div>
+                                <input type="range" min="0" max="2" step="0.1" value="1.0" class="slider" id="textAnimationIntensity">
+                                <p class="form-hint">Control animation strength (0 = none, 2 = extreme)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Styling -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">📝 Text Styling</h3>
+                            <p class="card-description">Configure text effects (glow, shadow, stroke)</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group mb-md">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="textUseGlow" checked>
+                                    <span class="checkbox-label">Use Glow Effect</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group mb-md">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="textUseShadow">
+                                    <span class="checkbox-label">Use Shadow Effect</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group mb-md">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="textUseStroke" checked>
+                                    <span class="checkbox-label">Use Stroke (Outline)</span>
+                                </label>
+                            </div>
+
+                            <!-- Shadow Settings -->
+                            <div id="shadowSettings" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                <h4 style="font-size: 14px; margin-bottom: 1rem; color: var(--primary-accent);">Shadow Settings</h4>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Blur</label>
+                                        <span class="slider-value" id="textShadowBlurValue">15px</span>
+                                    </div>
+                                    <input type="range" min="0" max="50" step="1" value="15" class="slider" id="textShadowBlur">
+                                </div>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Offset X</label>
+                                        <span class="slider-value" id="textShadowOffsetXValue">3px</span>
+                                    </div>
+                                    <input type="range" min="-20" max="20" step="1" value="3" class="slider" id="textShadowOffsetX">
+                                </div>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Offset Y</label>
+                                        <span class="slider-value" id="textShadowOffsetYValue">3px</span>
+                                    </div>
+                                    <input type="range" min="-20" max="20" step="1" value="3" class="slider" id="textShadowOffsetY">
+                                </div>
+
+                                <div class="color-picker-item">
+                                    <label class="form-label">Shadow Color</label>
+                                    <input type="color" value="#000000" class="color-picker-input" id="textShadowColor">
+                                </div>
+                            </div>
+
+                            <!-- Stroke Settings -->
+                            <div id="strokeSettings" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                <h4 style="font-size: 14px; margin-bottom: 1rem; color: var(--primary-accent);">Stroke Settings</h4>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Stroke Width</label>
+                                        <span class="slider-value" id="textStrokeWidthValue">8px</span>
+                                    </div>
+                                    <input type="range" min="0" max="20" step="1" value="8" class="slider" id="textStrokeWidth">
+                                </div>
+
+                                <div class="color-picker-item mb-0">
+                                    <label class="form-label">Stroke Color</label>
+                                    <input type="color" value="#000000" class="color-picker-input" id="textStrokeColor">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Animation Easing -->
                     <div class="card mb-lg">
                         <div class="card-header">
