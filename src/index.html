@@ -385,15 +385,162 @@
                                 </p>
                             </div>
                         </div>
+                        <!-- Enhanced Preview Controls -->
                         <div class="preview-controls">
                             <button class="btn btn-secondary btn-sm" id="playBtn" disabled>▶️ Play</button>
                             <button class="btn btn-secondary btn-sm" id="pauseBtn" disabled>⏸️ Pause</button>
                             <button class="btn btn-secondary btn-sm" id="restartBtn" disabled>🔄 Restart</button>
+                            <button class="btn btn-secondary btn-sm" id="loopBtn" title="Loop playback">🔁</button>
+                            <button class="btn btn-secondary btn-sm" id="muteBtn" title="Mute all">🔇</button>
+                            <button class="btn btn-secondary btn-sm" id="fullscreenBtn" title="Fullscreen">⛶</button>
+                        </div>
+
+                        <!-- Timeline Scrubber -->
+                        <div style="padding: 1rem; background: var(--surface-glass); border-top: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span id="currentTimeDisplay" style="font-size: 0.875rem; color: var(--text-secondary);">0:00</span>
+                                <span id="questionCounter" style="font-size: 0.875rem; color: var(--text-tertiary);">0 / 0</span>
+                                <span id="totalTimeDisplay" style="font-size: 0.875rem; color: var(--text-secondary);">0:00</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="0" class="slider" id="timelineScrubber" disabled style="width: 100%;">
+                        </div>
+
+                        <!-- Playback & Volume Controls -->
+                        <div style="padding: 1rem; background: var(--surface-glass); border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Playback Speed</label>
+                                <select id="playbackSpeed" class="form-input" style="width: 100%; padding: 0.5rem;">
+                                    <option value="0.25">0.25x</option>
+                                    <option value="0.5">0.5x</option>
+                                    <option value="0.75">0.75x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Canvas Zoom</label>
+                                <select id="canvasZoom" class="form-input" style="width: 100%; padding: 0.5rem;">
+                                    <option value="0.5">50%</option>
+                                    <option value="0.75">75%</option>
+                                    <option value="1" selected>100%</option>
+                                    <option value="1.25">125%</option>
+                                    <option value="1.5">150%</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Individual Volume Controls -->
+                        <div style="padding: 1rem; background: var(--surface-glass); border-top: 1px solid var(--border);">
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                                    <span>🎵 Music Volume</span>
+                                    <span id="musicVolDisplay">30%</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="30" class="slider" id="musicVolSlider" style="width: 100%;">
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                                    <span>🎤 Voice Volume</span>
+                                    <span id="voiceVolDisplay">100%</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="100" class="slider" id="voiceVolSlider" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                                    <span>🔊 Effects Volume</span>
+                                    <span id="effectsVolDisplay">100%</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="100" class="slider" id="effectsVolSlider" style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Presets Panel -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Quick Presets</h3>
+                            <p class="card-description">Load preset configurations instantly</p>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <button class="btn btn-ghost btn-sm" id="presetFast">🚀 Fast</button>
+                                <button class="btn btn-ghost btn-sm" id="presetBalanced">⚖️ Balanced</button>
+                                <button class="btn btn-ghost btn-sm" id="presetCinematic">🎬 Cinematic</button>
+                                <button class="btn btn-ghost btn-sm" id="presetMinimal">✨ Minimal</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Settings Panel -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h3 class="card-title">📤 Export Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Video Quality</label>
+                                <select id="exportQuality" class="form-input">
+                                    <option value="low">Low (2 Mbps)</option>
+                                    <option value="medium">Medium (5 Mbps)</option>
+                                    <option value="high" selected>High (8 Mbps)</option>
+                                    <option value="ultra">Ultra (12 Mbps)</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Frame Rate</label>
+                                <select id="exportFPS" class="form-input">
+                                    <option value="24">24 FPS (Cinematic)</option>
+                                    <option value="30" selected>30 FPS (Standard)</option>
+                                    <option value="60">60 FPS (Smooth)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Keyboard Shortcuts Help -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header" style="cursor: pointer;" id="shortcutsHeader">
+                            <h3 class="card-title">⌨️ Keyboard Shortcuts</h3>
+                        </div>
+                        <div class="card-body hidden" id="shortcutsPanel">
+                            <div style="font-size: 0.875rem; line-height: 1.8;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">Space</span>
+                                    <span style="color: var(--text-secondary);">Play / Pause</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">R</span>
+                                    <span style="color: var(--text-secondary);">Restart</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">M</span>
+                                    <span style="color: var(--text-secondary);">Mute All</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">F</span>
+                                    <span style="color: var(--text-secondary);">Fullscreen</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">←/→</span>
+                                    <span style="color: var(--text-secondary);">Seek -/+ 5s</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-tertiary);">L</span>
+                                    <span style="color: var(--text-secondary);">Toggle Loop</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- Auto-save Indicator -->
+        <div id="autoSaveIndicator" style="position: fixed; bottom: 20px; right: 20px; padding: 0.75rem 1rem; background: var(--success); color: white; border-radius: var(--radius-md); font-size: 0.875rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000;">
+            ✓ Auto-saved
+        </div>
     </div>
 
     <!-- Prompt Manager Modal (will be added via JS) -->

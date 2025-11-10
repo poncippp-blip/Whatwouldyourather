@@ -132,6 +132,18 @@ class VideoGenerator {
             color: 'rgba(0, 0, 0, 0.6)'
         };
 
+        // Enhanced player settings
+        this.playbackSpeed = 1.0;
+        this.canvasZoom = 1.0;
+        this.voiceVolume = 1.0;
+        this.effectsVolume = 1.0;
+        this.loopEnabled = false;
+        this.isMuted = false;
+        this.exportQuality = 'high';
+        this.exportFPS = 30;
+        this.autoSaveEnabled = true;
+        this.autoSaveTimer = null;
+
         // Event listeners
         this.generateBtn.addEventListener('click', () => this.generateVideo());
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
@@ -226,7 +238,7 @@ class VideoGenerator {
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             // Ignore if typing in input fields
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
 
             if (e.code === 'Space') {
                 e.preventDefault();
@@ -240,8 +252,149 @@ class VideoGenerator {
                 if (this.assets.questions.length > 0) {
                     this.restart();
                 }
+            } else if (e.code === 'KeyM') {
+                e.preventDefault();
+                this.toggleMute();
+            } else if (e.code === 'KeyF') {
+                e.preventDefault();
+                this.toggleFullscreen();
+            } else if (e.code === 'KeyL') {
+                e.preventDefault();
+                this.toggleLoop();
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                this.seekRelative(-5);
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                this.seekRelative(5);
             }
         });
+
+        // Setup enhanced controls
+        this.setupEnhancedControls();
+    }
+
+    setupEnhancedControls() {
+        // Timeline scrubber
+        const timelineScrubber = document.getElementById('timelineScrubber');
+        if (timelineScrubber) {
+            timelineScrubber.addEventListener('input', (e) => {
+                if (this.timeline.totalDuration > 0) {
+                    const seekTime = (parseInt(e.target.value) / 100) * this.timeline.totalDuration;
+                    this.seekTo(seekTime);
+                }
+            });
+        }
+
+        // Playback speed
+        const playbackSpeed = document.getElementById('playbackSpeed');
+        if (playbackSpeed) {
+            playbackSpeed.addEventListener('change', (e) => {
+                this.playbackSpeed = parseFloat(e.target.value);
+                this.triggerAutoSave();
+            });
+        }
+
+        // Canvas zoom
+        const canvasZoom = document.getElementById('canvasZoom');
+        const canvasContainer = document.querySelector('.canvas-container');
+        if (canvasZoom && canvasContainer) {
+            canvasZoom.addEventListener('change', (e) => {
+                this.canvasZoom = parseFloat(e.target.value);
+                canvasContainer.style.transform = `scale(${this.canvasZoom})`;
+                canvasContainer.style.transformOrigin = 'top center';
+                this.triggerAutoSave();
+            });
+        }
+
+        // Individual volume controls
+        const musicVolSlider = document.getElementById('musicVolSlider');
+        const musicVolDisplay = document.getElementById('musicVolDisplay');
+        if (musicVolSlider && musicVolDisplay) {
+            musicVolSlider.addEventListener('input', (e) => {
+                this.musicVolume = parseInt(e.target.value) / 100;
+                musicVolDisplay.textContent = `${e.target.value}%`;
+                if (this.assets.music) this.assets.music.volume = this.musicVolume;
+                this.triggerAutoSave();
+            });
+        }
+
+        const voiceVolSlider = document.getElementById('voiceVolSlider');
+        const voiceVolDisplay = document.getElementById('voiceVolDisplay');
+        if (voiceVolSlider && voiceVolDisplay) {
+            voiceVolSlider.addEventListener('input', (e) => {
+                this.voiceVolume = parseInt(e.target.value) / 100;
+                voiceVolDisplay.textContent = `${e.target.value}%`;
+                for (const question of this.assets.questions) {
+                    if (question.voice) question.voice.volume = this.voiceVolume;
+                }
+                this.triggerAutoSave();
+            });
+        }
+
+        const effectsVolSlider = document.getElementById('effectsVolSlider');
+        const effectsVolDisplay = document.getElementById('effectsVolDisplay');
+        if (effectsVolSlider && effectsVolDisplay) {
+            effectsVolSlider.addEventListener('input', (e) => {
+                this.effectsVolume = parseInt(e.target.value) / 100;
+                effectsVolDisplay.textContent = `${e.target.value}%`;
+                this.triggerAutoSave();
+            });
+        }
+
+        // Loop button
+        const loopBtn = document.getElementById('loopBtn');
+        if (loopBtn) {
+            loopBtn.addEventListener('click', () => this.toggleLoop());
+        }
+
+        // Mute button
+        const muteBtn = document.getElementById('muteBtn');
+        if (muteBtn) {
+            muteBtn.addEventListener('click', () => this.toggleMute());
+        }
+
+        // Fullscreen button
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+
+        // Export quality
+        const exportQuality = document.getElementById('exportQuality');
+        if (exportQuality) {
+            exportQuality.addEventListener('change', (e) => {
+                this.exportQuality = e.target.value;
+                this.triggerAutoSave();
+            });
+        }
+
+        // Export FPS
+        const exportFPS = document.getElementById('exportFPS');
+        if (exportFPS) {
+            exportFPS.addEventListener('change', (e) => {
+                this.exportFPS = parseInt(e.target.value);
+                this.triggerAutoSave();
+            });
+        }
+
+        // Quick presets
+        document.getElementById('presetFast')?.addEventListener('click', () => this.loadPreset('fast'));
+        document.getElementById('presetBalanced')?.addEventListener('click', () => this.loadPreset('balanced'));
+        document.getElementById('presetCinematic')?.addEventListener('click', () => this.loadPreset('cinematic'));
+        document.getElementById('presetMinimal')?.addEventListener('click', () => this.loadPreset('minimal'));
+
+        // Shortcuts help toggle
+        const shortcutsHeader = document.getElementById('shortcutsHeader');
+        const shortcutsPanel = document.getElementById('shortcutsPanel');
+        if (shortcutsHeader && shortcutsPanel) {
+            shortcutsHeader.addEventListener('click', () => {
+                shortcutsPanel.classList.toggle('hidden');
+            });
+        }
+
+        // Load saved settings
+        this.loadEnhancedSettings();
     }
 
     setupTimingSlider(sliderId, valueId, formatter, timingKey = null) {
@@ -758,6 +911,13 @@ class VideoGenerator {
             this.restartBtn.disabled = false;
             this.downloadBtn.disabled = false;
 
+            // Enable timeline scrubber
+            const timelineScrubber = document.getElementById('timelineScrubber');
+            if (timelineScrubber) timelineScrubber.disabled = false;
+
+            // Update displays
+            this.updateTimeDisplay();
+
             setTimeout(() => {
                 this.statusPanel.classList.add('hidden');
             }, 2000);
@@ -1097,18 +1257,27 @@ class VideoGenerator {
     animate() {
         if (!this.isPlaying) return;
 
-        this.currentTime = (Date.now() - this.startTime) / 1000;
+        this.currentTime = (Date.now() - this.startTime) / 1000 * this.playbackSpeed;
 
         if (this.currentTime >= this.timeline.totalDuration) {
             // Video completed
             this.currentTime = this.timeline.totalDuration;
             this.renderFrame(this.currentTime);
-            this.pause();
-            console.log('✅ Video playback completed');
+            this.updateTimeDisplay();
+
+            if (this.loopEnabled) {
+                // Loop back to start
+                console.log('🔁 Looping video...');
+                this.restart();
+            } else {
+                this.pause();
+                console.log('✅ Video playback completed');
+            }
             return;
         }
 
         this.renderFrame(this.currentTime);
+        this.updateTimeDisplay();
         this.animationFrame = requestAnimationFrame(() => this.animate());
     }
 
@@ -1411,8 +1580,9 @@ class VideoGenerator {
                 if (question.voice) question.voice.currentTime = 0;
             }
 
-            // Create canvas stream
-            const canvasStream = this.canvas.captureStream(30); // 30 fps
+            // Create canvas stream with selected FPS
+            const canvasStream = this.canvas.captureStream(this.exportFPS);
+            console.log(`🎬 Recording at ${this.exportFPS} FPS`);
 
             // Create audio context to mix all audio sources
             const audioContext = new AudioContext();
@@ -1439,16 +1609,26 @@ class VideoGenerator {
                 ...audioDestination.stream.getAudioTracks()
             ]);
 
-            // Set up MediaRecorder
+            // Set up MediaRecorder with quality settings
             const chunks = [];
             const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9')
                 ? 'video/webm; codecs=vp9'
                 : 'video/webm';
 
+            // Apply export quality settings
+            const qualityBitrates = {
+                low: 2000000,    // 2 Mbps
+                medium: 5000000, // 5 Mbps
+                high: 8000000,   // 8 Mbps
+                ultra: 12000000  // 12 Mbps
+            };
+
             const mediaRecorder = new MediaRecorder(combinedStream, {
                 mimeType: mimeType,
-                videoBitsPerSecond: 5000000 // 5 Mbps
+                videoBitsPerSecond: qualityBitrates[this.exportQuality] || 8000000
             });
+
+            console.log(`📹 Recording at ${this.exportQuality} quality (${qualityBitrates[this.exportQuality] / 1000000} Mbps)`);
 
             mediaRecorder.ondataavailable = (e) => {
                 if (e.data.size > 0) {
@@ -1553,5 +1733,247 @@ class VideoGenerator {
             this.downloadBtn.disabled = false;
             this.statusPanel.classList.add('hidden');
         }
+    }
+
+    // Enhanced player features
+    updateTimeDisplay() {
+        const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+        const totalTimeDisplay = document.getElementById('totalTimeDisplay');
+        const questionCounter = document.getElementById('questionCounter');
+        const timelineScrubber = document.getElementById('timelineScrubber');
+
+        if (currentTimeDisplay) {
+            currentTimeDisplay.textContent = this.formatTime(this.currentTime);
+        }
+
+        if (totalTimeDisplay && this.timeline.totalDuration) {
+            totalTimeDisplay.textContent = this.formatTime(this.timeline.totalDuration);
+        }
+
+        if (questionCounter && this.assets.questions.length > 0) {
+            let currentQuestion = 0;
+            for (let i = 0; i < this.timeline.questions.length; i++) {
+                if (this.currentTime >= this.timeline.questions[i].startTime) {
+                    currentQuestion = i + 1;
+                }
+            }
+            questionCounter.textContent = `${currentQuestion} / ${this.assets.questions.length}`;
+        }
+
+        if (timelineScrubber && this.timeline.totalDuration > 0) {
+            const progress = (this.currentTime / this.timeline.totalDuration) * 100;
+            timelineScrubber.value = Math.min(progress, 100);
+        }
+    }
+
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    seekTo(time) {
+        const wasPlaying = this.isPlaying;
+        if (wasPlaying) this.pause();
+
+        this.currentTime = Math.max(0, Math.min(time, this.timeline.totalDuration));
+        this.renderFrame(this.currentTime);
+        this.updateTimeDisplay();
+
+        if (wasPlaying) this.play();
+    }
+
+    seekRelative(seconds) {
+        if (this.assets.questions.length > 0) {
+            this.seekTo(this.currentTime + seconds);
+        }
+    }
+
+    toggleLoop() {
+        this.loopEnabled = !this.loopEnabled;
+        const loopBtn = document.getElementById('loopBtn');
+        if (loopBtn) {
+            loopBtn.style.opacity = this.loopEnabled ? '1' : '0.6';
+            loopBtn.style.background = this.loopEnabled ? 'var(--primary)' : '';
+        }
+        console.log(`Loop ${this.loopEnabled ? 'enabled' : 'disabled'}`);
+        this.triggerAutoSave();
+    }
+
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        const muteBtn = document.getElementById('muteBtn');
+
+        if (this.isMuted) {
+            if (this.assets.music) this.assets.music.volume = 0;
+            for (const question of this.assets.questions) {
+                if (question.voice) question.voice.volume = 0;
+            }
+            if (muteBtn) {
+                muteBtn.textContent = '🔈';
+                muteBtn.style.background = 'var(--error)';
+            }
+        } else {
+            if (this.assets.music) this.assets.music.volume = this.musicVolume;
+            for (const question of this.assets.questions) {
+                if (question.voice) question.voice.volume = this.voiceVolume;
+            }
+            if (muteBtn) {
+                muteBtn.textContent = '🔇';
+                muteBtn.style.background = '';
+            }
+        }
+        console.log(`Audio ${this.isMuted ? 'muted' : 'unmuted'}`);
+    }
+
+    toggleFullscreen() {
+        const previewWrapper = document.querySelector('.preview-wrapper');
+        if (!previewWrapper) return;
+
+        if (!document.fullscreenElement) {
+            previewWrapper.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    loadPreset(presetName) {
+        const presets = {
+            fast: {
+                questionDelay: 0.2,
+                voiceDelay: 0.2,
+                option1Delay: 0.1,
+                clockDuration: 2.0,
+                percentageDuration: 1.5,
+                swooshDuration: 0.7,
+                fadeInDuration: 0.3,
+                afterVoicePause: 0.2
+            },
+            balanced: {
+                questionDelay: 0.325,
+                voiceDelay: 0.325,
+                option1Delay: 0.13,
+                clockDuration: 2.7,
+                percentageDuration: 1.8,
+                swooshDuration: 0.9,
+                fadeInDuration: 0.45,
+                afterVoicePause: 0.325
+            },
+            cinematic: {
+                questionDelay: 0.8,
+                voiceDelay: 0.6,
+                option1Delay: 0.3,
+                clockDuration: 4.0,
+                percentageDuration: 3.0,
+                swooshDuration: 1.5,
+                fadeInDuration: 0.8,
+                afterVoicePause: 0.7
+            },
+            minimal: {
+                questionDelay: 0.1,
+                voiceDelay: 0.1,
+                option1Delay: 0.05,
+                clockDuration: 1.5,
+                percentageDuration: 1.0,
+                swooshDuration: 0.5,
+                fadeInDuration: 0.2,
+                afterVoicePause: 0.1
+            }
+        };
+
+        const preset = presets[presetName];
+        if (preset) {
+            Object.assign(this.timing, preset);
+
+            // Update UI
+            for (const [key, value] of Object.entries(preset)) {
+                const slider = document.getElementById(key);
+                const display = document.getElementById(`${key}Value`);
+                if (slider) slider.value = value;
+                if (display) display.textContent = `${value}s`;
+            }
+
+            console.log(`✅ Loaded ${presetName} preset`);
+            alert(`Loaded "${presetName}" preset! Regenerate your video to apply changes.`);
+            this.triggerAutoSave();
+        }
+    }
+
+    triggerAutoSave() {
+        if (!this.autoSaveEnabled) return;
+
+        clearTimeout(this.autoSaveTimer);
+        this.autoSaveTimer = setTimeout(() => {
+            this.saveEnhancedSettings();
+            this.showAutoSaveIndicator();
+        }, 1000);
+    }
+
+    saveEnhancedSettings() {
+        const settings = {
+            playbackSpeed: this.playbackSpeed,
+            canvasZoom: this.canvasZoom,
+            musicVolume: this.musicVolume,
+            voiceVolume: this.voiceVolume,
+            effectsVolume: this.effectsVolume,
+            loopEnabled: this.loopEnabled,
+            exportQuality: this.exportQuality,
+            exportFPS: this.exportFPS,
+            imageShadow: this.imageShadow,
+            timing: this.timing
+        };
+
+        localStorage.setItem('wouldYouRatherSettings', JSON.stringify(settings));
+    }
+
+    loadEnhancedSettings() {
+        const saved = localStorage.getItem('wouldYouRatherSettings');
+        if (!saved) return;
+
+        try {
+            const settings = JSON.parse(saved);
+
+            // Apply settings
+            if (settings.playbackSpeed) this.playbackSpeed = settings.playbackSpeed;
+            if (settings.canvasZoom) this.canvasZoom = settings.canvasZoom;
+            if (settings.musicVolume !== undefined) this.musicVolume = settings.musicVolume;
+            if (settings.voiceVolume !== undefined) this.voiceVolume = settings.voiceVolume;
+            if (settings.effectsVolume !== undefined) this.effectsVolume = settings.effectsVolume;
+            if (settings.loopEnabled) this.loopEnabled = settings.loopEnabled;
+            if (settings.exportQuality) this.exportQuality = settings.exportQuality;
+            if (settings.exportFPS) this.exportFPS = settings.exportFPS;
+            if (settings.imageShadow) Object.assign(this.imageShadow, settings.imageShadow);
+            if (settings.timing) Object.assign(this.timing, settings.timing);
+
+            // Update UI
+            document.getElementById('playbackSpeed')?.setAttribute('value', this.playbackSpeed);
+            document.getElementById('canvasZoom')?.setAttribute('value', this.canvasZoom);
+            document.getElementById('musicVolSlider')?.setAttribute('value', this.musicVolume * 100);
+            document.getElementById('voiceVolSlider')?.setAttribute('value', this.voiceVolume * 100);
+            document.getElementById('effectsVolSlider')?.setAttribute('value', this.effectsVolume * 100);
+            document.getElementById('exportQuality')?.setAttribute('value', this.exportQuality);
+            document.getElementById('exportFPS')?.setAttribute('value', this.exportFPS);
+
+            if (this.loopEnabled) {
+                const loopBtn = document.getElementById('loopBtn');
+                if (loopBtn) loopBtn.style.opacity = '1';
+            }
+
+            console.log('✅ Loaded saved settings from localStorage');
+        } catch (error) {
+            console.warn('Failed to load saved settings:', error);
+        }
+    }
+
+    showAutoSaveIndicator() {
+        const indicator = document.getElementById('autoSaveIndicator');
+        if (!indicator) return;
+
+        indicator.style.opacity = '1';
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+        }, 2000);
     }
 }
