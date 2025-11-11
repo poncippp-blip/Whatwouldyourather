@@ -2926,10 +2926,10 @@ class VideoGenerator {
         if (percentLoseColor) percentLoseColor.value = '#ff0040';
 
         // Set canvas filters
-        const saturationSlider = document.getElementById('saturationSlider');
+        const saturationSlider = document.getElementById('filterSaturation');
         if (saturationSlider) {
             saturationSlider.value = 142;
-            const saturationValue = document.getElementById('saturationValue');
+            const saturationValue = document.getElementById('filterSaturationValue');
             if (saturationValue) saturationValue.textContent = '142%';
         }
 
