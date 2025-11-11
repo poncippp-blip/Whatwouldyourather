@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WouldYouRather Studio Pro - Professional Video Suite</title>
+    <link rel="stylesheet" href="css/professional-suite.css">
+</head>
+<body>
+    <div class="pro-suite">
+        <!-- TOP BAR -->
+        <nav class="pro-topbar">
+            <div class="pro-brand">
+                <div class="pro-brand-icon">🎬</div>
+                <span>WouldYouRather Studio Pro</span>
+            </div>
+            <div class="pro-topbar-actions">
+                <button class="pro-btn pro-btn-ghost">💾 Save</button>
+                <button class="pro-btn pro-btn-ghost">📂 Load</button>
+                <button class="pro-btn pro-btn-primary" id="proGenerateBtn">✨ Generate Video</button>
+                <button class="pro-btn pro-btn-secondary" id="proDownloadBtn" disabled>📥 Export</button>
+            </div>
+        </nav>
+
+        <!-- WORKSPACE -->
+        <div class="pro-workspace">
+            <!-- LEFT SIDEBAR - Tab Navigation -->
+            <aside class="pro-sidebar-left">
+                <button class="pro-tab-btn active" data-tab="timeline" title="Timeline">📽️</button>
+                <button class="pro-tab-btn" data-tab="assets" title="Assets">🖼️</button>
+                <button class="pro-tab-btn" data-tab="effects" title="Effects">✨</button>
+                <button class="pro-tab-btn" data-tab="export" title="Export">📤</button>
+                <div style="flex: 1"></div>
+                <button class="pro-tab-btn" data-tab="settings" title="Settings">⚙️</button>
+            </aside>
+
+            <!-- TAB PANELS -->
+            <!-- Timeline Tab -->
+            <div class="pro-tab-panel active" id="tab-timeline">
+                <div class="pro-tab-header">
+                    <h2 class="pro-tab-title">Timeline & Questions</h2>
+                    <p class="pro-tab-description">Manage your video timeline and questions</p>
+                </div>
+                <div class="pro-tab-content">
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Video Configuration</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Number of Questions</label>
+                            <input type="range" min="1" max="15" value="7" class="pro-slider" id="proQuestionCount">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--pro-text-tertiary); margin-top: 4px;">
+                                <span>1</span>
+                                <span id="proQuestionCountValue">7</span>
+                                <span>15</span>
+                            </div>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Total Duration</label>
+                            <div style="font-size: 24px; font-weight: 600; color: var(--pro-primary);" id="proTotalDuration">0:00</div>
+                        </div>
+                    </div>
+
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Question Prompts</h3>
+                            <p class="pro-card-description">Choose random or custom prompts</p>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Prompt Source</label>
+                            <select class="pro-select" id="proPromptSource">
+                                <option value="auto">Auto-generate from library</option>
+                                <option value="custom">Use custom prompt</option>
+                                <option value="food">Food only mode</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assets Tab -->
+            <div class="pro-tab-panel" id="tab-assets">
+                <div class="pro-tab-header">
+                    <h2 class="pro-tab-title">Media & Assets</h2>
+                    <p class="pro-tab-description">Manage images, audio, and prompts</p>
+                </div>
+                <div class="pro-tab-content">
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">API Configuration</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Unsplash API Key</label>
+                            <input type="text" class="pro-input" id="proUnsplashKey" placeholder="Enter Unsplash API key">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">ElevenLabs API Key</label>
+                            <input type="text" class="pro-input" id="proElevenlabsKey" placeholder="Enter ElevenLabs API key">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">AI Voice</label>
+                            <select class="pro-select" id="proVoiceSelect">
+                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
+                                <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
+                                <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Male)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Audio Levels</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">🎵 Music Volume: <span id="proMusicVolDisplay">30%</span></label>
+                            <input type="range" min="0" max="100" value="30" class="pro-slider" id="proMusicVol">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">🎤 Voice Volume: <span id="proVoiceVolDisplay">100%</span></label>
+                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="proVoiceVol">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">🔊 Effects Volume: <span id="proEffectsVolDisplay">100%</span></label>
+                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="proEffectsVol">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Effects Tab -->
+            <div class="pro-tab-panel" id="tab-effects">
+                <div class="pro-tab-header">
+                    <h2 class="pro-tab-title">Visual Effects</h2>
+                    <p class="pro-tab-description">Customize animations, colors, and filters</p>
+                </div>
+                <div class="pro-tab-content">
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Text Animation</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Animation Type</label>
+                            <select class="pro-select">
+                                <option value="bounce">Bounce</option>
+                                <option value="fade">Fade</option>
+                                <option value="slide">Slide</option>
+                                <option value="scale">Scale</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Color Grading</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Brightness: <span id="proBrightnessDisplay">100%</span></label>
+                            <input type="range" min="0" max="200" value="100" class="pro-slider">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Contrast: <span id="proContrastDisplay">100%</span></label>
+                            <input type="range" min="0" max="200" value="100" class="pro-slider">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Saturation: <span id="proSaturationDisplay">100%</span></label>
+                            <input type="range" min="0" max="200" value="100" class="pro-slider">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Tab -->
+            <div class="pro-tab-panel" id="tab-export">
+                <div class="pro-tab-header">
+                    <h2 class="pro-tab-title">Export Settings</h2>
+                    <p class="pro-tab-description">Configure video quality and format</p>
+                </div>
+                <div class="pro-tab-content">
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Video Quality</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Quality Preset</label>
+                            <select class="pro-select" id="proExportQuality">
+                                <option value="low">Low (2 Mbps)</option>
+                                <option value="medium">Medium (5 Mbps)</option>
+                                <option value="high" selected>High (8 Mbps)</option>
+                                <option value="ultra">Ultra (12 Mbps)</option>
+                            </select>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Frame Rate</label>
+                            <select class="pro-select" id="proExportFPS">
+                                <option value="24">24 FPS (Cinematic)</option>
+                                <option value="30" selected>30 FPS (Standard)</option>
+                                <option value="60">60 FPS (Smooth)</option>
+                            </select>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Format</label>
+                            <select class="pro-select">
+                                <option value="mp4">MP4 (H.264 + AAC)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="pro-tab-panel" id="tab-settings">
+                <div class="pro-tab-header">
+                    <h2 class="pro-tab-title">Settings</h2>
+                    <p class="pro-tab-description">App preferences and advanced options</p>
+                </div>
+                <div class="pro-tab-content">
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Preferences</h3>
+                        </div>
+                        <button class="pro-btn pro-btn-secondary" style="width: 100%; margin-bottom: 8px;">Reset All Settings</button>
+                        <button class="pro-btn pro-btn-secondary" style="width: 100%;">Clear Cache</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PREVIEW AREA -->
+            <div class="pro-preview-area">
+                <div class="pro-preview-container">
+                    <canvas id="proPreviewCanvas" width="1080" height="1920"></canvas>
+                    <div class="pro-preview-overlay" id="proPreviewOverlay">
+                        <div class="pro-preview-overlay-icon">🎬</div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Professional Video Preview</div>
+                            <div style="font-size: 13px; color: var(--pro-text-secondary);">Click "Generate Video" to start</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIMELINE AREA -->
+        <div class="pro-timeline-area">
+            <div class="pro-timeline-toolbar">
+                <button class="pro-btn pro-btn-icon" id="proPlayBtn" disabled>▶️</button>
+                <button class="pro-btn pro-btn-icon" id="proPauseBtn" disabled>⏸️</button>
+                <button class="pro-btn pro-btn-icon" id="proRestartBtn" disabled>🔄</button>
+                <div style="flex: 1; margin: 0 16px;">
+                    <input type="range" min="0" max="100" value="0" class="pro-slider" id="proTimelineScrubber" disabled>
+                </div>
+                <span style="font-size: 13px; color: var(--pro-text-secondary);" id="proTimeDisplay">0:00 / 0:00</span>
+                <button class="pro-btn pro-btn-icon" id="proMuteBtn">🔇</button>
+                <button class="pro-btn pro-btn-icon" id="proFullscreenBtn">⛶</button>
+            </div>
+            <div class="pro-timeline-content">
+                <div class="pro-timeline-track" id="proTimelineTrack">
+                    <!-- Question blocks will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Panel -->
+    <div class="pro-status-panel hidden" id="proStatusPanel">
+        <div id="proStatusText">Processing...</div>
+        <div class="pro-progress-bar">
+            <div class="pro-progress-fill" id="proProgressFill" style="width: 0%;"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Tab switching
+        document.querySelectorAll('.pro-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+
+                // Update buttons
+                document.querySelectorAll('.pro-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update panels
+                document.querySelectorAll('.pro-tab-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById(`tab-${tab}`).classList.add('active');
+            });
+        });
+
+        // Volume sliders
+        const updateSlider = (sliderId, displayId) => {
+            const slider = document.getElementById(sliderId);
+            const display = document.getElementById(displayId);
+            slider.addEventListener('input', (e) => {
+                display.textContent = e.target.value + '%';
+            });
+        };
+
+        updateSlider('proMusicVol', 'proMusicVolDisplay');
+        updateSlider('proVoiceVol', 'proVoiceVolDisplay');
+        updateSlider('proEffectsVol', 'proEffectsVolDisplay');
+
+        // Question count
+        document.getElementById('proQuestionCount').addEventListener('input', (e) => {
+            document.getElementById('proQuestionCountValue').textContent = e.target.value;
+        });
+
+        // Initialize canvas
+        const canvas = document.getElementById('proPreviewCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 60px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Professional Preview', canvas.width / 2, canvas.height / 2);
+
+        console.log('🎬 WouldYouRather Studio Pro loaded!');
+        console.log('📌 This is a DEMO of the professional interface');
+        console.log('✨ Full functionality will be integrated next');
+    </script>
+</body>
+</html>
