@@ -3,716 +3,877 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WouldYouRather Studio Pro - Professional Video Suite</title>
-    <link rel="stylesheet" href="css/professional-suite.css">
+    <title>WouldYouRather.ai - Video Generator SaaS</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/compact-overrides.css">
 </head>
 <body>
-    <div class="pro-suite">
-        <!-- TOP BAR -->
-        <nav class="pro-topbar">
-            <div class="pro-brand">
-                <div class="pro-brand-icon">🎬</div>
-                <span>WouldYouRather Studio Pro</span>
-            </div>
-            <div class="pro-topbar-actions">
-                <button class="pro-btn pro-btn-ghost" id="saveConfigBtn">💾 Save</button>
-                <button class="pro-btn pro-btn-ghost" id="loadConfigBtn">📂 Load</button>
-                <input type="file" id="configFileInput" accept=".json" style="display: none;">
-                <button class="pro-btn pro-btn-ghost" id="promptManagerBtn">📝 Prompts</button>
-                <button class="pro-btn pro-btn-ghost" id="favoritesManagerBtn">⭐ Favorites</button>
-                <button class="pro-btn pro-btn-primary" id="generateBtn">✨ Generate Video</button>
-                <button class="pro-btn pro-btn-secondary" id="downloadBtn" disabled>📥 Export</button>
-            </div>
-        </nav>
-
-        <!-- WORKSPACE -->
-        <div class="pro-workspace">
-            <!-- LEFT SIDEBAR - Tab Navigation -->
-            <aside class="pro-sidebar-left">
-                <button class="pro-tab-btn active" data-tab="timeline" title="Timeline">📽️</button>
-                <button class="pro-tab-btn" data-tab="assets" title="Assets">🖼️</button>
-                <button class="pro-tab-btn" data-tab="effects" title="Effects">✨</button>
-                <button class="pro-tab-btn" data-tab="export" title="Export">📤</button>
-                <div style="flex: 1"></div>
-                <button class="pro-tab-btn" data-tab="settings" title="Settings">⚙️</button>
-            </aside>
-
-            <!-- TAB PANELS -->
-            <!-- Timeline Tab -->
-            <div class="pro-tab-panel active" id="tab-timeline">
-                <div class="pro-tab-header">
-                    <h2 class="pro-tab-title">Timeline & Questions</h2>
-                    <p class="pro-tab-description">Manage video timeline and timing</p>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="brand-logo">🎥</div>
+                    <div class="brand-text">
+                        <h1>WouldYouRather.ai</h1>
+                        <p>Generate viral videos in seconds</p>
+                    </div>
                 </div>
-                <div class="pro-tab-content">
-                    <!-- Quick Actions -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">⚡ Quick Actions</h3>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle">🌓 Deep Black</button>
+                    <button class="btn btn-ghost btn-sm" id="saveConfigBtn">
+                        💾 Save Config
+                    </button>
+                    <button class="btn btn-ghost btn-sm" id="loadConfigBtn">
+                        📂 Load Config
+                    </button>
+                    <input type="file" id="configFileInput" accept=".json" style="display: none;">
+                    <button class="btn btn-ghost btn-sm" id="promptManagerBtn">
+                        📝 Manage Prompts
+                    </button>
+                    <button class="btn btn-ghost btn-sm" id="favoritesManagerBtn">
+                        ⭐ Favorites
+                    </button>
+                    <button class="btn btn-secondary btn-sm">
+                        ⚙️ Settings
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <div class="dashboard-grid">
+                <!-- Control Panel -->
+                <div class="control-panel">
+                    <!-- Quick Actions - NEW -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Quick Actions</h3>
+                            <p class="card-description">Presets, shortcuts & quick tools</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Timing Presets</label>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
-                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('fast')">⚡ Fast</button>
-                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('balanced')">⚖️ Balanced</button>
-                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('cinematic')">🎬 Cinematic</button>
-                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('viral')">🔥 Viral</button>
+                        <div class="card-body">
+                            <!-- Presets -->
+                            <div class="form-group mb-md">
+                                <label class="form-label">Timing Presets</label>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem;">
+                                    <button class="btn btn-sm btn-secondary" onclick="videoGenerator.applyPreset('fast')">⚡ Fast</button>
+                                    <button class="btn btn-sm btn-primary" onclick="videoGenerator.applyPreset('balanced')">⚖️ Balanced</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="videoGenerator.applyPreset('cinematic')">🎬 Cinematic</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="videoGenerator.applyPreset('viral')">🔥 Viral</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">Quick Tools</label>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
-                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.shuffleQuestions()">🔀 Shuffle</button>
-                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.copySettingsToClipboard()">📋 Copy</button>
-                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.exportStats()">📊 Stats</button>
-                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.resetAllSettings()">🔄 Reset</button>
+
+                            <!-- Quick Tools -->
+                            <div class="form-group mb-md">
+                                <label class="form-label">Quick Tools</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.shuffleQuestions()">🔀 Shuffle</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.copySettingsToClipboard()">📋 Copy</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.pasteSettingsFromClipboard()">📥 Paste</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.duplicateCurrentSettings()">💾 Duplicate</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.exportStats()">📊 Stats</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.exportVideoMetadata()">📄 Metadata</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.resetAllSettings()">🔄 Reset All</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="videoGenerator.quickExportVideo()">⚡ Quick Export</button>
+                                </div>
+                            </div>
+
+                            <!-- Keyboard Shortcuts Toggle -->
+                            <label class="checkbox-container mb-md">
+                                <input type="checkbox" id="keyboardShortcutsToggle" checked>
+                                <span class="checkbox-label">Enable Keyboard Shortcuts</span>
+                            </label>
+
+                            <!-- Keyboard Shortcuts Help -->
+                            <div class="shortcuts-help" style="background: rgba(0, 217, 255, 0.05); padding: 0.4rem; border-radius: 4px; border-left: 2px solid var(--primary-accent);">
+                                <strong>Shortcuts:</strong><br>
+                                <span style="font-family: monospace; font-size: 0.65rem;">
+                                Space=Play/Pause • R=Restart • F/B=Frame • M=Mute • K=Bookmark<br>
+                                ←/→=Seek 5s • 0-9=Jump % • G=Generate • Ctrl+S=Save
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Video Configuration -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Video Configuration</h3>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Number of Questions</label>
-                            <input type="range" min="1" max="15" value="3" class="pro-slider" id="questionCount">
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--pro-text-tertiary); margin-top: 4px;">
-                                <span>1</span>
-                                <span id="questionCountValue">3</span>
-                                <span>15</span>
-                            </div>
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">Total Duration</label>
-                            <div style="font-size: 24px; font-weight: 600; color: var(--pro-primary);" id="proTotalDuration">0:00</div>
-                        </div>
-                    </div>
-
-                    <!-- Advanced Timing Settings -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Advanced Timing</h3>
-                            <p class="pro-card-description">Fine-tune all animation timings (seconds)</p>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Delay Between Questions: <span id="questionDelayValue">1.0s</span></label>
-                            <input type="range" min="0" max="5" step="0.1" value="1.0" class="pro-slider" id="questionDelay">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Voice Start Delay: <span id="voiceDelayValue">0.5s</span></label>
-                            <input type="range" min="0" max="3" step="0.1" value="0.5" class="pro-slider" id="voiceDelay">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Option 1 Delay: <span id="option1DelayValue">0.2s</span></label>
-                            <input type="range" min="0" max="2" step="0.1" value="0.2" class="pro-slider" id="option1Delay">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Option 2 Delay: <span id="option2DelayValue">50%</span></label>
-                            <input type="range" min="0" max="100" step="5" value="50" class="pro-slider" id="option2Delay">
-                            <p class="pro-hint">% of voice duration before option 2 appears</p>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Clock Duration: <span id="clockDurationValue">3.0s</span></label>
-                            <input type="range" min="0.5" max="10" step="0.5" value="3.0" class="pro-slider" id="clockDuration">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Percentage Display: <span id="percentageDurationValue">2.0s</span></label>
-                            <input type="range" min="0.5" max="10" step="0.5" value="2.0" class="pro-slider" id="percentageDuration">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Engagement Duration: <span id="engagementDurationValue">3.0s</span></label>
-                            <input type="range" min="1" max="10" step="0.5" value="3.0" class="pro-slider" id="engagementDuration">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Swoosh Duration: <span id="swooshDurationValue">1.0s</span></label>
-                            <input type="range" min="0.2" max="3" step="0.1" value="1.0" class="pro-slider" id="swooshDuration">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Fade In Duration: <span id="fadeInDurationValue">0.5s</span></label>
-                            <input type="range" min="0.1" max="2" step="0.1" value="0.5" class="pro-slider" id="fadeInDuration">
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">After-Voice Pause: <span id="afterVoicePauseValue">0.5s</span></label>
-                            <input type="range" min="0" max="3" step="0.1" value="0.5" class="pro-slider" id="afterVoicePause">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Assets Tab -->
-            <div class="pro-tab-panel" id="tab-assets">
-                <div class="pro-tab-header">
-                    <h2 class="pro-tab-title">Media & Assets</h2>
-                    <p class="pro-tab-description">Configure APIs, audio, and content</p>
-                </div>
-                <div class="pro-tab-content">
                     <!-- API Configuration -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">API Configuration</h3>
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">API Configuration</h3>
+                            <p class="card-description">Connect your API keys to enable video generation</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Unsplash API Key</label>
-                            <input type="text" class="pro-input" id="unsplashKey" placeholder="Enter Unsplash API key">
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">ElevenLabs API Key</label>
-                            <input type="text" class="pro-input" id="elevenlabsKey" placeholder="Enter ElevenLabs API key">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="unsplashKey">Unsplash API Key</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    id="unsplashKey"
+                                    placeholder="Enter your Unsplash access key"
+                                />
+                                <p class="form-hint">Get your key from <a href="https://unsplash.com/developers" target="_blank" style="color: var(--text-secondary)">Unsplash Developers</a></p>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label" for="elevenlabsKey">ElevenLabs API Key</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    id="elevenlabsKey"
+                                    placeholder="Enter your ElevenLabs API key"
+                                />
+                                <p class="form-hint">Get your key from <a href="https://elevenlabs.io" target="_blank" style="color: var(--text-secondary)">ElevenLabs</a></p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Audio Settings -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Audio Settings</h3>
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Audio Settings</h3>
+                            <p class="card-description">Configure voice and music settings</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">AI Voice</label>
-                            <select class="pro-select" id="voiceSelect">
-                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
-                                <option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option>
-                                <option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option>
-                                <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
-                                <option value="MF3mGyEYCl7XYWbV9V6O">Elli (Female)</option>
-                                <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Male)</option>
-                                <option value="VR6AewLTigWG4xSOukaG">Arnold (Male)</option>
-                                <option value="pNInz6obpgDQGcFmaJgB">Adam (Male)</option>
-                            </select>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="voiceSelect">AI Voice</label>
+                                <select class="form-select" id="voiceSelect">
+                                    <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
+                                    <option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option>
+                                    <option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option>
+                                    <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
+                                    <option value="MF3mGyEYCl7XYWbV9V6O">Elli (Female)</option>
+                                    <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Male)</option>
+                                    <option value="VR6AewLTigWG4xSOukaG">Arnold (Male)</option>
+                                    <option value="pNInz6obpgDQGcFmaJgB">Adam (Male)</option>
+                                </select>
+                            </div>
+                            <div class="slider-group mb-0">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Music Volume</label>
+                                    <span class="slider-value" id="volumeValue">30%</span>
+                                </div>
+                                <input type="range" min="0" max="100" value="30" class="slider" id="musicVolume">
+                            </div>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">🎵 Music Volume: <span id="volumeValue">30%</span></label>
-                            <input type="range" min="0" max="100" value="30" class="pro-slider" id="musicVolume">
+                    </div>
+
+                    <!-- Engagement Features -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Engagement Questions</h3>
+                            <p class="card-description">Insert custom engagement "Would You Rather" questions anywhere in your video</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">🎤 Voice Volume: <span id="voiceVolDisplay">100%</span></label>
-                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="voiceVolSlider">
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">🔊 Effects Volume: <span id="effectsVolDisplay">100%</span></label>
-                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="effectsVolSlider">
+                        <div class="card-body">
+                            <!-- Comment Engagement -->
+                            <div class="form-group mb-md" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="commentEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">💬 Comment Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="commentInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="commentOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Comment 'I love God')" value="Comment 'I love God'">
+                                <input type="text" id="commentOption2" class="form-input" placeholder="Option 2 (e.g., Reject the offer)" value="Reject the offer">
+                            </div>
+
+                            <!-- Share Engagement -->
+                            <div class="form-group mb-md" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="shareEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">🔄 Share Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="shareInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="shareOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Get cursed forever)" value="Always be alone">
+                                <input type="text" id="shareOption2" class="form-input" placeholder="Option 2 (e.g., Marry 3rd person who clicks share)" value="Marry the 3rd person who clicks share">
+                            </div>
+
+                            <!-- Follow Engagement -->
+                            <div class="form-group mb-md" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="followEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">👤 Follow Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="followInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="followOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Follow for more)" value="Follow for more">
+                                <input type="text" id="followOption2" class="form-input" placeholder="Option 2 (e.g., Skip)" value="Skip and regret it">
+                            </div>
+
+                            <!-- Like Engagement -->
+                            <div class="form-group mb-0" style="padding: var(--space-md); border: 1px solid var(--surface); border-radius: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                    <label class="form-label" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="likeEngagement" checked style="margin-right: 8px;">
+                                        <span style="font-weight: 600;">❤️ Like Engagement</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Insert after question:</span>
+                                        <input type="number" id="likeInsertAfter" min="0" max="15" value="0" class="form-input" style="width: 60px; padding: 4px 8px; text-align: center;">
+                                    </div>
+                                </div>
+                                <input type="text" id="likeOption1" class="form-input mb-sm" placeholder="Option 1 (e.g., Like if you chose option 1)" value="Like if you chose the first option">
+                                <input type="text" id="likeOption2" class="form-input" placeholder="Option 2 (e.g., Don't like)" value="Don't like and miss out">
+                            </div>
+
+                            <p class="form-hint" style="margin-top: var(--space-md);">Set "Insert after question" to 0 to place at the end. Otherwise, specify which question number (1-15) to insert after.</p>
                         </div>
                     </div>
 
                     <!-- Prompt Source -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Prompt Source</h3>
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Prompt Source</h3>
+                            <p class="card-description">Choose how prompts are selected</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">
-                                <input type="radio" name="promptSource" value="auto" checked style="margin-right: 8px;">
-                                Auto-generate from library
-                            </label>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">
-                                <input type="radio" name="promptSource" value="custom" style="margin-right: 8px;">
-                                Use custom prompt
-                            </label>
-                        </div>
-                        <div id="customPromptSection" class="hidden" style="margin-top: 12px;">
-                            <input type="text" class="pro-input" id="customOption1" placeholder="Option 1 (e.g., Pizza)" style="margin-bottom: 8px;">
-                            <input type="text" class="pro-input" id="customOption2" placeholder="Option 2 (e.g., Burger)">
+                        <div class="card-body">
+                            <div class="form-group mb-md">
+                                <label class="form-label">
+                                    <input type="radio" name="promptSource" value="auto" checked style="margin-right: 8px;">
+                                    Auto-generate from library
+                                </label>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">
+                                    <input type="radio" name="promptSource" value="custom" style="margin-right: 8px;">
+                                    Use custom prompt
+                                </label>
+                            </div>
+                            <div id="customPromptSection" class="hidden" style="margin-top: var(--space-md);">
+                                <input
+                                    type="text"
+                                    class="form-input mb-sm"
+                                    id="customOption1"
+                                    placeholder="Option 1 (e.g., Pizza)"
+                                />
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    id="customOption2"
+                                    placeholder="Option 2 (e.g., Burger)"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Engagement Questions -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Engagement Questions</h3>
-                            <p class="pro-card-description">Insert custom engagement hooks</p>
+                    <!-- Video Settings -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Video Settings</h3>
+                            <p class="card-description">Customize your video output</p>
                         </div>
-                        <!-- Comment Engagement -->
-                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="margin: 0; display: flex; align-items: center;">
-                                    <input type="checkbox" id="commentEngagement" checked style="margin-right: 8px;">
-                                    <span style="font-weight: 600; font-size: 13px;">💬 Comment</span>
-                                </label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
-                                    <input type="number" id="commentInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
+                        <div class="card-body">
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Number of Questions</label>
+                                    <span class="slider-value" id="questionCountValue">3</span>
                                 </div>
+                                <input type="range" min="1" max="15" value="3" class="slider" id="questionCount">
+                                <p class="form-hint">Generate 1-15 "Would You Rather" questions per video</p>
                             </div>
-                            <input type="text" id="commentOption1" class="pro-input" placeholder="Option 1" value="Comment 'I love God'" style="margin-bottom: 6px; font-size: 12px;">
-                            <input type="text" id="commentOption2" class="pro-input" placeholder="Option 2" value="Reject the offer" style="font-size: 12px;">
-                        </div>
-
-                        <!-- Share Engagement -->
-                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="margin: 0; display: flex; align-items: center;">
-                                    <input type="checkbox" id="shareEngagement" checked style="margin-right: 8px;">
-                                    <span style="font-weight: 600; font-size: 13px;">🔄 Share</span>
-                                </label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
-                                    <input type="number" id="shareInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
-                                </div>
+                            <div class="form-group mb-0">
+                                <button class="btn btn-ghost btn-sm btn-block" id="advancedTimingBtn">
+                                    ⚙️ Advanced Timing Settings
+                                </button>
                             </div>
-                            <input type="text" id="shareOption1" class="pro-input" placeholder="Option 1" value="Always be alone" style="margin-bottom: 6px; font-size: 12px;">
-                            <input type="text" id="shareOption2" class="pro-input" placeholder="Option 2" value="Marry the 3rd person who clicks share" style="font-size: 12px;">
-                        </div>
-
-                        <!-- Follow Engagement -->
-                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="margin: 0; display: flex; align-items: center;">
-                                    <input type="checkbox" id="followEngagement" checked style="margin-right: 8px;">
-                                    <span style="font-weight: 600; font-size: 13px;">👤 Follow</span>
-                                </label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
-                                    <input type="number" id="followInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
-                                </div>
-                            </div>
-                            <input type="text" id="followOption1" class="pro-input" placeholder="Option 1" value="Follow for more" style="margin-bottom: 6px; font-size: 12px;">
-                            <input type="text" id="followOption2" class="pro-input" placeholder="Option 2" value="Skip and regret it" style="font-size: 12px;">
-                        </div>
-
-                        <!-- Like Engagement -->
-                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px; margin-bottom: 0;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="margin: 0; display: flex; align-items: center;">
-                                    <input type="checkbox" id="likeEngagement" checked style="margin-right: 8px;">
-                                    <span style="font-weight: 600; font-size: 13px;">❤️ Like</span>
-                                </label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
-                                    <input type="number" id="likeInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
-                                </div>
-                            </div>
-                            <input type="text" id="likeOption1" class="pro-input" placeholder="Option 1" value="Like if you chose the first option" style="margin-bottom: 6px; font-size: 12px;">
-                            <input type="text" id="likeOption2" class="pro-input" placeholder="Option 2" value="Don't like and miss out" style="font-size: 12px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Effects Tab -->
-            <div class="pro-tab-panel" id="tab-effects">
-                <div class="pro-tab-header">
-                    <h2 class="pro-tab-title">Visual Effects</h2>
-                    <p class="pro-tab-description">Customize animations, colors, and filters</p>
-                </div>
-                <div class="pro-tab-content">
-                    <!-- Text Animation -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Text Animation</h3>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="textAnimationEnabled" checked>
-                                <span class="checkbox-label">Enable Text Animation</span>
-                            </label>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Animation Type</label>
-                            <select class="pro-select" id="textAnimationType">
-                                <option value="none">None</option>
-                                <option value="bounce" selected>Bounce</option>
-                                <option value="fade">Fade</option>
-                                <option value="slide">Slide</option>
-                                <option value="scale">Scale</option>
-                            </select>
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">Animation Intensity: <span id="textAnimationIntensityValue">1.0</span></label>
-                            <input type="range" min="0" max="2" step="0.1" value="1.0" class="pro-slider" id="textAnimationIntensity">
                         </div>
                     </div>
 
-                    <!-- Text Styling -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Text Styling</h3>
+                    <!-- Advanced Timing Settings (Collapsible) -->
+                    <div class="card mb-lg hidden" id="advancedTimingPanel">
+                        <div class="card-header">
+                            <h3 class="card-title">Advanced Timing Settings</h3>
+                            <p class="card-description">Fine-tune animation and transition timings (in seconds)</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="textUseGlow" checked>
-                                <span class="checkbox-label">Use Glow Effect</span>
-                            </label>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="textUseShadow">
-                                <span class="checkbox-label">Use Shadow Effect</span>
-                            </label>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="textUseStroke" checked>
-                                <span class="checkbox-label">Use Stroke (Outline)</span>
-                            </label>
-                        </div>
+                        <div class="card-body">
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Delay Between Questions</label>
+                                    <span class="slider-value" id="questionDelayValue">1.0s</span>
+                                </div>
+                                <input type="range" min="0" max="5" step="0.1" value="1.0" class="slider" id="questionDelay">
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Voice Start Delay</label>
+                                    <span class="slider-value" id="voiceDelayValue">0.5s</span>
+                                </div>
+                                <input type="range" min="0" max="3" step="0.1" value="0.5" class="slider" id="voiceDelay">
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Option 1 Delay</label>
+                                    <span class="slider-value" id="option1DelayValue">0.2s</span>
+                                </div>
+                                <input type="range" min="0" max="2" step="0.1" value="0.2" class="slider" id="option1Delay">
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Option 2 Delay Offset</label>
+                                    <span class="slider-value" id="option2DelayValue">50%</span>
+                                </div>
+                                <input type="range" min="0" max="100" step="5" value="50" class="slider" id="option2Delay">
+                                <p class="form-hint">% of voice duration before option 2 appears</p>
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Clock/Thinking Duration</label>
+                                    <span class="slider-value" id="clockDurationValue">3.0s</span>
+                                </div>
+                                <input type="range" min="0.5" max="10" step="0.5" value="3.0" class="slider" id="clockDuration">
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Percentage Display Duration</label>
+                                    <span class="slider-value" id="percentageDurationValue">2.0s</span>
+                                </div>
+                                <input type="range" min="0.5" max="10" step="0.5" value="2.0" class="slider" id="percentageDuration">
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Engagement Display Duration</label>
+                                    <span class="slider-value" id="engagementDurationValue">3.0s</span>
+                                </div>
+                                <input type="range" min="1" max="10" step="0.5" value="3.0" class="slider" id="engagementDuration">
+                                <p class="form-hint">How long to show engagement hooks (last question only)</p>
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Swoosh Transition Duration</label>
+                                    <span class="slider-value" id="swooshDurationValue">1.0s</span>
+                                </div>
+                                <input type="range" min="0.2" max="3" step="0.1" value="1.0" class="slider" id="swooshDuration">
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Fade In Duration</label>
+                                    <span class="slider-value" id="fadeInDurationValue">0.5s</span>
+                                </div>
+                                <input type="range" min="0.1" max="2" step="0.1" value="0.5" class="slider" id="fadeInDuration">
+                            </div>
+                            <div class="slider-group mb-md">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">After-Voice Pause</label>
+                                    <span class="slider-value" id="afterVoicePauseValue">0.5s</span>
+                                </div>
+                                <input type="range" min="0" max="3" step="0.1" value="0.5" class="slider" id="afterVoicePause">
+                                <p class="form-hint">Pause after voice ends before clock starts</p>
+                            </div>
 
-                        <!-- Shadow Settings -->
-                        <div id="shadowSettings" style="display: none; margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px;">
-                            <h4 style="font-size: 13px; margin-bottom: 12px; font-weight: 600;">Shadow Settings</h4>
-                            <div class="pro-form-group">
-                                <label class="pro-label">Shadow Blur: <span id="textShadowBlurValue">15px</span></label>
-                                <input type="range" min="0" max="50" step="1" value="15" class="pro-slider" id="textShadowBlur">
-                            </div>
-                            <div class="pro-form-group">
-                                <label class="pro-label">Shadow Offset X: <span id="textShadowOffsetXValue">3px</span></label>
-                                <input type="range" min="-20" max="20" step="1" value="3" class="pro-slider" id="textShadowOffsetX">
-                            </div>
-                            <div class="pro-form-group">
-                                <label class="pro-label">Shadow Offset Y: <span id="textShadowOffsetYValue">3px</span></label>
-                                <input type="range" min="-20" max="20" step="1" value="3" class="pro-slider" id="textShadowOffsetY">
-                            </div>
-                            <div class="pro-form-group" style="margin-bottom: 0;">
-                                <label class="pro-label">Shadow Color</label>
-                                <input type="color" value="#000000" class="pro-input" id="textShadowColor" style="height: 40px; cursor: pointer;">
-                            </div>
-                        </div>
+                            <!-- Image Shadow Settings -->
+                            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 20px;">
+                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: var(--text-primary);">Image Shadow Settings</h4>
 
-                        <!-- Stroke Settings -->
-                        <div id="strokeSettings" style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px;">
-                            <h4 style="font-size: 13px; margin-bottom: 12px; font-weight: 600;">Stroke Settings</h4>
-                            <div class="pro-form-group">
-                                <label class="pro-label">Stroke Width: <span id="textStrokeWidthValue">8px</span></label>
-                                <input type="range" min="0" max="20" step="1" value="8" class="pro-slider" id="textStrokeWidth">
-                            </div>
-                            <div class="pro-form-group" style="margin-bottom: 0;">
-                                <label class="pro-label">Stroke Color</label>
-                                <input type="color" value="#000000" class="pro-input" id="textStrokeColor" style="height: 40px; cursor: pointer;">
+                                <div class="checkbox-group mb-md">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="imageShadowEnabled" checked>
+                                        <span>Enable Image Shadow</span>
+                                    </label>
+                                </div>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Blur</label>
+                                        <span class="slider-value" id="imageShadowBlurValue">40px</span>
+                                    </div>
+                                    <input type="range" min="0" max="100" step="5" value="40" class="slider" id="imageShadowBlur">
+                                    <p class="form-hint">Shadow blur radius</p>
+                                </div>
+
+                                <div class="slider-group mb-0">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Offset Y</label>
+                                        <span class="slider-value" id="imageShadowOffsetYValue">15px</span>
+                                    </div>
+                                    <input type="range" min="0" max="50" step="1" value="15" class="slider" id="imageShadowOffsetY">
+                                    <p class="form-hint">Vertical shadow offset</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Canvas Filters -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Canvas Filters</h3>
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">🎨 Canvas Filters</h3>
+                            <p class="card-description">Apply real-time visual effects</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Brightness: <span id="filterBrightnessValue">100%</span></label>
-                            <input type="range" min="0" max="200" value="100" class="pro-slider" id="filterBrightness">
+                        <div class="card-body">
+                            <div class="filter-grid">
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Brightness</label>
+                                        <span class="slider-value" id="filterBrightnessValue">100%</span>
+                                    </div>
+                                    <input type="range" min="0" max="200" value="100" class="slider" id="filterBrightness">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Contrast</label>
+                                        <span class="slider-value" id="filterContrastValue">100%</span>
+                                    </div>
+                                    <input type="range" min="0" max="200" value="100" class="slider" id="filterContrast">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Saturation</label>
+                                        <span class="slider-value" id="filterSaturationValue">100%</span>
+                                    </div>
+                                    <input type="range" min="0" max="200" value="100" class="slider" id="filterSaturation">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin: 0;">Blur</label>
+                                        <span class="slider-value" id="filterBlurValue">0px</span>
+                                    </div>
+                                    <input type="range" min="0" max="20" value="0" class="slider" id="filterBlur">
+                                </div>
+                            </div>
+                            <button class="btn btn-ghost btn-sm btn-block" id="resetFiltersBtn" style="margin-top: 1rem;">Reset Filters</button>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Contrast: <span id="filterContrastValue">100%</span></label>
-                            <input type="range" min="0" max="200" value="100" class="pro-slider" id="filterContrast">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Saturation: <span id="filterSaturationValue">100%</span></label>
-                            <input type="range" min="0" max="200" value="100" class="pro-slider" id="filterSaturation">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Blur: <span id="filterBlurValue">0px</span></label>
-                            <input type="range" min="0" max="20" value="0" class="pro-slider" id="filterBlur">
-                        </div>
-                        <button class="pro-btn pro-btn-ghost" id="resetFiltersBtn" style="width: 100%;">Reset Filters</button>
                     </div>
 
                     <!-- Color Customization -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Color Customization</h3>
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">🎨 Color Customization</h3>
+                            <p class="card-description">Customize text and glow colors</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Text Color</label>
-                            <input type="color" value="#00d4ff" class="pro-input" id="textColor" style="height: 40px; cursor: pointer;">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Glow Color</label>
-                            <input type="color" value="#00d4ff" class="pro-input" id="glowColor" style="height: 40px; cursor: pointer;">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Percentage Win Color</label>
-                            <input type="color" value="#00ff88" class="pro-input" id="percentageWinColor" style="height: 40px; cursor: pointer;">
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">Percentage Lose Color</label>
-                            <input type="color" value="#ff3366" class="pro-input" id="percentageLoseColor" style="height: 40px; cursor: pointer;">
+                        <div class="card-body">
+                            <div class="color-picker-group">
+                                <div class="color-picker-item">
+                                    <label class="form-label">Text Color</label>
+                                    <input type="color" value="#00d4ff" class="color-picker-input" id="textColor">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label class="form-label">Glow Color</label>
+                                    <input type="color" value="#00d4ff" class="color-picker-input" id="glowColor">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label class="form-label">Percentage Win</label>
+                                    <input type="color" value="#00ff88" class="color-picker-input" id="percentageWinColor">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label class="form-label">Percentage Lose</label>
+                                    <input type="color" value="#ff3366" class="color-picker-input" id="percentageLoseColor">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Image Shadow Settings -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Image Shadow</h3>
+                    <!-- Food Only Mode -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">🍕 Food Only Mode</h3>
+                            <p class="card-description">Use 500+ delicious food prompts only</p>
                         </div>
-                        <div class="pro-form-group">
+                        <div class="card-body">
                             <label class="checkbox-container">
-                                <input type="checkbox" id="imageShadowEnabled" checked>
-                                <span class="checkbox-label">Enable Image Shadow</span>
+                                <input type="checkbox" id="foodOnlyMode">
+                                <span class="checkbox-label">Enable Food Only Mode (500+ Food Prompts)</span>
                             </label>
+                            <p class="form-hint" style="margin-top: 0.5rem;">When enabled, all questions will be about delicious foods, drinks, and meals</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Shadow Blur: <span id="imageShadowBlurValue">40px</span></label>
-                            <input type="range" min="0" max="100" step="5" value="40" class="pro-slider" id="imageShadowBlur">
+                    </div>
+
+                    <!-- Text Animation -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">✨ Text Animation</h3>
+                            <p class="card-description">Animate text appearance</p>
                         </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">Shadow Offset Y: <span id="imageShadowOffsetYValue">15px</span></label>
-                            <input type="range" min="0" max="50" step="1" value="15" class="pro-slider" id="imageShadowOffsetY">
+                        <div class="card-body">
+                            <label class="checkbox-container mb-md">
+                                <input type="checkbox" id="textAnimationEnabled" checked>
+                                <span class="checkbox-label">Enable Text Animation</span>
+                            </label>
+
+                            <div class="form-group mb-md">
+                                <label class="form-label">Animation Type</label>
+                                <select class="form-select" id="textAnimationType">
+                                    <option value="none">None</option>
+                                    <option value="bounce" selected>Bounce</option>
+                                    <option value="fade">Fade</option>
+                                    <option value="slide">Slide</option>
+                                    <option value="scale">Scale</option>
+                                </select>
+                            </div>
+
+                            <div class="slider-group mb-0">
+                                <div class="slider-header">
+                                    <label class="form-label" style="margin-bottom: 0;">Animation Intensity</label>
+                                    <span class="slider-value" id="textAnimationIntensityValue">1.0</span>
+                                </div>
+                                <input type="range" min="0" max="2" step="0.1" value="1.0" class="slider" id="textAnimationIntensity">
+                                <p class="form-hint">Control animation strength (0 = none, 2 = extreme)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Styling -->
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">📝 Text Styling</h3>
+                            <p class="card-description">Configure text effects (glow, shadow, stroke)</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group mb-md">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="textUseGlow" checked>
+                                    <span class="checkbox-label">Use Glow Effect</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group mb-md">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="textUseShadow">
+                                    <span class="checkbox-label">Use Shadow Effect</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group mb-md">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="textUseStroke" checked>
+                                    <span class="checkbox-label">Use Stroke (Outline)</span>
+                                </label>
+                            </div>
+
+                            <!-- Shadow Settings -->
+                            <div id="shadowSettings" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                <h4 style="font-size: 14px; margin-bottom: 1rem; color: var(--primary-accent);">Shadow Settings</h4>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Blur</label>
+                                        <span class="slider-value" id="textShadowBlurValue">15px</span>
+                                    </div>
+                                    <input type="range" min="0" max="50" step="1" value="15" class="slider" id="textShadowBlur">
+                                </div>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Offset X</label>
+                                        <span class="slider-value" id="textShadowOffsetXValue">3px</span>
+                                    </div>
+                                    <input type="range" min="-20" max="20" step="1" value="3" class="slider" id="textShadowOffsetX">
+                                </div>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Shadow Offset Y</label>
+                                        <span class="slider-value" id="textShadowOffsetYValue">3px</span>
+                                    </div>
+                                    <input type="range" min="-20" max="20" step="1" value="3" class="slider" id="textShadowOffsetY">
+                                </div>
+
+                                <div class="color-picker-item">
+                                    <label class="form-label">Shadow Color</label>
+                                    <input type="color" value="#000000" class="color-picker-input" id="textShadowColor">
+                                </div>
+                            </div>
+
+                            <!-- Stroke Settings -->
+                            <div id="strokeSettings" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                <h4 style="font-size: 14px; margin-bottom: 1rem; color: var(--primary-accent);">Stroke Settings</h4>
+
+                                <div class="slider-group mb-md">
+                                    <div class="slider-header">
+                                        <label class="form-label" style="margin-bottom: 0;">Stroke Width</label>
+                                        <span class="slider-value" id="textStrokeWidthValue">8px</span>
+                                    </div>
+                                    <input type="range" min="0" max="20" step="1" value="8" class="slider" id="textStrokeWidth">
+                                </div>
+
+                                <div class="color-picker-item mb-0">
+                                    <label class="form-label">Stroke Color</label>
+                                    <input type="color" value="#000000" class="color-picker-input" id="textStrokeColor">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Animation Easing -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Animation Easing</h3>
+                    <div class="card mb-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Animation Easing</h3>
+                            <p class="card-description">Control animation curves</p>
                         </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Slide Animation</label>
-                            <select class="pro-select" id="slideEasing">
-                                <option value="linear">Linear</option>
-                                <option value="ease" selected>Ease</option>
-                                <option value="ease-in">Ease In</option>
-                                <option value="ease-out">Ease Out</option>
-                                <option value="bounce">Bounce</option>
-                            </select>
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">Fade Animation</label>
-                            <select class="pro-select" id="fadeEasing">
-                                <option value="linear">Linear</option>
-                                <option value="ease" selected>Ease</option>
-                                <option value="ease-in">Ease In</option>
-                                <option value="ease-out">Ease Out</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Export Tab -->
-            <div class="pro-tab-panel" id="tab-export">
-                <div class="pro-tab-header">
-                    <h2 class="pro-tab-title">Export Settings</h2>
-                    <p class="pro-tab-description">Configure video quality and format</p>
-                </div>
-                <div class="pro-tab-content">
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Video Quality</h3>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Quality Preset</label>
-                            <select class="pro-select" id="exportQuality">
-                                <option value="low">Low (2 Mbps)</option>
-                                <option value="medium">Medium (5 Mbps)</option>
-                                <option value="high" selected>High (8 Mbps)</option>
-                                <option value="ultra">Ultra (12 Mbps)</option>
-                            </select>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">Frame Rate</label>
-                            <select class="pro-select" id="exportFPS">
-                                <option value="24">24 FPS (Cinematic)</option>
-                                <option value="30" selected>30 FPS (Standard)</option>
-                                <option value="60">60 FPS (Smooth)</option>
-                            </select>
-                        </div>
-                        <div class="pro-form-group" style="margin-bottom: 0;">
-                            <label class="pro-label">Format</label>
-                            <select class="pro-select" id="exportFormat">
-                                <option value="mp4">MP4 (H.264 + AAC)</option>
-                            </select>
-                            <p class="pro-hint" style="margin-top: 8px;">High-quality H.264 video with AAC audio</p>
-                        </div>
-                    </div>
-
-                    <!-- Export Progress -->
-                    <div class="pro-card hidden" id="exportProgress">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Export Progress</h3>
-                        </div>
-                        <div style="padding: 0 24px 24px 24px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="font-size: 13px; color: var(--pro-text-secondary);">Exporting...</span>
-                                <span style="font-size: 13px; font-weight: 600; color: var(--pro-primary);" id="exportPercentage">0%</span>
+                        <div class="card-body">
+                            <div class="form-group mb-md">
+                                <label class="form-label">Slide Animation</label>
+                                <select class="form-select" id="slideEasing">
+                                    <option value="linear">Linear</option>
+                                    <option value="ease" selected>Ease</option>
+                                    <option value="ease-in">Ease In</option>
+                                    <option value="ease-out">Ease Out</option>
+                                    <option value="bounce">Bounce</option>
+                                </select>
                             </div>
-                            <div class="pro-progress-bar">
-                                <div class="pro-progress-fill" id="exportProgressFill" style="width: 0%;"></div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Fade Animation</label>
+                                <select class="form-select" id="fadeEasing">
+                                    <option value="linear">Linear</option>
+                                    <option value="ease" selected>Ease</option>
+                                    <option value="ease-in">Ease In</option>
+                                    <option value="ease-out">Ease Out</option>
+                                </select>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Generate Button -->
+                    <div class="card">
+                        <div class="card-body">
+                            <button class="btn btn-primary btn-lg btn-block" id="generateBtn">
+                                ✨ Generate Video
+                            </button>
+                            <button class="btn btn-secondary btn-block" id="downloadBtn" disabled style="margin-top: var(--space-sm);">
+                                📥 Download Video
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Status Panel -->
+                    <div class="status-panel hidden" id="statusPanel" style="margin-top: var(--space-lg);">
+                        <div class="status-content">
+                            <span class="status-icon">⏳</span>
+                            <span class="status-text" id="statusText">Generating...</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="preview-container">
+                    <div class="preview-wrapper">
+                        <div class="canvas-container">
+                            <canvas id="previewCanvas" class="preview-canvas" width="1080" height="1920"></canvas>
+                            <div class="preview-overlay" id="previewOverlay">
+                                <div class="preview-overlay-icon">🎬</div>
+                                <p class="preview-overlay-text">
+                                    Your video preview will appear here<br>
+                                    <small style="color: var(--text-tertiary)">Click "Generate Video" to start</small>
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Enhanced Preview Controls -->
+                        <div class="preview-controls">
+                            <button class="btn btn-secondary btn-sm" id="framePrevBtn" disabled title="Previous Frame">⏮️</button>
+                            <button class="btn btn-secondary btn-sm" id="playBtn" disabled>▶️ Play</button>
+                            <button class="btn btn-secondary btn-sm" id="pauseBtn" disabled>⏸️ Pause</button>
+                            <button class="btn btn-secondary btn-sm" id="restartBtn" disabled>🔄 Restart</button>
+                            <button class="btn btn-secondary btn-sm" id="frameNextBtn" disabled title="Next Frame">⏭️</button>
+                            <button class="btn btn-secondary btn-sm" id="bookmarkBtn" disabled title="Bookmark">⭐</button>
+                            <button class="btn btn-secondary btn-sm" id="loopBtn" title="Loop playback">🔁</button>
+                            <button class="btn btn-secondary btn-sm" id="muteBtn" title="Mute all">🔇</button>
+                            <button class="btn btn-secondary btn-sm" id="fullscreenBtn" title="Fullscreen">⛶</button>
+                        </div>
+
+                        <!-- Enhanced Timeline with Markers -->
+                        <div class="timeline-container">
+                            <div class="timeline-info">
+                                <span class="timeline-time" id="currentTimeDisplay">0:00</span>
+                                <span class="timeline-question" id="questionCounter">0 / 0</span>
+                                <span class="timeline-time" id="totalTimeDisplay">0:00</span>
+                            </div>
+                            <div class="timeline-track">
+                                <div class="timeline-markers" id="timelineMarkers"></div>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="timelineScrubber" disabled style="width: 100%; position: absolute; top: 0; left: 0; background: transparent;">
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; align-items: center;">
+                                <label style="font-size: 0.8125rem; color: var(--text-tertiary);">
+                                    <input type="checkbox" id="snapToQuestion" style="margin-right: 0.25rem;">
+                                    Snap to Question
+                                </label>
+                                <button class="btn btn-ghost" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-left: auto;" id="clearBookmarksBtn">Clear Bookmarks</button>
+                            </div>
+                        </div>
+
+                        <!-- Playback & Volume Controls -->
+                        <div style="padding: 1rem; background: var(--surface-glass); border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Playback Speed</label>
+                                <select id="playbackSpeed" class="form-input" style="width: 100%; padding: 0.5rem;">
+                                    <option value="0.25">0.25x</option>
+                                    <option value="0.5">0.5x</option>
+                                    <option value="0.75">0.75x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Canvas Zoom</label>
+                                <select id="canvasZoom" class="form-input" style="width: 100%; padding: 0.5rem;">
+                                    <option value="0.5">50%</option>
+                                    <option value="0.75">75%</option>
+                                    <option value="1" selected>100%</option>
+                                    <option value="1.25">125%</option>
+                                    <option value="1.5">150%</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Individual Volume Controls -->
+                        <div style="padding: 1rem; background: var(--surface-glass); border-top: 1px solid var(--border);">
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                                    <span>🎵 Music Volume</span>
+                                    <span id="musicVolDisplay">30%</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="30" class="slider" id="musicVolSlider" style="width: 100%;">
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                                    <span>🎤 Voice Volume</span>
+                                    <span id="voiceVolDisplay">100%</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="100" class="slider" id="voiceVolSlider" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
+                                    <span>🔊 Effects Volume</span>
+                                    <span id="effectsVolDisplay">100%</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="100" class="slider" id="effectsVolSlider" style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Presets Panel -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Quick Presets</h3>
+                            <p class="card-description">Load preset configurations instantly</p>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <button class="btn btn-ghost btn-sm" id="presetFast">🚀 Fast</button>
+                                <button class="btn btn-ghost btn-sm" id="presetBalanced">⚖️ Balanced</button>
+                                <button class="btn btn-ghost btn-sm" id="presetCinematic">🎬 Cinematic</button>
+                                <button class="btn btn-ghost btn-sm" id="presetMinimal">✨ Minimal</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Settings Panel -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h3 class="card-title">📤 Export Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Video Quality</label>
+                                <select id="exportQuality" class="form-input">
+                                    <option value="low">Low (2 Mbps)</option>
+                                    <option value="medium">Medium (5 Mbps)</option>
+                                    <option value="high" selected>High (8 Mbps)</option>
+                                    <option value="ultra">Ultra (12 Mbps)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Frame Rate</label>
+                                <select id="exportFPS" class="form-input">
+                                    <option value="24">24 FPS (Cinematic)</option>
+                                    <option value="30" selected>30 FPS (Standard)</option>
+                                    <option value="60">60 FPS (Smooth)</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Export Format</label>
+                                <select id="exportFormat" class="form-input">
+                                    <option value="mp4" selected>MP4 (Recommended - FFmpeg)</option>
+                                </select>
+                                <p class="form-hint" style="margin-top: 0.5rem;">High-quality H.264 video with AAC audio</p>
+                            </div>
+                            <!-- Export Progress -->
+                            <div class="hidden" id="exportProgress" style="margin-top: 1rem; padding: 1rem; background: var(--bg-darker); border-radius: var(--radius-sm);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Exporting...</span>
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--primary-accent);" id="exportPercentage">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="exportProgressFill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Player Features -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Advanced Features</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="autoPauseOnBlur" checked>
+                                    <span style="font-size: 0.9375rem; color: var(--text-secondary);">Auto-pause when tab unfocused</span>
+                                </label>
+                            </div>
+                            <div class="form-group mb-0">
+                                <button class="btn btn-ghost btn-sm btn-block" id="undoBtn" disabled title="Undo last change">⟲ Undo</button>
+                                <button class="btn btn-ghost btn-sm btn-block" id="redoBtn" disabled title="Redo last change" style="margin-top: 0.5rem;">⟳ Redo</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Keyboard Shortcuts Help -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header" style="cursor: pointer;" id="shortcutsHeader">
+                            <h3 class="card-title">⌨️ Keyboard Shortcuts</h3>
+                        </div>
+                        <div class="card-body hidden" id="shortcutsPanel">
+                            <div style="font-size: 0.875rem; line-height: 1.8;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">Space</span>
+                                    <span style="color: var(--text-secondary);">Play / Pause</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">R</span>
+                                    <span style="color: var(--text-secondary);">Restart</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">M</span>
+                                    <span style="color: var(--text-secondary);">Mute All</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">F</span>
+                                    <span style="color: var(--text-secondary);">Fullscreen</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--text-tertiary);">←/→</span>
+                                    <span style="color: var(--text-secondary);">Seek -/+ 5s</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-tertiary);">L</span>
+                                    <span style="color: var(--text-secondary);">Toggle Loop</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </main>
 
-            <!-- Settings Tab -->
-            <div class="pro-tab-panel" id="tab-settings">
-                <div class="pro-tab-header">
-                    <h2 class="pro-tab-title">Settings</h2>
-                    <p class="pro-tab-description">App preferences and advanced options</p>
-                </div>
-                <div class="pro-tab-content">
-                    <!-- Food Only Mode -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">🍕 Food Only Mode</h3>
-                            <p class="pro-card-description">Use 500+ delicious food prompts only</p>
-                        </div>
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="foodOnlyMode">
-                            <span class="checkbox-label">Enable Food Only Mode</span>
-                        </label>
-                    </div>
-
-                    <!-- Keyboard Shortcuts -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">⌨️ Keyboard Shortcuts</h3>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="keyboardShortcutsToggle" checked>
-                                <span class="checkbox-label">Enable Keyboard Shortcuts</span>
-                            </label>
-                        </div>
-                        <div style="background: rgba(0, 217, 255, 0.05); padding: 12px; border-radius: 6px; border-left: 2px solid var(--pro-primary); font-size: 12px; line-height: 1.8;">
-                            <strong>Shortcuts:</strong><br>
-                            <span style="font-family: monospace; font-size: 11px; color: var(--pro-text-secondary);">
-                            Space=Play/Pause • R=Restart • F=Fullscreen • M=Mute<br>
-                            ←/→=Seek 5s • 0-9=Jump % • G=Generate • Ctrl+S=Save
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Advanced Features -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Advanced Features</h3>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="autoPauseOnBlur" checked>
-                                <span class="checkbox-label">Auto-pause when tab unfocused</span>
-                            </label>
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="snapToQuestion">
-                                <span class="checkbox-label">Snap timeline to questions</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Preferences -->
-                    <div class="pro-card">
-                        <div class="pro-card-header">
-                            <h3 class="pro-card-title">Preferences</h3>
-                        </div>
-                        <button class="pro-btn pro-btn-secondary" id="themeToggle" style="width: 100%; margin-bottom: 8px;">🌓 Toggle Theme</button>
-                        <button class="pro-btn pro-btn-secondary" style="width: 100%; margin-bottom: 8px;">🔄 Reset All Settings</button>
-                        <button class="pro-btn pro-btn-secondary" style="width: 100%;">🗑️ Clear Cache</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PREVIEW AREA -->
-            <div class="pro-preview-area">
-                <div class="pro-preview-container">
-                    <canvas id="previewCanvas" width="1080" height="1920"></canvas>
-                    <div class="pro-preview-overlay" id="previewOverlay">
-                        <div class="pro-preview-overlay-icon">🎬</div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Professional Video Preview</div>
-                            <div style="font-size: 13px; color: var(--pro-text-secondary);">Click "Generate Video" to start</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Playback Speed & Zoom -->
-                <div style="padding: 12px; background: var(--pro-bg-darker); border-top: 1px solid var(--pro-border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div>
-                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: block;">Playback Speed</label>
-                        <select id="playbackSpeed" class="pro-select" style="font-size: 12px; height: 32px;">
-                            <option value="0.25">0.25x</option>
-                            <option value="0.5">0.5x</option>
-                            <option value="0.75">0.75x</option>
-                            <option value="1" selected>1x</option>
-                            <option value="1.25">1.25x</option>
-                            <option value="1.5">1.5x</option>
-                            <option value="2">2x</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: block;">Canvas Zoom</label>
-                        <select id="canvasZoom" class="pro-select" style="font-size: 12px; height: 32px;">
-                            <option value="0.5">50%</option>
-                            <option value="0.75">75%</option>
-                            <option value="1" selected>100%</option>
-                            <option value="1.25">125%</option>
-                            <option value="1.5">150%</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Individual Volume Controls -->
-                <div style="padding: 12px; background: var(--pro-bg-darker); border-top: 1px solid var(--pro-border);">
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between;">
-                            <span>🎵 Music</span>
-                            <span id="musicVolDisplay">30%</span>
-                        </label>
-                        <input type="range" min="0" max="100" value="30" class="pro-slider" id="musicVolSlider">
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between;">
-                            <span>🎤 Voice</span>
-                            <span id="voiceVolDisplay2">100%</span>
-                        </label>
-                        <input type="range" min="0" max="100" value="100" class="pro-slider" id="voiceVolSlider2">
-                    </div>
-                    <div>
-                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between;">
-                            <span>🔊 Effects</span>
-                            <span id="effectsVolDisplay2">100%</span>
-                        </label>
-                        <input type="range" min="0" max="100" value="100" class="pro-slider" id="effectsVolSlider2">
-                    </div>
-                </div>
-            </div>
+        <!-- Auto-save Indicator -->
+        <div id="autoSaveIndicator" style="position: fixed; bottom: 20px; right: 20px; padding: 0.75rem 1rem; background: var(--success); color: white; border-radius: var(--radius-md); font-size: 0.875rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000;">
+            ✓ Auto-saved
         </div>
-
-        <!-- TIMELINE AREA -->
-        <div class="pro-timeline-area">
-            <div class="pro-timeline-toolbar">
-                <button class="pro-btn pro-btn-icon" id="playBtn" disabled>▶️</button>
-                <button class="pro-btn pro-btn-icon" id="pauseBtn" disabled>⏸️</button>
-                <button class="pro-btn pro-btn-icon" id="restartBtn" disabled>🔄</button>
-                <button class="pro-btn pro-btn-icon" id="framePrevBtn" disabled>⏮️</button>
-                <button class="pro-btn pro-btn-icon" id="frameNextBtn" disabled>⏭️</button>
-                <div style="flex: 1; margin: 0 16px;">
-                    <input type="range" min="0" max="100" value="0" class="pro-slider" id="timelineScrubber" disabled>
-                </div>
-                <span style="font-size: 13px; color: var(--pro-text-secondary);" id="currentTimeDisplay">0:00</span>
-                <span style="font-size: 13px; color: var(--pro-text-tertiary); margin: 0 8px;">/</span>
-                <span style="font-size: 13px; color: var(--pro-text-secondary);" id="totalTimeDisplay">0:00</span>
-                <button class="pro-btn pro-btn-icon" id="bookmarkBtn" disabled>⭐</button>
-                <button class="pro-btn pro-btn-icon" id="loopBtn">🔁</button>
-                <button class="pro-btn pro-btn-icon" id="muteBtn">🔇</button>
-                <button class="pro-btn pro-btn-icon" id="fullscreenBtn">⛶</button>
-            </div>
-            <div class="pro-timeline-content">
-                <div class="pro-timeline-track" id="timelineMarkers">
-                    <!-- Question blocks will be added here dynamically -->
-                </div>
-                <div style="display: flex; gap: 12px; padding: 8px 16px; align-items: center;">
-                    <span style="font-size: 12px; color: var(--pro-text-tertiary);" id="questionCounter">Question 0 / 0</span>
-                    <button class="pro-btn pro-btn-ghost" style="margin-left: auto; font-size: 11px; padding: 4px 12px;" id="clearBookmarksBtn">Clear Bookmarks</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Status Panel -->
-    <div class="pro-status-panel hidden" id="statusPanel">
-        <div id="statusText">Processing...</div>
-        <div class="pro-progress-bar">
-            <div class="pro-progress-fill" id="progressFill" style="width: 0%;"></div>
-        </div>
-    </div>
-
-    <!-- Auto-save Indicator -->
-    <div id="autoSaveIndicator" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 16px; background: var(--pro-success); color: white; border-radius: var(--pro-radius-md); font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000;">
-        ✓ Auto-saved
     </div>
 
     <!-- Prompt Manager Modal (will be added via JS) -->
@@ -728,126 +889,5 @@
     <script src="js/engagement-manager.js"></script>
     <script src="js/video-generator.js"></script>
     <script src="js/app.js"></script>
-
-    <script>
-        // Tab switching
-        document.querySelectorAll('.pro-tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tab = btn.dataset.tab;
-                document.querySelectorAll('.pro-tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.pro-tab-panel').forEach(p => p.classList.remove('active'));
-                document.getElementById(`tab-${tab}`).classList.add('active');
-            });
-        });
-
-        // Slider value updates
-        const updateSlider = (sliderId, displayId) => {
-            const slider = document.getElementById(sliderId);
-            const display = document.getElementById(displayId);
-            if (slider && display) {
-                slider.addEventListener('input', (e) => {
-                    let val = e.target.value;
-                    if (sliderId.includes('Delay') || sliderId.includes('Duration') || sliderId.includes('Pause')) {
-                        display.textContent = val + 's';
-                    } else if (sliderId.includes('option2Delay')) {
-                        display.textContent = val + '%';
-                    } else if (sliderId.includes('Volume') || sliderId.includes('Vol')) {
-                        display.textContent = val + '%';
-                    } else if (sliderId.includes('filter') || sliderId.includes('Intensity')) {
-                        display.textContent = sliderId.includes('Blur') ? val + 'px' : val + (sliderId.includes('Intensity') ? '' : '%');
-                    } else if (sliderId.includes('Shadow') || sliderId.includes('Stroke')) {
-                        display.textContent = val + 'px';
-                    } else {
-                        display.textContent = val;
-                    }
-                });
-            }
-        };
-
-        // Initialize all sliders
-        updateSlider('questionCount', 'questionCountValue');
-        updateSlider('questionDelay', 'questionDelayValue');
-        updateSlider('voiceDelay', 'voiceDelayValue');
-        updateSlider('option1Delay', 'option1DelayValue');
-        updateSlider('option2Delay', 'option2DelayValue');
-        updateSlider('clockDuration', 'clockDurationValue');
-        updateSlider('percentageDuration', 'percentageDurationValue');
-        updateSlider('engagementDuration', 'engagementDurationValue');
-        updateSlider('swooshDuration', 'swooshDurationValue');
-        updateSlider('fadeInDuration', 'fadeInDurationValue');
-        updateSlider('afterVoicePause', 'afterVoicePauseValue');
-        updateSlider('musicVolume', 'volumeValue');
-        updateSlider('textAnimationIntensity', 'textAnimationIntensityValue');
-        updateSlider('textShadowBlur', 'textShadowBlurValue');
-        updateSlider('textShadowOffsetX', 'textShadowOffsetXValue');
-        updateSlider('textShadowOffsetY', 'textShadowOffsetYValue');
-        updateSlider('textStrokeWidth', 'textStrokeWidthValue');
-        updateSlider('filterBrightness', 'filterBrightnessValue');
-        updateSlider('filterContrast', 'filterContrastValue');
-        updateSlider('filterSaturation', 'filterSaturationValue');
-        updateSlider('filterBlur', 'filterBlurValue');
-        updateSlider('imageShadowBlur', 'imageShadowBlurValue');
-        updateSlider('imageShadowOffsetY', 'imageShadowOffsetYValue');
-
-        // Dual volume controls sync
-        const musicVolSlider = document.getElementById('musicVolSlider');
-        const musicVolDisplay = document.getElementById('musicVolDisplay');
-        if (musicVolSlider && musicVolDisplay) {
-            musicVolSlider.addEventListener('input', (e) => {
-                musicVolDisplay.textContent = e.target.value + '%';
-            });
-        }
-
-        const voiceVolSlider2 = document.getElementById('voiceVolSlider2');
-        const voiceVolDisplay2 = document.getElementById('voiceVolDisplay2');
-        if (voiceVolSlider2 && voiceVolDisplay2) {
-            voiceVolSlider2.addEventListener('input', (e) => {
-                voiceVolDisplay2.textContent = e.target.value + '%';
-            });
-        }
-
-        const effectsVolSlider2 = document.getElementById('effectsVolSlider2');
-        const effectsVolDisplay2 = document.getElementById('effectsVolDisplay2');
-        if (effectsVolSlider2 && effectsVolDisplay2) {
-            effectsVolSlider2.addEventListener('input', (e) => {
-                effectsVolDisplay2.textContent = e.target.value + '%';
-            });
-        }
-
-        // Custom prompt section toggle
-        document.querySelectorAll('input[name="promptSource"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const customSection = document.getElementById('customPromptSection');
-                if (e.target.value === 'custom') {
-                    customSection.classList.remove('hidden');
-                } else {
-                    customSection.classList.add('hidden');
-                }
-            });
-        });
-
-        // Shadow settings toggle
-        const shadowCheckbox = document.getElementById('textUseShadow');
-        const shadowSettings = document.getElementById('shadowSettings');
-        if (shadowCheckbox && shadowSettings) {
-            shadowCheckbox.addEventListener('change', (e) => {
-                shadowSettings.style.display = e.target.checked ? 'block' : 'none';
-            });
-        }
-
-        // Initialize canvas
-        const canvas = document.getElementById('previewCanvas');
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 60px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Professional Studio', canvas.width / 2, canvas.height / 2);
-
-        console.log('🎬 WouldYouRather Studio Pro loaded!');
-        console.log('✨ All features integrated into professional UI');
-    </script>
 </body>
 </html>
