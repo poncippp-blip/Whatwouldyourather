@@ -1779,6 +1779,7 @@ class VideoGenerator {
             const audioUrl = URL.createObjectURL(audioBlob);
 
             const voiceAudio = new Audio(audioUrl);
+            voiceAudio.volume = this.voiceVolume; // Apply voice volume setting
 
             await new Promise((resolve, reject) => {
                 voiceAudio.addEventListener('loadedmetadata', () => {
@@ -1921,6 +1922,7 @@ class VideoGenerator {
                 const timeoutId = setTimeout(() => {
                     if (this.isPlaying) {
                         const clockClone = this.assets.clockSound.cloneNode();
+                        clockClone.volume = this.effectsVolume; // Apply effects volume
                         clockClone.play().catch(e => console.log('Clock play error:', e));
                     }
                 }, delay);
@@ -1933,6 +1935,7 @@ class VideoGenerator {
                 const timeoutId = setTimeout(() => {
                     if (this.isPlaying) {
                         const dingClone = this.assets.dingSound.cloneNode();
+                        dingClone.volume = this.effectsVolume; // Apply effects volume
                         dingClone.play().catch(e => console.log('Ding play error:', e));
                     }
                 }, delay);
@@ -1945,6 +1948,7 @@ class VideoGenerator {
                 const timeoutId = setTimeout(() => {
                     if (this.isPlaying) {
                         const swooshClone = this.assets.swooshSound.cloneNode();
+                        swooshClone.volume = this.effectsVolume; // Apply effects volume
                         swooshClone.play().catch(e => console.log('Swoosh play error:', e));
                     }
                 }, delay);
