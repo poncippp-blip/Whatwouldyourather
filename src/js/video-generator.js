@@ -804,6 +804,20 @@ class VideoGenerator {
         }
     }
 
+    setupSlider(sliderId, valueId, callback, suffix = '', decimals = 0) {
+        const slider = document.getElementById(sliderId);
+        const valueDisplay = document.getElementById(valueId);
+
+        if (slider && valueDisplay) {
+            slider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                const displayValue = decimals > 0 ? value.toFixed(decimals) : Math.round(value);
+                valueDisplay.textContent = `${displayValue}${suffix}`;
+                callback(value);
+            });
+        }
+    }
+
     loadAPIKeys() {
         // Load from localStorage first
         const savedUnsplash = localStorage.getItem('unsplashApiKey');
@@ -1564,7 +1578,7 @@ class VideoGenerator {
                     console.error('❌ Background image failed to load:', e);
                     reject(new Error('Failed to load background'));
                 };
-                img.src = '../assets/images/or.png';
+                img.src = '/assets/images/or.png';
             });
             this.assets.background = img;
         } catch (error) {
@@ -1576,9 +1590,9 @@ class VideoGenerator {
     async loadEngagementImages() {
         try {
             const imagesToLoad = {
-                'comment': '../assets/images/engagement/comment.svg',
-                'reject': '../assets/images/engagement/reject.svg',
-                'marry': '../assets/images/engagement/marry.svg'
+                'comment': '/assets/images/engagement/comment.svg',
+                'reject': '/assets/images/engagement/reject.svg',
+                'marry': '/assets/images/engagement/marry.svg'
             };
 
             for (const [key, path] of Object.entries(imagesToLoad)) {
@@ -1930,16 +1944,16 @@ class VideoGenerator {
 
     async loadAudioAssets() {
         try {
-            this.assets.music = new Audio('../assets/audio/music.mp3');
+            this.assets.music = new Audio('/assets/audio/music.mp3');
             await this.waitForAudioLoad(this.assets.music);
 
-            this.assets.clockSound = new Audio('../assets/audio/clock.mp3');
+            this.assets.clockSound = new Audio('/assets/audio/clock.mp3');
             await this.waitForAudioLoad(this.assets.clockSound);
 
-            this.assets.dingSound = new Audio('../assets/audio/ding.mp3');
+            this.assets.dingSound = new Audio('/assets/audio/ding.mp3');
             await this.waitForAudioLoad(this.assets.dingSound);
 
-            this.assets.swooshSound = new Audio('../assets/audio/swoosh.mp3');
+            this.assets.swooshSound = new Audio('/assets/audio/swoosh.mp3');
             await this.waitForAudioLoad(this.assets.swooshSound);
 
             console.log('All audio assets loaded successfully');
