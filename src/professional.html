@@ -15,10 +15,13 @@
                 <span>WouldYouRather Studio Pro</span>
             </div>
             <div class="pro-topbar-actions">
-                <button class="pro-btn pro-btn-ghost">💾 Save</button>
-                <button class="pro-btn pro-btn-ghost">📂 Load</button>
-                <button class="pro-btn pro-btn-primary" id="proGenerateBtn">✨ Generate Video</button>
-                <button class="pro-btn pro-btn-secondary" id="proDownloadBtn" disabled>📥 Export</button>
+                <button class="pro-btn pro-btn-ghost" id="saveConfigBtn">💾 Save</button>
+                <button class="pro-btn pro-btn-ghost" id="loadConfigBtn">📂 Load</button>
+                <input type="file" id="configFileInput" accept=".json" style="display: none;">
+                <button class="pro-btn pro-btn-ghost" id="promptManagerBtn">📝 Prompts</button>
+                <button class="pro-btn pro-btn-ghost" id="favoritesManagerBtn">⭐ Favorites</button>
+                <button class="pro-btn pro-btn-primary" id="generateBtn">✨ Generate Video</button>
+                <button class="pro-btn pro-btn-secondary" id="downloadBtn" disabled>📥 Export</button>
             </div>
         </nav>
 
@@ -39,40 +42,100 @@
             <div class="pro-tab-panel active" id="tab-timeline">
                 <div class="pro-tab-header">
                     <h2 class="pro-tab-title">Timeline & Questions</h2>
-                    <p class="pro-tab-description">Manage your video timeline and questions</p>
+                    <p class="pro-tab-description">Manage video timeline and timing</p>
                 </div>
                 <div class="pro-tab-content">
+                    <!-- Quick Actions -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">⚡ Quick Actions</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Timing Presets</label>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('fast')">⚡ Fast</button>
+                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('balanced')">⚖️ Balanced</button>
+                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('cinematic')">🎬 Cinematic</button>
+                                <button class="pro-btn pro-btn-secondary" onclick="videoGenerator.applyPreset('viral')">🔥 Viral</button>
+                            </div>
+                        </div>
+                        <div class="pro-form-group" style="margin-bottom: 0;">
+                            <label class="pro-label">Quick Tools</label>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.shuffleQuestions()">🔀 Shuffle</button>
+                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.copySettingsToClipboard()">📋 Copy</button>
+                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.exportStats()">📊 Stats</button>
+                                <button class="pro-btn pro-btn-ghost" onclick="videoGenerator.resetAllSettings()">🔄 Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Configuration -->
                     <div class="pro-card">
                         <div class="pro-card-header">
                             <h3 class="pro-card-title">Video Configuration</h3>
                         </div>
                         <div class="pro-form-group">
                             <label class="pro-label">Number of Questions</label>
-                            <input type="range" min="1" max="15" value="7" class="pro-slider" id="proQuestionCount">
+                            <input type="range" min="1" max="15" value="3" class="pro-slider" id="questionCount">
                             <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--pro-text-tertiary); margin-top: 4px;">
                                 <span>1</span>
-                                <span id="proQuestionCountValue">7</span>
+                                <span id="questionCountValue">3</span>
                                 <span>15</span>
                             </div>
                         </div>
-                        <div class="pro-form-group">
+                        <div class="pro-form-group" style="margin-bottom: 0;">
                             <label class="pro-label">Total Duration</label>
                             <div style="font-size: 24px; font-weight: 600; color: var(--pro-primary);" id="proTotalDuration">0:00</div>
                         </div>
                     </div>
 
+                    <!-- Advanced Timing Settings -->
                     <div class="pro-card">
                         <div class="pro-card-header">
-                            <h3 class="pro-card-title">Question Prompts</h3>
-                            <p class="pro-card-description">Choose random or custom prompts</p>
+                            <h3 class="pro-card-title">Advanced Timing</h3>
+                            <p class="pro-card-description">Fine-tune all animation timings (seconds)</p>
                         </div>
                         <div class="pro-form-group">
-                            <label class="pro-label">Prompt Source</label>
-                            <select class="pro-select" id="proPromptSource">
-                                <option value="auto">Auto-generate from library</option>
-                                <option value="custom">Use custom prompt</option>
-                                <option value="food">Food only mode</option>
-                            </select>
+                            <label class="pro-label">Delay Between Questions: <span id="questionDelayValue">1.0s</span></label>
+                            <input type="range" min="0" max="5" step="0.1" value="1.0" class="pro-slider" id="questionDelay">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Voice Start Delay: <span id="voiceDelayValue">0.5s</span></label>
+                            <input type="range" min="0" max="3" step="0.1" value="0.5" class="pro-slider" id="voiceDelay">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Option 1 Delay: <span id="option1DelayValue">0.2s</span></label>
+                            <input type="range" min="0" max="2" step="0.1" value="0.2" class="pro-slider" id="option1Delay">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Option 2 Delay: <span id="option2DelayValue">50%</span></label>
+                            <input type="range" min="0" max="100" step="5" value="50" class="pro-slider" id="option2Delay">
+                            <p class="pro-hint">% of voice duration before option 2 appears</p>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Clock Duration: <span id="clockDurationValue">3.0s</span></label>
+                            <input type="range" min="0.5" max="10" step="0.5" value="3.0" class="pro-slider" id="clockDuration">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Percentage Display: <span id="percentageDurationValue">2.0s</span></label>
+                            <input type="range" min="0.5" max="10" step="0.5" value="2.0" class="pro-slider" id="percentageDuration">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Engagement Duration: <span id="engagementDurationValue">3.0s</span></label>
+                            <input type="range" min="1" max="10" step="0.5" value="3.0" class="pro-slider" id="engagementDuration">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Swoosh Duration: <span id="swooshDurationValue">1.0s</span></label>
+                            <input type="range" min="0.2" max="3" step="0.1" value="1.0" class="pro-slider" id="swooshDuration">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Fade In Duration: <span id="fadeInDurationValue">0.5s</span></label>
+                            <input type="range" min="0.1" max="2" step="0.1" value="0.5" class="pro-slider" id="fadeInDuration">
+                        </div>
+                        <div class="pro-form-group" style="margin-bottom: 0;">
+                            <label class="pro-label">After-Voice Pause: <span id="afterVoicePauseValue">0.5s</span></label>
+                            <input type="range" min="0" max="3" step="0.1" value="0.5" class="pro-slider" id="afterVoicePause">
                         </div>
                     </div>
                 </div>
@@ -82,46 +145,147 @@
             <div class="pro-tab-panel" id="tab-assets">
                 <div class="pro-tab-header">
                     <h2 class="pro-tab-title">Media & Assets</h2>
-                    <p class="pro-tab-description">Manage images, audio, and prompts</p>
+                    <p class="pro-tab-description">Configure APIs, audio, and content</p>
                 </div>
                 <div class="pro-tab-content">
+                    <!-- API Configuration -->
                     <div class="pro-card">
                         <div class="pro-card-header">
                             <h3 class="pro-card-title">API Configuration</h3>
                         </div>
                         <div class="pro-form-group">
                             <label class="pro-label">Unsplash API Key</label>
-                            <input type="text" class="pro-input" id="proUnsplashKey" placeholder="Enter Unsplash API key">
+                            <input type="text" class="pro-input" id="unsplashKey" placeholder="Enter Unsplash API key">
                         </div>
-                        <div class="pro-form-group">
+                        <div class="pro-form-group" style="margin-bottom: 0;">
                             <label class="pro-label">ElevenLabs API Key</label>
-                            <input type="text" class="pro-input" id="proElevenlabsKey" placeholder="Enter ElevenLabs API key">
-                        </div>
-                        <div class="pro-form-group">
-                            <label class="pro-label">AI Voice</label>
-                            <select class="pro-select" id="proVoiceSelect">
-                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
-                                <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
-                                <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Male)</option>
-                            </select>
+                            <input type="text" class="pro-input" id="elevenlabsKey" placeholder="Enter ElevenLabs API key">
                         </div>
                     </div>
 
+                    <!-- Audio Settings -->
                     <div class="pro-card">
                         <div class="pro-card-header">
-                            <h3 class="pro-card-title">Audio Levels</h3>
+                            <h3 class="pro-card-title">Audio Settings</h3>
                         </div>
                         <div class="pro-form-group">
-                            <label class="pro-label">🎵 Music Volume: <span id="proMusicVolDisplay">30%</span></label>
-                            <input type="range" min="0" max="100" value="30" class="pro-slider" id="proMusicVol">
+                            <label class="pro-label">AI Voice</label>
+                            <select class="pro-select" id="voiceSelect">
+                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
+                                <option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option>
+                                <option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option>
+                                <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
+                                <option value="MF3mGyEYCl7XYWbV9V6O">Elli (Female)</option>
+                                <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Male)</option>
+                                <option value="VR6AewLTigWG4xSOukaG">Arnold (Male)</option>
+                                <option value="pNInz6obpgDQGcFmaJgB">Adam (Male)</option>
+                            </select>
                         </div>
                         <div class="pro-form-group">
-                            <label class="pro-label">🎤 Voice Volume: <span id="proVoiceVolDisplay">100%</span></label>
-                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="proVoiceVol">
+                            <label class="pro-label">🎵 Music Volume: <span id="volumeValue">30%</span></label>
+                            <input type="range" min="0" max="100" value="30" class="pro-slider" id="musicVolume">
                         </div>
                         <div class="pro-form-group">
-                            <label class="pro-label">🔊 Effects Volume: <span id="proEffectsVolDisplay">100%</span></label>
-                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="proEffectsVol">
+                            <label class="pro-label">🎤 Voice Volume: <span id="voiceVolDisplay">100%</span></label>
+                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="voiceVolSlider">
+                        </div>
+                        <div class="pro-form-group" style="margin-bottom: 0;">
+                            <label class="pro-label">🔊 Effects Volume: <span id="effectsVolDisplay">100%</span></label>
+                            <input type="range" min="0" max="100" value="100" class="pro-slider" id="effectsVolSlider">
+                        </div>
+                    </div>
+
+                    <!-- Prompt Source -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Prompt Source</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">
+                                <input type="radio" name="promptSource" value="auto" checked style="margin-right: 8px;">
+                                Auto-generate from library
+                            </label>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">
+                                <input type="radio" name="promptSource" value="custom" style="margin-right: 8px;">
+                                Use custom prompt
+                            </label>
+                        </div>
+                        <div id="customPromptSection" class="hidden" style="margin-top: 12px;">
+                            <input type="text" class="pro-input" id="customOption1" placeholder="Option 1 (e.g., Pizza)" style="margin-bottom: 8px;">
+                            <input type="text" class="pro-input" id="customOption2" placeholder="Option 2 (e.g., Burger)">
+                        </div>
+                    </div>
+
+                    <!-- Engagement Questions -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Engagement Questions</h3>
+                            <p class="pro-card-description">Insert custom engagement hooks</p>
+                        </div>
+                        <!-- Comment Engagement -->
+                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <label style="margin: 0; display: flex; align-items: center;">
+                                    <input type="checkbox" id="commentEngagement" checked style="margin-right: 8px;">
+                                    <span style="font-weight: 600; font-size: 13px;">💬 Comment</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
+                                    <input type="number" id="commentInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
+                                </div>
+                            </div>
+                            <input type="text" id="commentOption1" class="pro-input" placeholder="Option 1" value="Comment 'I love God'" style="margin-bottom: 6px; font-size: 12px;">
+                            <input type="text" id="commentOption2" class="pro-input" placeholder="Option 2" value="Reject the offer" style="font-size: 12px;">
+                        </div>
+
+                        <!-- Share Engagement -->
+                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <label style="margin: 0; display: flex; align-items: center;">
+                                    <input type="checkbox" id="shareEngagement" checked style="margin-right: 8px;">
+                                    <span style="font-weight: 600; font-size: 13px;">🔄 Share</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
+                                    <input type="number" id="shareInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
+                                </div>
+                            </div>
+                            <input type="text" id="shareOption1" class="pro-input" placeholder="Option 1" value="Always be alone" style="margin-bottom: 6px; font-size: 12px;">
+                            <input type="text" id="shareOption2" class="pro-input" placeholder="Option 2" value="Marry the 3rd person who clicks share" style="font-size: 12px;">
+                        </div>
+
+                        <!-- Follow Engagement -->
+                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <label style="margin: 0; display: flex; align-items: center;">
+                                    <input type="checkbox" id="followEngagement" checked style="margin-right: 8px;">
+                                    <span style="font-weight: 600; font-size: 13px;">👤 Follow</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
+                                    <input type="number" id="followInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
+                                </div>
+                            </div>
+                            <input type="text" id="followOption1" class="pro-input" placeholder="Option 1" value="Follow for more" style="margin-bottom: 6px; font-size: 12px;">
+                            <input type="text" id="followOption2" class="pro-input" placeholder="Option 2" value="Skip and regret it" style="font-size: 12px;">
+                        </div>
+
+                        <!-- Like Engagement -->
+                        <div class="pro-form-group" style="padding: 12px; border: 1px solid var(--pro-border); border-radius: 6px; margin-bottom: 0;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <label style="margin: 0; display: flex; align-items: center;">
+                                    <input type="checkbox" id="likeEngagement" checked style="margin-right: 8px;">
+                                    <span style="font-weight: 600; font-size: 13px;">❤️ Like</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 11px; color: var(--pro-text-tertiary);">After Q:</span>
+                                    <input type="number" id="likeInsertAfter" min="0" max="15" value="0" class="pro-input" style="width: 50px; padding: 4px; text-align: center; font-size: 12px;">
+                                </div>
+                            </div>
+                            <input type="text" id="likeOption1" class="pro-input" placeholder="Option 1" value="Like if you chose the first option" style="margin-bottom: 6px; font-size: 12px;">
+                            <input type="text" id="likeOption2" class="pro-input" placeholder="Option 2" value="Don't like and miss out" style="font-size: 12px;">
                         </div>
                     </div>
                 </div>
@@ -134,36 +298,183 @@
                     <p class="pro-tab-description">Customize animations, colors, and filters</p>
                 </div>
                 <div class="pro-tab-content">
+                    <!-- Text Animation -->
                     <div class="pro-card">
                         <div class="pro-card-header">
                             <h3 class="pro-card-title">Text Animation</h3>
                         </div>
                         <div class="pro-form-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="textAnimationEnabled" checked>
+                                <span class="checkbox-label">Enable Text Animation</span>
+                            </label>
+                        </div>
+                        <div class="pro-form-group">
                             <label class="pro-label">Animation Type</label>
-                            <select class="pro-select">
-                                <option value="bounce">Bounce</option>
+                            <select class="pro-select" id="textAnimationType">
+                                <option value="none">None</option>
+                                <option value="bounce" selected>Bounce</option>
                                 <option value="fade">Fade</option>
                                 <option value="slide">Slide</option>
                                 <option value="scale">Scale</option>
                             </select>
                         </div>
+                        <div class="pro-form-group" style="margin-bottom: 0;">
+                            <label class="pro-label">Animation Intensity: <span id="textAnimationIntensityValue">1.0</span></label>
+                            <input type="range" min="0" max="2" step="0.1" value="1.0" class="pro-slider" id="textAnimationIntensity">
+                        </div>
                     </div>
 
+                    <!-- Text Styling -->
                     <div class="pro-card">
                         <div class="pro-card-header">
-                            <h3 class="pro-card-title">Color Grading</h3>
+                            <h3 class="pro-card-title">Text Styling</h3>
                         </div>
                         <div class="pro-form-group">
-                            <label class="pro-label">Brightness: <span id="proBrightnessDisplay">100%</span></label>
-                            <input type="range" min="0" max="200" value="100" class="pro-slider">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="textUseGlow" checked>
+                                <span class="checkbox-label">Use Glow Effect</span>
+                            </label>
                         </div>
                         <div class="pro-form-group">
-                            <label class="pro-label">Contrast: <span id="proContrastDisplay">100%</span></label>
-                            <input type="range" min="0" max="200" value="100" class="pro-slider">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="textUseShadow">
+                                <span class="checkbox-label">Use Shadow Effect</span>
+                            </label>
                         </div>
                         <div class="pro-form-group">
-                            <label class="pro-label">Saturation: <span id="proSaturationDisplay">100%</span></label>
-                            <input type="range" min="0" max="200" value="100" class="pro-slider">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="textUseStroke" checked>
+                                <span class="checkbox-label">Use Stroke (Outline)</span>
+                            </label>
+                        </div>
+
+                        <!-- Shadow Settings -->
+                        <div id="shadowSettings" style="display: none; margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+                            <h4 style="font-size: 13px; margin-bottom: 12px; font-weight: 600;">Shadow Settings</h4>
+                            <div class="pro-form-group">
+                                <label class="pro-label">Shadow Blur: <span id="textShadowBlurValue">15px</span></label>
+                                <input type="range" min="0" max="50" step="1" value="15" class="pro-slider" id="textShadowBlur">
+                            </div>
+                            <div class="pro-form-group">
+                                <label class="pro-label">Shadow Offset X: <span id="textShadowOffsetXValue">3px</span></label>
+                                <input type="range" min="-20" max="20" step="1" value="3" class="pro-slider" id="textShadowOffsetX">
+                            </div>
+                            <div class="pro-form-group">
+                                <label class="pro-label">Shadow Offset Y: <span id="textShadowOffsetYValue">3px</span></label>
+                                <input type="range" min="-20" max="20" step="1" value="3" class="pro-slider" id="textShadowOffsetY">
+                            </div>
+                            <div class="pro-form-group" style="margin-bottom: 0;">
+                                <label class="pro-label">Shadow Color</label>
+                                <input type="color" value="#000000" class="pro-input" id="textShadowColor" style="height: 40px; cursor: pointer;">
+                            </div>
+                        </div>
+
+                        <!-- Stroke Settings -->
+                        <div id="strokeSettings" style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+                            <h4 style="font-size: 13px; margin-bottom: 12px; font-weight: 600;">Stroke Settings</h4>
+                            <div class="pro-form-group">
+                                <label class="pro-label">Stroke Width: <span id="textStrokeWidthValue">8px</span></label>
+                                <input type="range" min="0" max="20" step="1" value="8" class="pro-slider" id="textStrokeWidth">
+                            </div>
+                            <div class="pro-form-group" style="margin-bottom: 0;">
+                                <label class="pro-label">Stroke Color</label>
+                                <input type="color" value="#000000" class="pro-input" id="textStrokeColor" style="height: 40px; cursor: pointer;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Filters -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Canvas Filters</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Brightness: <span id="filterBrightnessValue">100%</span></label>
+                            <input type="range" min="0" max="200" value="100" class="pro-slider" id="filterBrightness">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Contrast: <span id="filterContrastValue">100%</span></label>
+                            <input type="range" min="0" max="200" value="100" class="pro-slider" id="filterContrast">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Saturation: <span id="filterSaturationValue">100%</span></label>
+                            <input type="range" min="0" max="200" value="100" class="pro-slider" id="filterSaturation">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Blur: <span id="filterBlurValue">0px</span></label>
+                            <input type="range" min="0" max="20" value="0" class="pro-slider" id="filterBlur">
+                        </div>
+                        <button class="pro-btn pro-btn-ghost" id="resetFiltersBtn" style="width: 100%;">Reset Filters</button>
+                    </div>
+
+                    <!-- Color Customization -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Color Customization</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Text Color</label>
+                            <input type="color" value="#00d4ff" class="pro-input" id="textColor" style="height: 40px; cursor: pointer;">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Glow Color</label>
+                            <input type="color" value="#00d4ff" class="pro-input" id="glowColor" style="height: 40px; cursor: pointer;">
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Percentage Win Color</label>
+                            <input type="color" value="#00ff88" class="pro-input" id="percentageWinColor" style="height: 40px; cursor: pointer;">
+                        </div>
+                        <div class="pro-form-group" style="margin-bottom: 0;">
+                            <label class="pro-label">Percentage Lose Color</label>
+                            <input type="color" value="#ff3366" class="pro-input" id="percentageLoseColor" style="height: 40px; cursor: pointer;">
+                        </div>
+                    </div>
+
+                    <!-- Image Shadow Settings -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Image Shadow</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="imageShadowEnabled" checked>
+                                <span class="checkbox-label">Enable Image Shadow</span>
+                            </label>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Shadow Blur: <span id="imageShadowBlurValue">40px</span></label>
+                            <input type="range" min="0" max="100" step="5" value="40" class="pro-slider" id="imageShadowBlur">
+                        </div>
+                        <div class="pro-form-group" style="margin-bottom: 0;">
+                            <label class="pro-label">Shadow Offset Y: <span id="imageShadowOffsetYValue">15px</span></label>
+                            <input type="range" min="0" max="50" step="1" value="15" class="pro-slider" id="imageShadowOffsetY">
+                        </div>
+                    </div>
+
+                    <!-- Animation Easing -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Animation Easing</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="pro-label">Slide Animation</label>
+                            <select class="pro-select" id="slideEasing">
+                                <option value="linear">Linear</option>
+                                <option value="ease" selected>Ease</option>
+                                <option value="ease-in">Ease In</option>
+                                <option value="ease-out">Ease Out</option>
+                                <option value="bounce">Bounce</option>
+                            </select>
+                        </div>
+                        <div class="pro-form-group" style="margin-bottom: 0;">
+                            <label class="pro-label">Fade Animation</label>
+                            <select class="pro-select" id="fadeEasing">
+                                <option value="linear">Linear</option>
+                                <option value="ease" selected>Ease</option>
+                                <option value="ease-in">Ease In</option>
+                                <option value="ease-out">Ease Out</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -182,7 +493,7 @@
                         </div>
                         <div class="pro-form-group">
                             <label class="pro-label">Quality Preset</label>
-                            <select class="pro-select" id="proExportQuality">
+                            <select class="pro-select" id="exportQuality">
                                 <option value="low">Low (2 Mbps)</option>
                                 <option value="medium">Medium (5 Mbps)</option>
                                 <option value="high" selected>High (8 Mbps)</option>
@@ -191,17 +502,34 @@
                         </div>
                         <div class="pro-form-group">
                             <label class="pro-label">Frame Rate</label>
-                            <select class="pro-select" id="proExportFPS">
+                            <select class="pro-select" id="exportFPS">
                                 <option value="24">24 FPS (Cinematic)</option>
                                 <option value="30" selected>30 FPS (Standard)</option>
                                 <option value="60">60 FPS (Smooth)</option>
                             </select>
                         </div>
-                        <div class="pro-form-group">
+                        <div class="pro-form-group" style="margin-bottom: 0;">
                             <label class="pro-label">Format</label>
-                            <select class="pro-select">
+                            <select class="pro-select" id="exportFormat">
                                 <option value="mp4">MP4 (H.264 + AAC)</option>
                             </select>
+                            <p class="pro-hint" style="margin-top: 8px;">High-quality H.264 video with AAC audio</p>
+                        </div>
+                    </div>
+
+                    <!-- Export Progress -->
+                    <div class="pro-card hidden" id="exportProgress">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Export Progress</h3>
+                        </div>
+                        <div style="padding: 0 24px 24px 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 13px; color: var(--pro-text-secondary);">Exporting...</span>
+                                <span style="font-size: 13px; font-weight: 600; color: var(--pro-primary);" id="exportPercentage">0%</span>
+                            </div>
+                            <div class="pro-progress-bar">
+                                <div class="pro-progress-fill" id="exportProgressFill" style="width: 0%;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -214,12 +542,65 @@
                     <p class="pro-tab-description">App preferences and advanced options</p>
                 </div>
                 <div class="pro-tab-content">
+                    <!-- Food Only Mode -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">🍕 Food Only Mode</h3>
+                            <p class="pro-card-description">Use 500+ delicious food prompts only</p>
+                        </div>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="foodOnlyMode">
+                            <span class="checkbox-label">Enable Food Only Mode</span>
+                        </label>
+                    </div>
+
+                    <!-- Keyboard Shortcuts -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">⌨️ Keyboard Shortcuts</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="keyboardShortcutsToggle" checked>
+                                <span class="checkbox-label">Enable Keyboard Shortcuts</span>
+                            </label>
+                        </div>
+                        <div style="background: rgba(0, 217, 255, 0.05); padding: 12px; border-radius: 6px; border-left: 2px solid var(--pro-primary); font-size: 12px; line-height: 1.8;">
+                            <strong>Shortcuts:</strong><br>
+                            <span style="font-family: monospace; font-size: 11px; color: var(--pro-text-secondary);">
+                            Space=Play/Pause • R=Restart • F=Fullscreen • M=Mute<br>
+                            ←/→=Seek 5s • 0-9=Jump % • G=Generate • Ctrl+S=Save
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Features -->
+                    <div class="pro-card">
+                        <div class="pro-card-header">
+                            <h3 class="pro-card-title">Advanced Features</h3>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="autoPauseOnBlur" checked>
+                                <span class="checkbox-label">Auto-pause when tab unfocused</span>
+                            </label>
+                        </div>
+                        <div class="pro-form-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="snapToQuestion">
+                                <span class="checkbox-label">Snap timeline to questions</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Preferences -->
                     <div class="pro-card">
                         <div class="pro-card-header">
                             <h3 class="pro-card-title">Preferences</h3>
                         </div>
-                        <button class="pro-btn pro-btn-secondary" style="width: 100%; margin-bottom: 8px;">Reset All Settings</button>
-                        <button class="pro-btn pro-btn-secondary" style="width: 100%;">Clear Cache</button>
+                        <button class="pro-btn pro-btn-secondary" id="themeToggle" style="width: 100%; margin-bottom: 8px;">🌓 Toggle Theme</button>
+                        <button class="pro-btn pro-btn-secondary" style="width: 100%; margin-bottom: 8px;">🔄 Reset All Settings</button>
+                        <button class="pro-btn pro-btn-secondary" style="width: 100%;">🗑️ Clear Cache</button>
                     </div>
                 </div>
             </div>
@@ -227,13 +608,64 @@
             <!-- PREVIEW AREA -->
             <div class="pro-preview-area">
                 <div class="pro-preview-container">
-                    <canvas id="proPreviewCanvas" width="1080" height="1920"></canvas>
-                    <div class="pro-preview-overlay" id="proPreviewOverlay">
+                    <canvas id="previewCanvas" width="1080" height="1920"></canvas>
+                    <div class="pro-preview-overlay" id="previewOverlay">
                         <div class="pro-preview-overlay-icon">🎬</div>
                         <div style="text-align: center;">
                             <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Professional Video Preview</div>
                             <div style="font-size: 13px; color: var(--pro-text-secondary);">Click "Generate Video" to start</div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Playback Speed & Zoom -->
+                <div style="padding: 12px; background: var(--pro-bg-darker); border-top: 1px solid var(--pro-border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: block;">Playback Speed</label>
+                        <select id="playbackSpeed" class="pro-select" style="font-size: 12px; height: 32px;">
+                            <option value="0.25">0.25x</option>
+                            <option value="0.5">0.5x</option>
+                            <option value="0.75">0.75x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: block;">Canvas Zoom</label>
+                        <select id="canvasZoom" class="pro-select" style="font-size: 12px; height: 32px;">
+                            <option value="0.5">50%</option>
+                            <option value="0.75">75%</option>
+                            <option value="1" selected>100%</option>
+                            <option value="1.25">125%</option>
+                            <option value="1.5">150%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Individual Volume Controls -->
+                <div style="padding: 12px; background: var(--pro-bg-darker); border-top: 1px solid var(--pro-border);">
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between;">
+                            <span>🎵 Music</span>
+                            <span id="musicVolDisplay">30%</span>
+                        </label>
+                        <input type="range" min="0" max="100" value="30" class="pro-slider" id="musicVolSlider">
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between;">
+                            <span>🎤 Voice</span>
+                            <span id="voiceVolDisplay2">100%</span>
+                        </label>
+                        <input type="range" min="0" max="100" value="100" class="pro-slider" id="voiceVolSlider2">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: var(--pro-text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between;">
+                            <span>🔊 Effects</span>
+                            <span id="effectsVolDisplay2">100%</span>
+                        </label>
+                        <input type="range" min="0" max="100" value="100" class="pro-slider" id="effectsVolSlider2">
                     </div>
                 </div>
             </div>
@@ -242,80 +674,180 @@
         <!-- TIMELINE AREA -->
         <div class="pro-timeline-area">
             <div class="pro-timeline-toolbar">
-                <button class="pro-btn pro-btn-icon" id="proPlayBtn" disabled>▶️</button>
-                <button class="pro-btn pro-btn-icon" id="proPauseBtn" disabled>⏸️</button>
-                <button class="pro-btn pro-btn-icon" id="proRestartBtn" disabled>🔄</button>
+                <button class="pro-btn pro-btn-icon" id="playBtn" disabled>▶️</button>
+                <button class="pro-btn pro-btn-icon" id="pauseBtn" disabled>⏸️</button>
+                <button class="pro-btn pro-btn-icon" id="restartBtn" disabled>🔄</button>
+                <button class="pro-btn pro-btn-icon" id="framePrevBtn" disabled>⏮️</button>
+                <button class="pro-btn pro-btn-icon" id="frameNextBtn" disabled>⏭️</button>
                 <div style="flex: 1; margin: 0 16px;">
-                    <input type="range" min="0" max="100" value="0" class="pro-slider" id="proTimelineScrubber" disabled>
+                    <input type="range" min="0" max="100" value="0" class="pro-slider" id="timelineScrubber" disabled>
                 </div>
-                <span style="font-size: 13px; color: var(--pro-text-secondary);" id="proTimeDisplay">0:00 / 0:00</span>
-                <button class="pro-btn pro-btn-icon" id="proMuteBtn">🔇</button>
-                <button class="pro-btn pro-btn-icon" id="proFullscreenBtn">⛶</button>
+                <span style="font-size: 13px; color: var(--pro-text-secondary);" id="currentTimeDisplay">0:00</span>
+                <span style="font-size: 13px; color: var(--pro-text-tertiary); margin: 0 8px;">/</span>
+                <span style="font-size: 13px; color: var(--pro-text-secondary);" id="totalTimeDisplay">0:00</span>
+                <button class="pro-btn pro-btn-icon" id="bookmarkBtn" disabled>⭐</button>
+                <button class="pro-btn pro-btn-icon" id="loopBtn">🔁</button>
+                <button class="pro-btn pro-btn-icon" id="muteBtn">🔇</button>
+                <button class="pro-btn pro-btn-icon" id="fullscreenBtn">⛶</button>
             </div>
             <div class="pro-timeline-content">
-                <div class="pro-timeline-track" id="proTimelineTrack">
+                <div class="pro-timeline-track" id="timelineMarkers">
                     <!-- Question blocks will be added here dynamically -->
+                </div>
+                <div style="display: flex; gap: 12px; padding: 8px 16px; align-items: center;">
+                    <span style="font-size: 12px; color: var(--pro-text-tertiary);" id="questionCounter">Question 0 / 0</span>
+                    <button class="pro-btn pro-btn-ghost" style="margin-left: auto; font-size: 11px; padding: 4px 12px;" id="clearBookmarksBtn">Clear Bookmarks</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Status Panel -->
-    <div class="pro-status-panel hidden" id="proStatusPanel">
-        <div id="proStatusText">Processing...</div>
+    <div class="pro-status-panel hidden" id="statusPanel">
+        <div id="statusText">Processing...</div>
         <div class="pro-progress-bar">
-            <div class="pro-progress-fill" id="proProgressFill" style="width: 0%;"></div>
+            <div class="pro-progress-fill" id="progressFill" style="width: 0%;"></div>
         </div>
     </div>
 
+    <!-- Auto-save Indicator -->
+    <div id="autoSaveIndicator" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 16px; background: var(--pro-success); color: white; border-radius: var(--pro-radius-md); font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000;">
+        ✓ Auto-saved
+    </div>
+
+    <!-- Prompt Manager Modal (will be added via JS) -->
+    <div id="promptManagerModal" class="hidden"></div>
+
     <!-- Scripts -->
+    <!-- FFmpeg.wasm for proper video encoding with perfect audio sync -->
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+
+    <script src="config.js"></script>
+    <script src="js/prompt-manager.js"></script>
+    <script src="js/engagement-manager.js"></script>
+    <script src="js/video-generator.js"></script>
+    <script src="js/app.js"></script>
+
     <script>
         // Tab switching
         document.querySelectorAll('.pro-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tab = btn.dataset.tab;
-
-                // Update buttons
                 document.querySelectorAll('.pro-tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-
-                // Update panels
                 document.querySelectorAll('.pro-tab-panel').forEach(p => p.classList.remove('active'));
                 document.getElementById(`tab-${tab}`).classList.add('active');
             });
         });
 
-        // Volume sliders
+        // Slider value updates
         const updateSlider = (sliderId, displayId) => {
             const slider = document.getElementById(sliderId);
             const display = document.getElementById(displayId);
-            slider.addEventListener('input', (e) => {
-                display.textContent = e.target.value + '%';
-            });
+            if (slider && display) {
+                slider.addEventListener('input', (e) => {
+                    let val = e.target.value;
+                    if (sliderId.includes('Delay') || sliderId.includes('Duration') || sliderId.includes('Pause')) {
+                        display.textContent = val + 's';
+                    } else if (sliderId.includes('option2Delay')) {
+                        display.textContent = val + '%';
+                    } else if (sliderId.includes('Volume') || sliderId.includes('Vol')) {
+                        display.textContent = val + '%';
+                    } else if (sliderId.includes('filter') || sliderId.includes('Intensity')) {
+                        display.textContent = sliderId.includes('Blur') ? val + 'px' : val + (sliderId.includes('Intensity') ? '' : '%');
+                    } else if (sliderId.includes('Shadow') || sliderId.includes('Stroke')) {
+                        display.textContent = val + 'px';
+                    } else {
+                        display.textContent = val;
+                    }
+                });
+            }
         };
 
-        updateSlider('proMusicVol', 'proMusicVolDisplay');
-        updateSlider('proVoiceVol', 'proVoiceVolDisplay');
-        updateSlider('proEffectsVol', 'proEffectsVolDisplay');
+        // Initialize all sliders
+        updateSlider('questionCount', 'questionCountValue');
+        updateSlider('questionDelay', 'questionDelayValue');
+        updateSlider('voiceDelay', 'voiceDelayValue');
+        updateSlider('option1Delay', 'option1DelayValue');
+        updateSlider('option2Delay', 'option2DelayValue');
+        updateSlider('clockDuration', 'clockDurationValue');
+        updateSlider('percentageDuration', 'percentageDurationValue');
+        updateSlider('engagementDuration', 'engagementDurationValue');
+        updateSlider('swooshDuration', 'swooshDurationValue');
+        updateSlider('fadeInDuration', 'fadeInDurationValue');
+        updateSlider('afterVoicePause', 'afterVoicePauseValue');
+        updateSlider('musicVolume', 'volumeValue');
+        updateSlider('textAnimationIntensity', 'textAnimationIntensityValue');
+        updateSlider('textShadowBlur', 'textShadowBlurValue');
+        updateSlider('textShadowOffsetX', 'textShadowOffsetXValue');
+        updateSlider('textShadowOffsetY', 'textShadowOffsetYValue');
+        updateSlider('textStrokeWidth', 'textStrokeWidthValue');
+        updateSlider('filterBrightness', 'filterBrightnessValue');
+        updateSlider('filterContrast', 'filterContrastValue');
+        updateSlider('filterSaturation', 'filterSaturationValue');
+        updateSlider('filterBlur', 'filterBlurValue');
+        updateSlider('imageShadowBlur', 'imageShadowBlurValue');
+        updateSlider('imageShadowOffsetY', 'imageShadowOffsetYValue');
 
-        // Question count
-        document.getElementById('proQuestionCount').addEventListener('input', (e) => {
-            document.getElementById('proQuestionCountValue').textContent = e.target.value;
+        // Dual volume controls sync
+        const musicVolSlider = document.getElementById('musicVolSlider');
+        const musicVolDisplay = document.getElementById('musicVolDisplay');
+        if (musicVolSlider && musicVolDisplay) {
+            musicVolSlider.addEventListener('input', (e) => {
+                musicVolDisplay.textContent = e.target.value + '%';
+            });
+        }
+
+        const voiceVolSlider2 = document.getElementById('voiceVolSlider2');
+        const voiceVolDisplay2 = document.getElementById('voiceVolDisplay2');
+        if (voiceVolSlider2 && voiceVolDisplay2) {
+            voiceVolSlider2.addEventListener('input', (e) => {
+                voiceVolDisplay2.textContent = e.target.value + '%';
+            });
+        }
+
+        const effectsVolSlider2 = document.getElementById('effectsVolSlider2');
+        const effectsVolDisplay2 = document.getElementById('effectsVolDisplay2');
+        if (effectsVolSlider2 && effectsVolDisplay2) {
+            effectsVolSlider2.addEventListener('input', (e) => {
+                effectsVolDisplay2.textContent = e.target.value + '%';
+            });
+        }
+
+        // Custom prompt section toggle
+        document.querySelectorAll('input[name="promptSource"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const customSection = document.getElementById('customPromptSection');
+                if (e.target.value === 'custom') {
+                    customSection.classList.remove('hidden');
+                } else {
+                    customSection.classList.add('hidden');
+                }
+            });
         });
 
+        // Shadow settings toggle
+        const shadowCheckbox = document.getElementById('textUseShadow');
+        const shadowSettings = document.getElementById('shadowSettings');
+        if (shadowCheckbox && shadowSettings) {
+            shadowCheckbox.addEventListener('change', (e) => {
+                shadowSettings.style.display = e.target.checked ? 'block' : 'none';
+            });
+        }
+
         // Initialize canvas
-        const canvas = document.getElementById('proPreviewCanvas');
+        const canvas = document.getElementById('previewCanvas');
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#0a0a0a';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 60px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('Professional Preview', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Professional Studio', canvas.width / 2, canvas.height / 2);
 
         console.log('🎬 WouldYouRather Studio Pro loaded!');
-        console.log('📌 This is a DEMO of the professional interface');
-        console.log('✨ Full functionality will be integrated next');
+        console.log('✨ All features integrated into professional UI');
     </script>
 </body>
 </html>

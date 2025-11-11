@@ -487,3 +487,29 @@ body {
     transform: translateY(-2px);
     box-shadow: var(--pro-shadow-md);
 }
+
+/* === CHECKBOXES === */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    margin-left: var(--pro-spacing-xs);
+    font-size: 13px;
+    color: var(--pro-text-primary);
+    user-select: none;
+}
+
+/* === HINTS === */
+.pro-hint {
+    font-size: 11px;
+    color: var(--pro-text-tertiary);
+    margin: 0;
+}
+
+/* === UTILITIES === */
+.hidden {
+    display: none !important;
+}
