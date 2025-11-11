@@ -507,6 +507,17 @@ class VideoGenerator {
             this.triggerAutoSave();
         });
 
+        // Initialize colors from HTML inputs
+        const textColorInput = document.getElementById('textColor');
+        const glowColorInput = document.getElementById('glowColor');
+        const percentageWinInput = document.getElementById('percentageWinColor');
+        const percentageLoseInput = document.getElementById('percentageLoseColor');
+
+        if (textColorInput) this.customColors.text = textColorInput.value;
+        if (glowColorInput) this.customColors.glow = glowColorInput.value;
+        if (percentageWinInput) this.customColors.percentageWin = percentageWinInput.value;
+        if (percentageLoseInput) this.customColors.percentageLose = percentageLoseInput.value;
+
         // Animation easing
         document.getElementById('slideEasing')?.addEventListener('change', (e) => {
             this.animationEasing.slide = e.target.value;
