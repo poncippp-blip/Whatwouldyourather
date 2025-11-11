@@ -2,6 +2,18 @@
 
 A professional-grade SaaS platform for generating viral "Would You Rather" videos with AI-powered voiceovers, engagement hooks, and automated content creation.
 
+## 🔥 Latest Updates (Nov 2025)
+
+### ✅ Video Export FIXED
+- **Added background music** to MP4 exports (was completely missing!)
+- **Fixed FFmpeg Worker CORS** errors with custom server.py
+- **Fixed audio volume controls** - voice and effects volumes now properly applied
+- **Replaced broken MediaRecorder** with FFmpeg.wasm for perfect sync
+- **Professional MP4 export** with H.264 video + AAC audio @ 192kbps
+
+### ⚠️ IMPORTANT: Server Required
+You **MUST** use `python3 server.py` to run this app. Opening `index.html` directly will NOT work due to FFmpeg.wasm requirements.
+
 ## 🚀 Features
 
 ### Core Features
@@ -111,16 +123,23 @@ Option 2: Enter keys directly in the UI (saved to localStorage)
 
 ### 4. Launch
 
-Open `src/index.html` in your browser or serve with a local server:
+**CRITICAL:** You MUST use the provided `server.py` script for FFmpeg.wasm to work:
+
 ```bash
-# Using Python
-python -m http.server 8000
-
-# Using Node.js
-npx serve
-
-# Then navigate to http://localhost:8000/src/
+cd src
+python3 server.py
 ```
+
+Then navigate to **http://localhost:8080**
+
+**⚠️ DO NOT open index.html directly (`file://`) - it will NOT work!**
+
+Why? FFmpeg.wasm requires:
+- SharedArrayBuffer (needs special CORS headers)
+- Web Workers (blocked on `file://` protocol)
+- Proper CORS for CDN resources
+
+The `server.py` script sets up these headers automatically.
 
 ## 📝 How It Works
 
