@@ -3535,18 +3535,14 @@ class VideoGenerator {
         if (textAnimationType) textAnimationType.value = this.textAnimation.type;
 
         // Text style
-        const useGlow = document.getElementById('useGlow');
+        const useGlow = document.getElementById('textUseGlow');
         if (useGlow) useGlow.checked = this.textStyle.useGlow;
 
-        const useShadow = document.getElementById('useShadow');
+        const useShadow = document.getElementById('textUseShadow');
         if (useShadow) useShadow.checked = this.textStyle.useShadow;
 
-        const useStroke = document.getElementById('useStroke');
+        const useStroke = document.getElementById('textUseStroke');
         if (useStroke) useStroke.checked = this.textStyle.useStroke;
-
-        // Color pickers
-        const bgColorPicker = document.getElementById('bgColorPicker');
-        if (bgColorPicker) bgColorPicker.value = this.backgroundColor;
 
         console.log('✅ UI updated from settings');
     }
