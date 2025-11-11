@@ -1221,156 +1221,253 @@ class VideoGenerator {
         }
 
         try {
-            this.updateStatus('📹 Recording video...', 0);
+            this.updateStatus('🔧 Initializing FFmpeg...', 0);
             this.downloadBtn.disabled = true;
+
+            // Initialize FFmpeg
+            const { FFmpeg } = FFmpegWASM;
+            const { fetchFile, toBlobURL } = FFmpegUtil;
+
+            const ffmpeg = new FFmpeg();
+
+            // Load FFmpeg with progress
+            ffmpeg.on('log', ({ message }) => {
+                console.log(message);
+            });
+
+            ffmpeg.on('progress', ({ progress }) => {
+                if (progress > 0 && progress < 1) {
+                    this.updateStatus(`🎬 Encoding video... ${Math.floor(progress * 100)}%`, 50 + (progress * 40));
+                }
+            });
+
+            const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd';
+            await ffmpeg.load({
+                coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            });
+
+            this.updateStatus('📹 Rendering frames...', 5);
 
             // Reset to start
             this.pause();
             this.currentTime = 0;
-            if (this.assets.music) this.assets.music.currentTime = 0;
-            for (const question of this.assets.questions) {
-                if (question.voice) question.voice.currentTime = 0;
-            }
 
-            // Create canvas stream
-            const canvasStream = this.canvas.captureStream(30); // 30 fps
+            // Render video frame by frame
+            const fps = 30;
+            const totalFrames = Math.ceil(this.timeline.totalDuration * fps);
+            const frames = [];
 
-            // Create audio context to mix all audio sources
-            const audioContext = new AudioContext();
-            const audioDestination = audioContext.createMediaStreamDestination();
+            console.log(`Rendering ${totalFrames} frames at ${fps} fps for ${this.timeline.totalDuration.toFixed(2)}s video`);
 
-            // Add music to mix
-            if (this.assets.music) {
-                const musicSource = audioContext.createMediaElementSource(this.assets.music);
-                musicSource.connect(audioDestination);
-                musicSource.connect(audioContext.destination); // Also play through speakers
-            }
+            for (let frameNum = 0; frameNum < totalFrames; frameNum++) {
+                const time = frameNum / fps;
+                this.renderFrame(time);
 
-            // Add question voices to mix
-            for (const question of this.assets.questions) {
-                if (question.voice) {
-                    const voiceSource = audioContext.createMediaElementSource(question.voice);
-                    voiceSource.connect(audioDestination);
+                // Convert canvas to blob
+                const blob = await new Promise(resolve => this.canvas.toBlob(resolve, 'image/png'));
+                const arrayBuffer = await blob.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
+
+                // Write frame to FFmpeg
+                const filename = `frame${frameNum.toString().padStart(6, '0')}.png`;
+                await ffmpeg.writeFile(filename, uint8Array);
+                frames.push(filename);
+
+                // Update progress
+                const progress = (frameNum / totalFrames) * 40;
+                if (frameNum % 10 === 0) {
+                    this.updateStatus(`📹 Rendering frames... ${frameNum}/${totalFrames}`, 5 + progress);
                 }
             }
 
-            // Combine video and audio streams
-            const combinedStream = new MediaStream([
-                ...canvasStream.getVideoTracks(),
-                ...audioDestination.stream.getAudioTracks()
-            ]);
+            this.updateStatus('🎵 Processing audio...', 45);
 
-            // Set up MediaRecorder
-            const chunks = [];
-            const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9')
-                ? 'video/webm; codecs=vp9'
-                : 'video/webm';
+            // Extract and write audio files
+            const audioFiles = [];
 
-            const mediaRecorder = new MediaRecorder(combinedStream, {
-                mimeType: mimeType,
-                videoBitsPerSecond: 5000000 // 5 Mbps
-            });
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    chunks.push(e.data);
-                }
-            };
-
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `would-you-rather-${Date.now()}.webm`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                this.updateStatus('✅ Video downloaded!', 100);
-                setTimeout(() => {
-                    this.statusPanel.classList.add('hidden');
-                    this.downloadBtn.disabled = false;
-                }, 2000);
-            };
-
-            // Start recording
-            mediaRecorder.start();
-            this.updateStatus('📹 Recording video...', 10);
-
-            // Play the video and monitor progress
-            this.isPlaying = true;
-            this.startTime = Date.now();
-            this.animate();
-
-            // Start all audio
+            // Background music
             if (this.assets.music) {
-                this.assets.music.loop = true;
-                this.assets.music.volume = this.musicVolume;
-                this.assets.music.play();
+                try {
+                    const musicBlob = await fetch(this.assets.music.src).then(r => r.blob());
+                    const musicData = new Uint8Array(await musicBlob.arrayBuffer());
+                    await ffmpeg.writeFile('music.mp3', musicData);
+                    audioFiles.push({
+                        file: 'music.mp3',
+                        volume: this.musicVolume,
+                        start: 0,
+                        duration: this.timeline.totalDuration
+                    });
+                } catch (e) {
+                    console.warn('Failed to load music:', e);
+                }
             }
 
-            // Schedule all audio events
+            // Question voices
+            for (let i = 0; i < this.assets.questions.length; i++) {
+                const question = this.assets.questions[i];
+                const qt = this.timeline.questions[i];
+
+                if (question.voice && question.voice.src) {
+                    try {
+                        const voiceBlob = await fetch(question.voice.src).then(r => r.blob());
+                        const voiceData = new Uint8Array(await voiceBlob.arrayBuffer());
+                        const voiceFilename = `voice${i}.mp3`;
+                        await ffmpeg.writeFile(voiceFilename, voiceData);
+                        audioFiles.push({
+                            file: voiceFilename,
+                            volume: 1.0,
+                            start: qt.voiceStart,
+                            duration: question.voice.duration
+                        });
+                    } catch (e) {
+                        console.warn(`Failed to load voice ${i}:`, e);
+                    }
+                }
+            }
+
+            // Sound effects
+            const soundEffects = [
+                { asset: this.assets.clockSound, name: 'clock' },
+                { asset: this.assets.dingSound, name: 'ding' },
+                { asset: this.assets.swooshSound, name: 'swoosh' }
+            ];
+
+            for (const { asset, name } of soundEffects) {
+                if (asset && asset.src) {
+                    try {
+                        const blob = await fetch(asset.src).then(r => r.blob());
+                        const data = new Uint8Array(await blob.arrayBuffer());
+                        await ffmpeg.writeFile(`${name}.mp3`, data);
+                    } catch (e) {
+                        console.warn(`Failed to load ${name} sound:`, e);
+                    }
+                }
+            }
+
+            // Schedule sound effects
             for (let i = 0; i < this.timeline.questions.length; i++) {
                 const qt = this.timeline.questions[i];
-                const question = this.assets.questions[i];
-
-                if (question.voice) {
-                    setTimeout(() => {
-                        if (this.isPlaying) {
-                            question.voice.play().catch(e => console.log('Voice play error:', e));
-                        }
-                    }, qt.voiceStart * 1000);
-                }
 
                 if (this.assets.clockSound) {
-                    setTimeout(() => {
-                        if (this.isPlaying) {
-                            const clockClone = this.assets.clockSound.cloneNode();
-                            clockClone.play().catch(e => console.log('Clock play error:', e));
-                        }
-                    }, qt.clockStart * 1000);
+                    audioFiles.push({
+                        file: 'clock.mp3',
+                        volume: 0.7,
+                        start: qt.clockStart,
+                        duration: 3.0
+                    });
                 }
 
                 if (this.assets.dingSound) {
-                    setTimeout(() => {
-                        if (this.isPlaying) {
-                            const dingClone = this.assets.dingSound.cloneNode();
-                            dingClone.play().catch(e => console.log('Ding play error:', e));
-                        }
-                    }, qt.dingStart * 1000);
+                    audioFiles.push({
+                        file: 'ding.mp3',
+                        volume: 0.8,
+                        start: qt.dingStart,
+                        duration: 0.5
+                    });
                 }
 
                 if (this.assets.swooshSound) {
-                    setTimeout(() => {
-                        if (this.isPlaying) {
-                            const swooshClone = this.assets.swooshSound.cloneNode();
-                            swooshClone.play().catch(e => console.log('Swoosh play error:', e));
-                        }
-                    }, qt.swooshStart * 1000);
+                    audioFiles.push({
+                        file: 'swoosh.mp3',
+                        volume: 0.6,
+                        start: qt.swooshStart,
+                        duration: 1.0
+                    });
                 }
             }
 
-            // Update progress during recording
-            const progressInterval = setInterval(() => {
-                if (this.isPlaying) {
-                    const progress = (this.currentTime / this.timeline.totalDuration) * 90;
-                    this.updateStatus(`📹 Recording video... ${Math.floor(progress)}%`, 10 + progress);
-                }
-            }, 100);
+            this.updateStatus('🎬 Encoding video with audio...', 50);
 
-            // Stop recording when video ends
+            // Build FFmpeg audio filter for mixing
+            let audioInputs = '';
+            let filterComplex = '';
+            let audioMapCount = 0;
+
+            // Add each audio file with delay and trim
+            for (let i = 0; i < audioFiles.length; i++) {
+                const { file, volume, start, duration } = audioFiles[i];
+                audioInputs += ` -i ${file}`;
+
+                // Create audio stream with delay, volume, and duration
+                const delayMs = Math.floor(start * 1000);
+                filterComplex += `[${i + 1}:a]volume=${volume},adelay=${delayMs}|${delayMs}[a${i}];`;
+                audioMapCount++;
+            }
+
+            // Mix all audio streams
+            if (audioMapCount > 0) {
+                const audioStreams = Array.from({ length: audioMapCount }, (_, i) => `[a${i}]`).join('');
+                filterComplex += `${audioStreams}amix=inputs=${audioMapCount}:duration=longest:dropout_transition=2[aout]`;
+            }
+
+            // Build FFmpeg command
+            let ffmpegArgs = [
+                '-framerate', fps.toString(),
+                '-i', 'frame%06d.png'
+            ];
+
+            if (audioFiles.length > 0) {
+                ffmpegArgs.push(...audioInputs.split(' ').filter(s => s));
+                ffmpegArgs.push('-filter_complex', filterComplex);
+                ffmpegArgs.push('-map', '0:v');
+                ffmpegArgs.push('-map', '[aout]');
+            }
+
+            ffmpegArgs.push(
+                '-c:v', 'libx264',
+                '-preset', 'medium',
+                '-crf', '23',
+                '-pix_fmt', 'yuv420p'
+            );
+
+            if (audioFiles.length > 0) {
+                ffmpegArgs.push('-c:a', 'aac', '-b:a', '192k');
+            }
+
+            ffmpegArgs.push(
+                '-t', this.timeline.totalDuration.toString(),
+                '-y',
+                'output.mp4'
+            );
+
+            console.log('FFmpeg command:', ffmpegArgs.join(' '));
+
+            // Run FFmpeg
+            await ffmpeg.exec(ffmpegArgs);
+
+            this.updateStatus('💾 Preparing download...', 95);
+
+            // Read output file
+            const data = await ffmpeg.readFile('output.mp4');
+            const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+            const url = URL.createObjectURL(videoBlob);
+
+            // Download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `would-you-rather-${Date.now()}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Cleanup
+            for (const frame of frames) {
+                await ffmpeg.deleteFile(frame);
+            }
+
+            this.updateStatus('✅ Video downloaded!', 100);
             setTimeout(() => {
-                clearInterval(progressInterval);
-                this.pause();
-                mediaRecorder.stop();
-                audioContext.close();
-            }, this.timeline.totalDuration * 1000 + 500);
+                this.statusPanel.classList.add('hidden');
+                this.downloadBtn.disabled = false;
+            }, 2000);
+
+            console.log('✅ Video export completed successfully!');
 
         } catch (error) {
             console.error('Download error:', error);
-            alert('Error downloading video: ' + error.message);
+            alert('Error downloading video: ' + error.message + '\n\nPlease check the console for more details.');
             this.downloadBtn.disabled = false;
             this.statusPanel.classList.add('hidden');
         }
