@@ -8,6 +8,7 @@ Serves from project root to access both src/ and assets/ directories
 import http.server
 import socketserver
 import os
+from urllib.parse import unquote
 
 class CORSRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -20,14 +21,25 @@ class CORSRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', '*')
         super().end_headers()
 
-    def translate_path(self, path):
-        # Serve index.html from /src/ as the root
+    def do_GET(self):
+        # Decode the URL path
+        path = unquote(self.path.split('?')[0])
+
+        # Map root to index.html
         if path == '/':
-            path = '/src/index.html'
-        elif not path.startswith('/assets/') and not path.startswith('/src/'):
-            # Redirect all other paths to /src/
-            path = '/src' + path
-        return super().translate_path(path)
+            self.path = '/src/index.html'
+        # Keep /assets/ paths as-is
+        elif path.startswith('/assets/'):
+            self.path = path
+        # Keep /src/ paths as-is
+        elif path.startswith('/src/'):
+            self.path = path
+        # All other paths go to /src/
+        else:
+            self.path = '/src' + path
+
+        # Call parent GET handler
+        return super().do_GET()
 
 PORT = 8080
 
@@ -37,12 +49,20 @@ os.chdir('/home/user/Whatwouldyourather')
 Handler = CORSRequestHandler
 
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    print("="*40)
+    print(" WouldYouRather.ai Video Generator")
+    print(" Starting server with CORS headers...")
+    print("="*40)
+    print()
     print(f"🚀 Server running at http://localhost:{PORT}")
     print(f"✨ FFmpeg.wasm CORS headers enabled")
     print(f"📂 Serving from: {os.getcwd()}")
-    print(f"📂 index.html: /src/index.html")
-    print(f"📂 assets: /assets/")
-    print("\nPress Ctrl+C to stop")
+    print(f"📂 Root: {os.getcwd()}/src/index.html")
+    print(f"📂 Assets: {os.getcwd()}/assets/")
+    print()
+    print("Press Ctrl+C to stop the server")
+    print("="*40)
+    print()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

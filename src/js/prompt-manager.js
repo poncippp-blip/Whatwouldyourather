@@ -3,6 +3,7 @@
 class PromptManager {
     constructor() {
         // Simple Fast Foods - Only basic, common fast foods (no complex combinations)
+        // Each pair is DIFFERENT types of food for variety
         this.simpleFastFoodPrompts = [
             ['Pizza', 'Burger'],
             ['Fries', 'Onion Rings'],
@@ -39,8 +40,9 @@ class PromptManager {
             ['Milk', 'Juice'],
             ['Smoothie', 'Milkshake'],
             ['Popsicle', 'Ice Cream'],
-            ['Gummy Bears', 'Gummy Worms'],
-            ['Lollipop', 'Hard Candy'],
+            ['Skittles', 'Jellybeans'],            // CHANGED: Was M&Ms
+            ['Gummy Bears', 'Lollipop'],            // CHANGED: Was Gummy Worms
+            ['Hard Candy', 'Chocolate Bar'],        // NEW: Different types
             ['Chips', 'Crackers'],
             ['Peanuts', 'Cashews'],
             ['Raisins', 'Cranberries'],
@@ -64,7 +66,7 @@ class PromptManager {
             ['Hot', 'Cold'],
             ['Crispy', 'Soft'],
             ['Crunchy', 'Chewy'],
-            ['Thin Crust', 'Thick Crust'],
+            ['Thin Crust Pizza', 'Thick Crust Pizza'],
             ['Cheese Pizza', 'Pepperoni Pizza'],
             ['Plain Burger', 'Cheeseburger'],
             ['French Fries', 'Sweet Potato Fries'],
@@ -73,7 +75,7 @@ class PromptManager {
             ['Chicken Sandwich', 'Fish Sandwich'],
             ['Grilled Cheese', 'PB&J'],
             ['Mac and Cheese', 'Spaghetti'],
-            ['Tomato Soup', 'Chicken Noodle'],
+            ['Tomato Soup', 'Chicken Noodle Soup'],
             ['Apple Pie', 'Cherry Pie'],
             ['Chocolate Chip Cookie', 'Oatmeal Cookie'],
             ['Vanilla Cake', 'Chocolate Cake'],
@@ -99,7 +101,6 @@ class PromptManager {
             ['Goldfish', 'Cheez-Its'],
             ['Doritos', 'Lay\'s Chips'],
             ['Pringles', 'Ruffles'],
-            ['Skittles', 'M&Ms'],
             ['Starburst', 'Jolly Ranchers'],
             ['Reese\'s', 'Snickers'],
             ['Kit Kat', 'Twix'],
