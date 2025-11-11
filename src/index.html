@@ -244,10 +244,16 @@
                                     Auto-generate from library
                                 </label>
                             </div>
-                            <div class="form-group mb-0">
+                            <div class="form-group mb-md">
                                 <label class="form-label">
                                     <input type="radio" name="promptSource" value="custom" style="margin-right: 8px;">
-                                    Use custom prompt
+                                    Use custom prompt (same for all questions)
+                                </label>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">
+                                    <input type="radio" name="promptSource" value="manual" style="margin-right: 8px;">
+                                    Manual text input (write each question)
                                 </label>
                             </div>
                             <div id="customPromptSection" class="hidden" style="margin-top: var(--space-md);">
@@ -263,6 +269,10 @@
                                     id="customOption2"
                                     placeholder="Option 2 (e.g., Burger)"
                                 />
+                            </div>
+                            <div id="manualPromptSection" class="hidden" style="margin-top: var(--space-md);">
+                                <p class="form-hint" style="margin-bottom: 0.5rem;">Enter custom text for each question below:</p>
+                                <div id="manualPromptsContainer"></div>
                             </div>
                         </div>
                     </div>
@@ -475,15 +485,21 @@
                     <!-- Food Only Mode -->
                     <div class="card mb-lg">
                         <div class="card-header">
-                            <h3 class="card-title">🍕 Food Only Mode</h3>
-                            <p class="card-description">Use 500+ delicious food prompts only</p>
+                            <h3 class="card-title">🍕 Food Only Modes</h3>
+                            <p class="card-description">Use food-related prompts only</p>
                         </div>
                         <div class="card-body">
-                            <label class="checkbox-container">
+                            <label class="checkbox-container mb-md">
                                 <input type="checkbox" id="foodOnlyMode">
-                                <span class="checkbox-label">Enable Food Only Mode (500+ Food Prompts)</span>
+                                <span class="checkbox-label">Enable All Foods Mode (500+ Food Prompts)</span>
                             </label>
-                            <p class="form-hint" style="margin-top: 0.5rem;">When enabled, all questions will be about delicious foods, drinks, and meals</p>
+                            <p class="form-hint" style="margin-top: 0; margin-bottom: 0.75rem;">All questions will be about delicious foods, drinks, and meals</p>
+
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="simpleFastFoodMode">
+                                <span class="checkbox-label">Enable Simple Fast Foods Mode (Basic Foods Only)</span>
+                            </label>
+                            <p class="form-hint" style="margin-top: 0;">Only simple, common fast foods: pizza, burger, fries, pancakes, waffles, etc. No complex combinations!</p>
                         </div>
                     </div>
 

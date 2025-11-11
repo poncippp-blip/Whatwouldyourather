@@ -94,6 +94,8 @@ class VideoGenerator {
         this.customOption1 = document.getElementById('customOption1');
         this.customOption2 = document.getElementById('customOption2');
         this.customPromptSection = document.getElementById('customPromptSection');
+        this.manualPromptSection = document.getElementById('manualPromptSection');
+        this.manualPromptsContainer = document.getElementById('manualPromptsContainer');
 
         // Volume control
         this.musicVolumeSlider = document.getElementById('musicVolume');
@@ -170,7 +172,13 @@ class VideoGenerator {
         this.maxHistorySize = 50;
 
         // NEW: Food-only mode (500+ delicious food prompts)
-        this.foodOnlyMode = true;
+        this.foodOnlyMode = false;
+
+        // NEW: Simple fast food mode (100+ simple fast foods only)
+        this.simpleFastFoodMode = false;
+
+        // Manual prompts storage
+        this.manualPrompts = [];
 
         // NEW: Text animation settings
         this.textAnimation = {
@@ -246,8 +254,14 @@ class VideoGenerator {
             radio.addEventListener('change', (e) => {
                 if (e.target.value === 'custom') {
                     this.customPromptSection.classList.remove('hidden');
+                    this.manualPromptSection.classList.add('hidden');
+                } else if (e.target.value === 'manual') {
+                    this.customPromptSection.classList.add('hidden');
+                    this.manualPromptSection.classList.remove('hidden');
+                    this.generateManualInputs();
                 } else {
                     this.customPromptSection.classList.add('hidden');
+                    this.manualPromptSection.classList.add('hidden');
                 }
             });
         });
@@ -268,6 +282,11 @@ class VideoGenerator {
             this.questionCountSlider.addEventListener('input', (e) => {
                 this.questionCount = parseInt(e.target.value);
                 this.questionCountValue.textContent = e.target.value;
+                // Regenerate manual inputs if manual mode is active
+                const manualRadio = document.querySelector('input[name="promptSource"][value="manual"]');
+                if (manualRadio && manualRadio.checked) {
+                    this.generateManualInputs();
+                }
             });
         }
 
@@ -555,6 +574,24 @@ class VideoGenerator {
         // NEW: Food-only mode
         document.getElementById('foodOnlyMode')?.addEventListener('change', (e) => {
             this.foodOnlyMode = e.target.checked;
+            // Make food modes mutually exclusive
+            if (this.foodOnlyMode && this.simpleFastFoodMode) {
+                this.simpleFastFoodMode = false;
+                const simpleFastFoodCheckbox = document.getElementById('simpleFastFoodMode');
+                if (simpleFastFoodCheckbox) simpleFastFoodCheckbox.checked = false;
+            }
+            this.triggerAutoSave();
+        });
+
+        // NEW: Simple fast food mode
+        document.getElementById('simpleFastFoodMode')?.addEventListener('change', (e) => {
+            this.simpleFastFoodMode = e.target.checked;
+            // Make food modes mutually exclusive
+            if (this.simpleFastFoodMode && this.foodOnlyMode) {
+                this.foodOnlyMode = false;
+                const foodOnlyCheckbox = document.getElementById('foodOnlyMode');
+                if (foodOnlyCheckbox) foodOnlyCheckbox.checked = false;
+            }
             this.triggerAutoSave();
         });
 
@@ -807,6 +844,57 @@ class VideoGenerator {
 
         if (this.unsplashKey) localStorage.setItem('unsplashApiKey', this.unsplashKey);
         if (this.elevenlabsKey) localStorage.setItem('elevenlabsApiKey', this.elevenlabsKey);
+    }
+
+    generateManualInputs() {
+        if (!this.manualPromptsContainer) return;
+
+        // Save existing values first
+        const existingValues = [];
+        const existingInputs = this.manualPromptsContainer.querySelectorAll('.manual-prompt-pair');
+        existingInputs.forEach((pair, index) => {
+            const opt1 = pair.querySelector('.manual-option1')?.value || '';
+            const opt2 = pair.querySelector('.manual-option2')?.value || '';
+            existingValues[index] = { opt1, opt2 };
+        });
+
+        // Clear container
+        this.manualPromptsContainer.innerHTML = '';
+
+        // Generate inputs for each question
+        for (let i = 0; i < this.questionCount; i++) {
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'manual-prompt-pair';
+            pairDiv.style.cssText = 'margin-bottom: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);';
+
+            const label = document.createElement('label');
+            label.className = 'form-label';
+            label.textContent = `Question ${i + 1}:`;
+            label.style.marginBottom = '0.5rem';
+            label.style.display = 'block';
+            label.style.fontWeight = '600';
+            label.style.color = 'var(--primary-accent)';
+
+            const opt1 = document.createElement('input');
+            opt1.type = 'text';
+            opt1.className = 'form-input mb-sm manual-option1';
+            opt1.placeholder = `Option 1 (e.g., Pizza)`;
+            opt1.value = existingValues[i]?.opt1 || '';
+            opt1.style.marginBottom = '0.5rem';
+
+            const opt2 = document.createElement('input');
+            opt2.type = 'text';
+            opt2.className = 'form-input manual-option2';
+            opt2.placeholder = `Option 2 (e.g., Burger)`;
+            opt2.value = existingValues[i]?.opt2 || '';
+
+            pairDiv.appendChild(label);
+            pairDiv.appendChild(opt1);
+            pairDiv.appendChild(opt2);
+            this.manualPromptsContainer.appendChild(pairDiv);
+        }
+
+        console.log(`✅ Generated ${this.questionCount} manual input fields`);
     }
 
     saveConfig() {
@@ -1264,13 +1352,30 @@ class VideoGenerator {
                 }
 
                 // Get random prompts + the custom one
-                const randomPrompts = this.promptManager.getRandomPrompts(this.questionCount - 1, this.foodOnlyMode);
+                const randomPrompts = this.promptManager.getRandomPrompts(this.questionCount - 1, this.foodOnlyMode, this.simpleFastFoodMode);
                 regularQuestions = [
                     { option1: opt1, option2: opt2 },
                     ...randomPrompts
                 ];
+            } else if (promptSource === 'manual') {
+                // Read manual inputs
+                regularQuestions = [];
+                const manualPairs = this.manualPromptsContainer.querySelectorAll('.manual-prompt-pair');
+
+                for (let i = 0; i < manualPairs.length; i++) {
+                    const opt1 = manualPairs[i].querySelector('.manual-option1')?.value.trim();
+                    const opt2 = manualPairs[i].querySelector('.manual-option2')?.value.trim();
+
+                    if (!opt1 || !opt2) {
+                        alert(`Please enter both options for Question ${i + 1}`);
+                        this.generateBtn.disabled = false;
+                        return;
+                    }
+
+                    regularQuestions.push({ option1: opt1, option2: opt2 });
+                }
             } else {
-                regularQuestions = this.promptManager.getRandomPrompts(this.questionCount, this.foodOnlyMode);
+                regularQuestions = this.promptManager.getRandomPrompts(this.questionCount, this.foodOnlyMode, this.simpleFastFoodMode);
             }
 
             // Collect enabled engagement questions

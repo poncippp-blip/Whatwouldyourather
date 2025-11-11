@@ -2,6 +2,112 @@
 // 1000+ Premium Prompts with Clear Opposing Choices
 class PromptManager {
     constructor() {
+        // Simple Fast Foods - Only basic, common fast foods (no complex combinations)
+        this.simpleFastFoodPrompts = [
+            ['Pizza', 'Burger'],
+            ['Fries', 'Onion Rings'],
+            ['Hot Dog', 'Taco'],
+            ['Pancakes', 'Waffles'],
+            ['Donut', 'Cupcake'],
+            ['Ice Cream', 'Milkshake'],
+            ['Cookie', 'Brownie'],
+            ['Soda', 'Juice'],
+            ['Chicken Nuggets', 'Chicken Wings'],
+            ['Sandwich', 'Wrap'],
+            ['Burger', 'Hot Dog'],
+            ['Pizza', 'Pasta'],
+            ['Fries', 'Chips'],
+            ['Popcorn', 'Pretzels'],
+            ['Candy', 'Chocolate'],
+            ['Coffee', 'Tea'],
+            ['Water', 'Soda'],
+            ['Apple', 'Orange'],
+            ['Banana', 'Grapes'],
+            ['Cake', 'Pie'],
+            ['Muffin', 'Bagel'],
+            ['Cereal', 'Oatmeal'],
+            ['Toast', 'Biscuit'],
+            ['Bacon', 'Sausage'],
+            ['Scrambled Eggs', 'Fried Eggs'],
+            ['Ketchup', 'Mustard'],
+            ['Mayo', 'Ranch'],
+            ['Cheese', 'Butter'],
+            ['Salt', 'Pepper'],
+            ['Vanilla', 'Chocolate'],
+            ['Strawberry', 'Cherry'],
+            ['Lemon', 'Lime'],
+            ['Milk', 'Juice'],
+            ['Smoothie', 'Milkshake'],
+            ['Popsicle', 'Ice Cream'],
+            ['Gummy Bears', 'Gummy Worms'],
+            ['Lollipop', 'Hard Candy'],
+            ['Chips', 'Crackers'],
+            ['Peanuts', 'Cashews'],
+            ['Raisins', 'Cranberries'],
+            ['Bread', 'Rice'],
+            ['Noodles', 'Pasta'],
+            ['Soup', 'Stew'],
+            ['Salad', 'Vegetables'],
+            ['Beef', 'Chicken'],
+            ['Pork', 'Turkey'],
+            ['Fish', 'Shrimp'],
+            ['Tuna', 'Salmon'],
+            ['Ham', 'Roast Beef'],
+            ['Pepperoni', 'Sausage'],
+            ['Meatball', 'Hamburger Patty'],
+            ['Steak', 'Ribs'],
+            ['BBQ', 'Grilled'],
+            ['Baked', 'Fried'],
+            ['Boiled', 'Steamed'],
+            ['Sweet', 'Salty'],
+            ['Spicy', 'Mild'],
+            ['Hot', 'Cold'],
+            ['Crispy', 'Soft'],
+            ['Crunchy', 'Chewy'],
+            ['Thin Crust', 'Thick Crust'],
+            ['Cheese Pizza', 'Pepperoni Pizza'],
+            ['Plain Burger', 'Cheeseburger'],
+            ['French Fries', 'Sweet Potato Fries'],
+            ['Regular Chips', 'BBQ Chips'],
+            ['Corn Dog', 'Hot Dog'],
+            ['Chicken Sandwich', 'Fish Sandwich'],
+            ['Grilled Cheese', 'PB&J'],
+            ['Mac and Cheese', 'Spaghetti'],
+            ['Tomato Soup', 'Chicken Noodle'],
+            ['Apple Pie', 'Cherry Pie'],
+            ['Chocolate Chip Cookie', 'Oatmeal Cookie'],
+            ['Vanilla Cake', 'Chocolate Cake'],
+            ['Strawberry Ice Cream', 'Mint Ice Cream'],
+            ['Chocolate Milk', 'Regular Milk'],
+            ['Orange Juice', 'Apple Juice'],
+            ['Lemonade', 'Iced Tea'],
+            ['Hot Chocolate', 'Hot Tea'],
+            ['Iced Coffee', 'Hot Coffee'],
+            ['Energy Drink', 'Sports Drink'],
+            ['Bottled Water', 'Tap Water'],
+            ['Sparkling Water', 'Still Water'],
+            ['Diet Soda', 'Regular Soda'],
+            ['Fruit Snacks', 'Granola Bar'],
+            ['Trail Mix', 'Mixed Nuts'],
+            ['Yogurt', 'Pudding'],
+            ['Jello', 'Pudding Cup'],
+            ['Fruit Cup', 'Applesauce'],
+            ['String Cheese', 'Cheese Cubes'],
+            ['Baby Carrots', 'Celery Sticks'],
+            ['Apple Slices', 'Orange Slices'],
+            ['Peanut Butter Crackers', 'Cheese Crackers'],
+            ['Goldfish', 'Cheez-Its'],
+            ['Doritos', 'Lay\'s Chips'],
+            ['Pringles', 'Ruffles'],
+            ['Skittles', 'M&Ms'],
+            ['Starburst', 'Jolly Ranchers'],
+            ['Reese\'s', 'Snickers'],
+            ['Kit Kat', 'Twix'],
+            ['Oreos', 'Chips Ahoy'],
+            ['Graham Crackers', 'Vanilla Wafers'],
+            ['Animal Crackers', 'Teddy Grahams']
+        ];
+
         // Random selection is automatic - getRandomPrompts() picks random prompts each time
         this.defaultPrompts = [
             // Classic Choices - Fun, everyday decisions
@@ -1040,14 +1146,27 @@ class PromptManager {
         return this.foodPrompts;
     }
 
+    getSimpleFastFoodPrompts() {
+        return this.simpleFastFoodPrompts;
+    }
+
     getAllPrompts() {
         return [...this.customPrompts, ...this.defaultPrompts];
     }
 
     // Automatically selects RANDOM prompts - no configuration needed!
     // Set foodOnly=true for 500+ delicious food prompts only
-    getRandomPrompts(count = 3, foodOnly = false) {
-        const all = foodOnly ? this.getFoodOnlyPrompts() : this.getAllPrompts();
+    // Set simpleFastFood=true for 100+ simple fast foods only (pizza, burger, fries, etc.)
+    getRandomPrompts(count = 3, foodOnly = false, simpleFastFood = false) {
+        let all;
+        if (simpleFastFood) {
+            all = this.getSimpleFastFoodPrompts();
+        } else if (foodOnly) {
+            all = this.getFoodOnlyPrompts();
+        } else {
+            all = this.getAllPrompts();
+        }
+
         const selected = [];
         const usedIndices = new Set();
 
