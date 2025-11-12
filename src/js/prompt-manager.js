@@ -99,12 +99,12 @@ class PromptManager {
             ['Apple Slices', 'Orange Slices'],
             ['Peanut Butter Crackers', 'Cheese Crackers'],
             ['Goldfish', 'Cheez-Its'],
-            ['Doritos', 'Lay\'s Chips'],
-            ['Pringles', 'Ruffles'],
+            ['Tortilla Chips', 'Potato Chips'],      // CHANGED: Was Doritos vs Lay's Chips (brand names)
+            ['Potato Chips', 'Corn Chips'],          // CHANGED: Was Pringles vs Ruffles (brand names)
             ['Starburst', 'Jolly Ranchers'],
-            ['Reese\'s', 'Snickers'],
-            ['Kit Kat', 'Twix'],
-            ['Oreos', 'Chips Ahoy'],
+            ['Peanut Butter Cups', 'Candy Bar'],     // CHANGED: Was Reese's vs Snickers (brand names)
+            ['Chocolate Wafer', 'Chocolate Cookie'], // CHANGED: Was Kit Kat vs Twix (brand names)
+            ['Sandwich Cookies', 'Chocolate Chip Cookies'], // CHANGED: Was Oreos vs Chips Ahoy (brand names)
             ['Graham Crackers', 'Vanilla Wafers'],
             ['Animal Crackers', 'Teddy Grahams']
         ];
