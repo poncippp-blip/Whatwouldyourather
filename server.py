@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
 Simple HTTP server with CORS headers for FFmpeg.wasm
-Fixed version with proper path resolution
+Works on Windows, Linux, and macOS
 """
 
 import http.server
 import socketserver
 import os
+import sys
 
 class CORSRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -21,26 +22,30 @@ class CORSRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 PORT = 8080
 
-# Change to project root directory BEFORE creating server
-os.chdir('/home/user/Whatwouldyourather')
+# Get the directory where this script is located (works on Windows/Linux/Mac)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
 
-print("="*40)
+print("="*50)
 print(" WouldYouRather.ai Video Generator")
-print("="*40)
+print("="*50)
 print()
 print(f"🚀 Server running at http://localhost:{PORT}")
 print(f"✨ FFmpeg.wasm CORS headers enabled")
 print(f"📂 Working directory: {os.getcwd()}")
 print()
+print("📂 File structure:")
+print(f"   ✓ src/index.html exists: {os.path.exists('src/index.html')}")
+print(f"   ✓ assets/ exists: {os.path.exists('assets')}")
+print(f"   ✓ src/config.js exists: {os.path.exists('src/config.js')}")
+print()
 print("📂 URL Mappings:")
-print("   / → src/index.html")
-print("   /css/* → src/css/*")
-print("   /js/* → src/js/*")
-print("   /config.js → src/config.js")
-print("   /assets/* → assets/*")
+print("   http://localhost:8080/ → src/index.html")
+print("   http://localhost:8080/assets/* → assets/*")
+print("   http://localhost:8080/src/* → src/*")
 print()
 print("Press Ctrl+C to stop")
-print("="*40)
+print("="*50)
 print()
 
 Handler = CORSRequestHandler
